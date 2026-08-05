@@ -11,6 +11,7 @@ Aplicación cliente del proyecto **Alejandría**.
 
 - Interfaz de administración de la biblioteca
 - Consumo de la API del backend
+- Prototipo navegable de la interfaz (primer entregable de diseño)
 
 ## Estado
 
