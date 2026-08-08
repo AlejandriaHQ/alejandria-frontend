@@ -1,0 +1,7 @@
+{
+  "name": "AlenjadriaHQ",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
