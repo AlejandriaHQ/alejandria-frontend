@@ -1,0 +1,137 @@
+ion-content {
+  --background: #f4ebdd;
+}
+
+.login-page {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 430px;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 24px;
+  padding: 40px 35px;
+  box-shadow: 0 15px 45px rgba(18, 48, 74, 0.15);
+  border: 1px solid rgba(18, 48, 74, 0.08);
+}
+
+.brand {
+  text-align: center;
+}
+
+.logo-placeholder {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 20px;
+  background: #ffffff;
+  color: #237a78;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.brand h1 {
+  margin: 0;
+  color: #12304a;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.brand h1 span {
+  color: #237a78;
+}
+
+.brand p {
+  margin: 8px 0 0;
+  color: #12304a;
+  font-size: 14px;
+}
+
+.welcome {
+  margin-top: 35px;
+  text-align: center;
+}
+
+.welcome h2 {
+  margin: 0;
+  color: #12304a;
+  font-size: 25px;
+}
+
+.welcome p {
+  margin: 7px 0 0;
+  color: #65727c;
+}
+
+.form {
+  margin-top: 28px;
+}
+
+ion-item {
+  --background: #ffffff;
+  --border-radius: 12px;
+  --padding-start: 15px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(18, 48, 74, 0.12);
+}
+
+ion-input {
+  --color: #12304a;
+  --placeholder-color: #8b949a;
+}
+
+.login-button {
+  --background: #12304a;
+  --background-hover: #173b57;
+  --border-radius: 12px;
+  --box-shadow: none;
+
+  height: 50px;
+  margin-top: 12px;
+
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.login-button::part(native) {
+  border-bottom: 3px solid #d9a441;
+}
+
+.forgot-button {
+  --color: #237a78;
+  margin-top: 10px;
+  font-size: 14px;
+}
+.logo {
+  display: block;
+  width: 190px;
+  max-width: 80%;
+  height: auto;
+  margin: 0 auto 20px;
+}
+
+.login-error {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  background: #fce8e6;
+
+  color: #b3261e;
+
+  font-size: 13px;
+
+  text-align: center;
+}

@@ -1,0 +1,77 @@
+<ion-content [fullscreen]="true">
+
+  <div class="login-page">
+
+    <div class="login-card">
+
+      <div class="brand">
+       
+        <div class="logo-placeholder">
+           <img
+               src="assets/img/ale.png"
+                alt="AlexandriaHQ"
+               class="logo">
+        </div>
+
+        <h1>
+          Alexandria<span>HQ</span>
+        </h1>
+
+        <p>Gestión de Bibliotecas Inteligente</p>
+      </div>
+
+      <div class="welcome">
+        <h2>Bienvenido</h2>
+        <p>Inicia sesión para continuar</p>
+      </div>
+
+      <div class="form">
+
+        <ion-item lines="none">
+          <ion-input
+            label="Identificador"
+            labelPlacement="floating"
+            type="text"
+            placeholder="Correo o código de miembro"
+            [(ngModel)]="identificador">
+          </ion-input>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-input
+            label="Contraseña"
+            labelPlacement="floating"
+            type="password"
+            placeholder="Ingresa tu contraseña"
+            [(ngModel)]="contrasena">
+          </ion-input>
+        </ion-item>
+        
+          <div
+            class="login-error"
+            *ngIf="error">
+
+            {{ error }}
+
+          </div>
+
+        <ion-button
+          expand="block"
+          class="login-button"
+          (click)="iniciarSesion()">
+          Iniciar sesión
+        </ion-button>
+
+        <ion-button
+          fill="clear"
+          class="forgot-button">
+          ¿Olvidaste tu contraseña?
+        </ion-button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-content>
