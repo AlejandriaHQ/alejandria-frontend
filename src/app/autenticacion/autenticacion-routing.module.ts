@@ -7,11 +7,13 @@ const routes: Routes = [
   {
     path: '',
     component: AutenticacionPage
-  },  {
+  },
+  {
     path: 'recuperar-contrasena',
-    loadChildren: () => import('./recuperar-contrasena/recuperar-contrasena.module').then( m => m.RecuperarContrasenaPageModule)
+    loadChildren: () =>
+      import('./recuperar-contrasena/recuperar-contrasena.module')
+        .then(m => m.RecuperarContrasenaPageModule)
   }
-
 ];
 
 @NgModule({

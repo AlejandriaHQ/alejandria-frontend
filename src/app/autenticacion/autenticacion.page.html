@@ -8,7 +8,7 @@
        
         <div class="logo-placeholder">
            <img
-               src="assets/img/ale.png"
+               src="assets/img/ale_icono.png"
                 alt="AlexandriaHQ"
                class="logo">
         </div>
@@ -46,7 +46,7 @@
             [(ngModel)]="contrasena">
           </ion-input>
         </ion-item>
-        
+
           <div
             class="login-error"
             *ngIf="error">
@@ -64,8 +64,11 @@
 
         <ion-button
           fill="clear"
-          class="forgot-button">
+          class="forgot-button"
+          routerLink="/autenticacion/recuperar-contrasena">
+
           ¿Olvidaste tu contraseña?
+
         </ion-button>
 
       </div>
