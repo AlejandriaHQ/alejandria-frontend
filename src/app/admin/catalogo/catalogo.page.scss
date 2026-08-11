@@ -1,0 +1,112 @@
+ion-content {
+  --background: #f4ebdd;
+}
+
+.catalogo-page {
+  padding: 25px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.catalogo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.catalogo-header h1 {
+  margin: 0;
+  color: #12304a;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.catalogo-header p {
+  margin: 6px 0 0;
+  color: #65727c;
+}
+
+.add-button {
+  --background: #12304a;
+  --border-radius: 12px;
+  --box-shadow: none;
+    color: #f3f3f3;
+  font-weight: 700;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+ion-searchbar {
+  --background: #ffffff;
+  --color: #12304a;
+  --placeholder-color: #8b949a;
+  --border-radius: 12px;
+}
+
+ion-select {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 5px 12px;
+  color: #12304a;
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+ion-card {
+  margin: 0;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(18, 48, 74, 0.10);
+}
+
+ion-card-title {
+  color: #fdfeff;
+  font-weight: 700;
+}
+
+ion-card-subtitle {
+  margin-top: 5px;
+}
+
+ion-card-content p {
+  color: #65727c;
+}
+
+@media (max-width: 800px) {
+
+  .books-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .catalogo-page {
+    padding: 18px;
+  }
+
+  .catalogo-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .books-grid {
+    grid-template-columns: 1fr;
+  }
+
+}

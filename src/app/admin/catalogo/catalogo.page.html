@@ -1,0 +1,147 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Catálogo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="catalogo-page">
+
+    <div class="catalogo-header">
+      <div>
+        <h1>Catálogo</h1>
+        <p>Administra los libros de AlexandriaHQ</p>
+      </div>
+
+      <ion-button class="add-button">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Agregar libro
+      </ion-button>
+    </div>
+
+    <div class="filters">
+
+      <ion-searchbar
+        placeholder="Buscar por título, autor o ISBN">
+      </ion-searchbar>
+
+      <ion-select
+        label="Categoría"
+        label-placement="floating"
+        interface="popover"
+        placeholder="Todas">
+
+        <ion-select-option value="todas">
+          Todas
+        </ion-select-option>
+
+        <ion-select-option value="novela">
+          Novela
+        </ion-select-option>
+
+        <ion-select-option value="ciencia">
+          Ciencia
+        </ion-select-option>
+
+        <ion-select-option value="historia">
+          Historia
+        </ion-select-option>
+
+      </ion-select>
+
+    </div>
+
+    <div class="books-grid">
+
+      <ion-card>
+
+        <ion-card-header>
+
+          <ion-card-title>
+            Cien años de soledad
+          </ion-card-title>
+
+          <ion-card-subtitle>
+            Gabriel García Márquez
+          </ion-card-subtitle>
+
+        </ion-card-header>
+
+        <ion-card-content>
+
+          <p>
+            ISBN: 978-0307474728
+          </p>
+
+          <ion-badge color="success">
+            Disponible
+          </ion-badge>
+
+        </ion-card-content>
+
+      </ion-card>
+
+
+      <ion-card>
+
+        <ion-card-header>
+
+          <ion-card-title>
+            Don Quijote de la Mancha
+          </ion-card-title>
+
+          <ion-card-subtitle>
+            Miguel de Cervantes
+          </ion-card-subtitle>
+
+        </ion-card-header>
+
+        <ion-card-content>
+
+          <p>
+            ISBN: 978-8420412146
+          </p>
+
+          <ion-badge color="warning">
+            Prestado
+          </ion-badge>
+
+        </ion-card-content>
+
+      </ion-card>
+
+
+      <ion-card>
+
+        <ion-card-header>
+
+          <ion-card-title>
+            Introducción a la programación
+          </ion-card-title>
+
+          <ion-card-subtitle>
+            Libro académico
+          </ion-card-subtitle>
+
+        </ion-card-header>
+
+        <ion-card-content>
+
+          <p>
+            ISBN: 978-0000000000
+          </p>
+
+          <ion-badge color="success">
+            Disponible
+          </ion-badge>
+
+        </ion-card-content>
+
+      </ion-card>
+
+    </div>
+
+  </div>
+
+</ion-content>
