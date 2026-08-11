@@ -33,7 +33,7 @@ export class AuthService {
 
     // Administrador
     if (
-      identificador === 'admin@alexandria.com' &&
+      identificador === 'admin@alejandria.com' &&
       contrasena === 'admin123'
     ) {
 
