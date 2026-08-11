@@ -94,7 +94,7 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# AI tooling — never commit
+# Local tooling / helpers
 .atl/
 .opencode/
 .agents/

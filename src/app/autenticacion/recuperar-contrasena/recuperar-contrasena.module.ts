@@ -9,12 +9,7 @@ import { RecuperarContrasenaPageRoutingModule } from './recuperar-contrasena-rou
 import { RecuperarContrasenaPage } from './recuperar-contrasena.page';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    RecuperarContrasenaPageRoutingModule
-  ],
-  declarations: [RecuperarContrasenaPage]
+  imports: [CommonModule, FormsModule, IonicModule, RecuperarContrasenaPageRoutingModule],
+  declarations: [RecuperarContrasenaPage],
 })
 export class RecuperarContrasenaPageModule {}

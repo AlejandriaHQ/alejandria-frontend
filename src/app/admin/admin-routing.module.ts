@@ -6,12 +6,12 @@ import { AdminPage } from './admin.page';
 const routes: Routes = [
   {
     path: '',
-    component: AdminPage
-  },  {
+    component: AdminPage,
+  },
+  {
     path: 'catalogo',
-    loadChildren: () => import('./catalogo/catalogo.module').then( m => m.CatalogoPageModule)
-  }
-
+    loadChildren: () => import('./catalogo/catalogo.module').then((m) => m.CatalogoPageModule),
+  },
 ];
 
 @NgModule({

@@ -5,143 +5,101 @@
 </ion-header>
 
 <ion-content>
-
   <div class="catalogo-page">
-
     <div class="catalogo-header">
       <div>
         <h1>Catálogo</h1>
-        <p>Administra los libros de AlexandriaHQ</p>
+        <p>Administra los libros de AlejandriaHQ</p>
       </div>
 
-      <ion-button class="add-button">
+      <ion-button class="add-button" (click)="alternarFormulario()">
         <ion-icon name="add-outline" slot="start"></ion-icon>
-        Agregar libro
+        {{ mostrarFormulario ? 'Cancelar' : 'Agregar libro' }}
       </ion-button>
     </div>
 
     <div class="filters">
-
       <ion-searchbar
-        placeholder="Buscar por título, autor o ISBN">
+        placeholder="Buscar por título, autor o ISBN"
+        [(ngModel)]="termino"
+        (ionInput)="librosFiltrados()"
+      >
       </ion-searchbar>
 
       <ion-select
         label="Categoría"
         label-placement="floating"
         interface="popover"
-        placeholder="Todas">
+        placeholder="Todas"
+        [(ngModel)]="categoriaId"
+        (ionChange)="librosFiltrados()"
+      >
+        <ion-select-option [value]="0"> Todas </ion-select-option>
 
-        <ion-select-option value="todas">
-          Todas
+        <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
+          {{ categoria.nombre }}
         </ion-select-option>
-
-        <ion-select-option value="novela">
-          Novela
-        </ion-select-option>
-
-        <ion-select-option value="ciencia">
-          Ciencia
-        </ion-select-option>
-
-        <ion-select-option value="historia">
-          Historia
-        </ion-select-option>
-
       </ion-select>
+    </div>
 
+    <div *ngIf="mostrarFormulario" class="book-form">
+      <ion-list>
+        <ion-item>
+          <ion-label position="floating">Título</ion-label>
+          <ion-input [(ngModel)]="nuevoTitulo" name="titulo"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Autor</ion-label>
+          <ion-input [(ngModel)]="nuevoAutor" name="autor"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">ISBN</ion-label>
+          <ion-input [(ngModel)]="nuevoIsbn" name="isbn"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Categoría</ion-label>
+          <ion-select
+            [(ngModel)]="nuevaCategoriaId"
+            name="categoria"
+            interface="popover"
+            placeholder="Selecciona una categoría"
+          >
+            <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
+              {{ categoria.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Año</ion-label>
+          <ion-input type="number" [(ngModel)]="nuevoAnio" name="anio"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" (click)="agregarLibro()"> Guardar libro </ion-button>
     </div>
 
     <div class="books-grid">
-
-      <ion-card>
-
+      <ion-card *ngFor="let libro of librosFiltrados()">
         <ion-card-header>
+          <ion-card-title> {{ libro.titulo }} </ion-card-title>
 
-          <ion-card-title>
-            Cien años de soledad
-          </ion-card-title>
-
-          <ion-card-subtitle>
-            Gabriel García Márquez
-          </ion-card-subtitle>
-
+          <ion-card-subtitle> {{ libro.autor }} </ion-card-subtitle>
         </ion-card-header>
 
         <ion-card-content>
+          <p>{{ nombreCategoria(libro.categoriaId) }}</p>
 
-          <p>
-            ISBN: 978-0307474728
-          </p>
+          <p>ISBN: {{ libro.isbn }}</p>
 
-          <ion-badge color="success">
-            Disponible
-          </ion-badge>
+          <ion-badge *ngIf="libro.disponible" color="success"> Disponible </ion-badge>
 
+          <ion-badge *ngIf="!libro.disponible" color="warning"> Prestado </ion-badge>
         </ion-card-content>
-
       </ion-card>
-
-
-      <ion-card>
-
-        <ion-card-header>
-
-          <ion-card-title>
-            Don Quijote de la Mancha
-          </ion-card-title>
-
-          <ion-card-subtitle>
-            Miguel de Cervantes
-          </ion-card-subtitle>
-
-        </ion-card-header>
-
-        <ion-card-content>
-
-          <p>
-            ISBN: 978-8420412146
-          </p>
-
-          <ion-badge color="warning">
-            Prestado
-          </ion-badge>
-
-        </ion-card-content>
-
-      </ion-card>
-
-
-      <ion-card>
-
-        <ion-card-header>
-
-          <ion-card-title>
-            Introducción a la programación
-          </ion-card-title>
-
-          <ion-card-subtitle>
-            Libro académico
-          </ion-card-subtitle>
-
-        </ion-card-header>
-
-        <ion-card-content>
-
-          <p>
-            ISBN: 978-0000000000
-          </p>
-
-          <ion-badge color="success">
-            Disponible
-          </ion-badge>
-
-        </ion-card-content>
-
-      </ion-card>
-
     </div>
-
   </div>
-
 </ion-content>

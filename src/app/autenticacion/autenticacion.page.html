@@ -1,21 +1,12 @@
 <ion-content [fullscreen]="true">
-
   <div class="login-page">
-
     <div class="login-card">
-
       <div class="brand">
-       
         <div class="logo-placeholder">
-           <img
-               src="assets/img/ale_icono2.jpeg"
-                alt="AlexandriaHQ"
-               class="logo">
+          <img src="assets/img/ale_icono2.jpeg" alt="Logo de Alejandría" class="logo" />
         </div>
 
-        <h1>
-          Alexandria<span>HQ</span>
-        </h1>
+        <h1>Alejandria<span>HQ</span></h1>
 
         <p>Gestión de Bibliotecas Inteligente</p>
       </div>
@@ -25,56 +16,84 @@
         <p>Inicia sesión para continuar</p>
       </div>
 
-      <div class="form">
-
+      <form class="form" novalidate [attr.aria-busy]="cargando" (ngSubmit)="iniciarSesion()">
         <ion-item lines="none">
           <ion-input
+            id="identificador"
+            name="identificador"
             label="Identificador"
             labelPlacement="floating"
             type="text"
             placeholder="Correo o código de miembro"
-            [(ngModel)]="identificador">
+            [(ngModel)]="identificador"
+            required
+            autocomplete="username"
+            enterkeyhint="next"
+            aria-label="Identificador"
+            aria-describedby="login-error"
+            [class.ion-invalid]="!!error"
+            [class.ion-touched]="!!error"
+          >
           </ion-input>
         </ion-item>
 
         <ion-item lines="none">
           <ion-input
+            id="contrasena"
+            name="contrasena"
             label="Contraseña"
             labelPlacement="floating"
-            type="password"
+            [type]="mostrarContrasena ? 'text' : 'password'"
             placeholder="Ingresa tu contraseña"
-            [(ngModel)]="contrasena">
+            [(ngModel)]="contrasena"
+            required
+            autocomplete="current-password"
+            enterkeyhint="go"
+            aria-label="Contraseña"
+            aria-describedby="login-error"
+            [class.ion-invalid]="!!error"
+            [class.ion-touched]="!!error"
+          >
           </ion-input>
+
+          <ion-button
+            slot="end"
+            type="button"
+            fill="clear"
+            class="visibility-toggle"
+            (click)="alternarVisibilidadContrasena()"
+            [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-pressed]="mostrarContrasena"
+            aria-controls="contrasena"
+          >
+            <ion-icon
+              slot="icon-only"
+              [name]="mostrarContrasena ? 'eye-off-outline' : 'eye-outline'"
+              aria-hidden="true"
+            >
+            </ion-icon>
+          </ion-button>
         </ion-item>
 
-          <div
-            class="login-error"
-            *ngIf="error">
+        <div id="login-error" class="login-error" role="alert" aria-live="assertive" *ngIf="error">
+          <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+          <span>{{ error }}</span>
+        </div>
 
-            {{ error }}
+        <ion-button expand="block" type="submit" class="login-button" [disabled]="cargando">
+          <ion-spinner name="crescent" *ngIf="cargando"> </ion-spinner>
 
-          </div>
-
-        <ion-button
-          expand="block"
-          class="login-button"
-          (click)="iniciarSesion()">
-          Iniciar sesión
+          <span>{{ cargando ? 'Iniciando sesión' : 'Iniciar sesión' }}</span>
         </ion-button>
+      </form>
 
-        <ion-button
-          fill="clear"
-          class="forgot-button"
-          routerLink="/autenticacion/recuperar-contrasena">
-
-          ¿Olvidaste tu contraseña?
-
-        </ion-button>
-
-      </div>
-
+      <ion-button
+        fill="clear"
+        class="forgot-button"
+        routerLink="/autenticacion/recuperar-contrasena"
+      >
+        ¿Olvidaste tu contraseña?
+      </ion-button>
     </div>
-
   </div>
-
 </ion-content>

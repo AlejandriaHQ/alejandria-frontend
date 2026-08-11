@@ -32,7 +32,7 @@ ion-content {
   --background: #12304a;
   --border-radius: 12px;
   --box-shadow: none;
-    color: #f3f3f3;
+  color: #f3f3f3;
   font-weight: 700;
 }
 
@@ -57,6 +57,23 @@ ion-select {
   color: #12304a;
 }
 
+.book-form {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(18, 48, 74, 0.1);
+  padding: 15px;
+  margin-bottom: 25px;
+}
+
+.book-form ion-button {
+  margin-top: 15px;
+  --background: #12304a;
+  --border-radius: 12px;
+  --box-shadow: none;
+  color: #f3f3f3;
+  font-weight: 700;
+}
+
 .books-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -66,7 +83,7 @@ ion-select {
 ion-card {
   margin: 0;
   border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(18, 48, 74, 0.10);
+  box-shadow: 0 8px 25px rgba(18, 48, 74, 0.1);
 }
 
 ion-card-title {
@@ -83,15 +100,12 @@ ion-card-content p {
 }
 
 @media (max-width: 800px) {
-
   .books-grid {
     grid-template-columns: 1fr 1fr;
   }
-
 }
 
 @media (max-width: 600px) {
-
   .catalogo-page {
     padding: 18px;
   }
@@ -108,5 +122,4 @@ ion-card-content p {
   .books-grid {
     grid-template-columns: 1fr;
   }
-
 }

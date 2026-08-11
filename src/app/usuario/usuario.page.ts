@@ -6,23 +6,17 @@ import { AuthService } from '../Services/auth.service';
   selector: 'app-usuario',
   templateUrl: './usuario.page.html',
   styleUrls: ['./usuario.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class UsuarioPage implements OnInit {
-
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit() {}
 
   cerrarSesion() {
-
     this.authService.cerrarSesion();
-
-    
-
   }
-
 }

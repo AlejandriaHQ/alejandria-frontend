@@ -1,31 +1,55 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>
-      AlexandriaHQ
-    </ion-title>
+    <ion-title> AlejandriaHQ </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content>
+  <div class="admin-page">
+    <section class="admin-welcome">
+      <div class="welcome-icon" aria-hidden="true">
+        <ion-icon name="library-outline"></ion-icon>
+      </div>
 
-  <h1>Bienvenido, admin</h1>
+      <h1>Bienvenido, admin</h1>
 
-  <p>Área de admin de AlexandriaHQ.</p>
+      <p>Área de administración de AlejandriaHQ.</p>
+    </section>
 
-  <ion-button
-    expand="block"
-    routerLink="/admin/catalogo">
+    <section class="admin-actions" aria-label="Acciones de administración">
+      <ion-card button class="action-card" routerLink="/admin/catalogo">
+        <div class="action-icon" aria-hidden="true">
+          <ion-icon name="book-outline"></ion-icon>
+        </div>
 
-    📚 Catálogo
+        <div class="action-body">
+          <h2>Catálogo</h2>
+          <p>Administra los libros de la biblioteca</p>
+        </div>
 
-  </ion-button>
+        <ion-icon
+          class="action-chevron"
+          name="chevron-forward-outline"
+          aria-hidden="true"
+        ></ion-icon>
+      </ion-card>
 
-  <ion-button
-    expand="block"
-    (click)="cerrarSesion()">
+      <ion-card button class="action-card action-card--danger" (click)="cerrarSesion()">
+        <div class="action-icon" aria-hidden="true">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </div>
 
-    Cerrar sesión
+        <div class="action-body">
+          <h2>Cerrar sesión</h2>
+          <p>Salir de tu cuenta</p>
+        </div>
 
-  </ion-button>
-
+        <ion-icon
+          class="action-chevron"
+          name="chevron-forward-outline"
+          aria-hidden="true"
+        ></ion-icon>
+      </ion-card>
+    </section>
+  </div>
 </ion-content>

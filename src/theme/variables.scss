@@ -1,2 +1,22 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+
+// Tema claro explícito de Alejandría
+:root {
+  --ion-background-color: #f4ebdd;
+  --ion-background-color-rgb: 244, 235, 221;
+
+  --ion-text-color: #12304a;
+  --ion-text-color-rgb: 18, 48, 74;
+
+  --ion-toolbar-background: #ffffff;
+  --ion-toolbar-color: #12304a;
+
+  --ion-card-background: #ffffff;
+  --ion-card-color: #12304a;
+
+  --ion-item-background: #ffffff;
+  --ion-item-color: #12304a;
+
+  --ion-border-color: rgba(18, 48, 74, 0.12);
+}
