@@ -5,9 +5,7 @@
 </ion-header>
 
 <ion-content>
-
   <div class="catalogo-page">
-
     <div class="catalogo-header">
       <div>
         <h1>Catálogo</h1>
@@ -21,11 +19,11 @@
     </div>
 
     <div class="filters">
-
       <ion-searchbar
         placeholder="Buscar por título, autor o ISBN"
         [(ngModel)]="termino"
-        (ionInput)="librosFiltrados()">
+        (ionInput)="librosFiltrados()"
+      >
       </ion-searchbar>
 
       <ion-select
@@ -34,22 +32,17 @@
         interface="popover"
         placeholder="Todas"
         [(ngModel)]="categoriaId"
-        (ionChange)="librosFiltrados()">
-
-        <ion-select-option [value]="0">
-          Todas
-        </ion-select-option>
+        (ionChange)="librosFiltrados()"
+      >
+        <ion-select-option [value]="0"> Todas </ion-select-option>
 
         <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
           {{ categoria.nombre }}
         </ion-select-option>
-
       </ion-select>
-
     </div>
 
     <div *ngIf="mostrarFormulario" class="book-form">
-
       <ion-list>
         <ion-item>
           <ion-label position="floating">Título</ion-label>
@@ -72,12 +65,11 @@
             [(ngModel)]="nuevaCategoriaId"
             name="categoria"
             interface="popover"
-            placeholder="Selecciona una categoría">
-
+            placeholder="Selecciona una categoría"
+          >
             <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
               {{ categoria.nombre }}
             </ion-select-option>
-
           </ion-select>
         </ion-item>
 
@@ -87,52 +79,27 @@
         </ion-item>
       </ion-list>
 
-      <ion-button expand="block" (click)="agregarLibro()">
-        Guardar libro
-      </ion-button>
-
+      <ion-button expand="block" (click)="agregarLibro()"> Guardar libro </ion-button>
     </div>
 
     <div class="books-grid">
-
       <ion-card *ngFor="let libro of librosFiltrados()">
-
         <ion-card-header>
+          <ion-card-title> {{ libro.titulo }} </ion-card-title>
 
-          <ion-card-title>
-            {{ libro.titulo }}
-          </ion-card-title>
-
-          <ion-card-subtitle>
-            {{ libro.autor }}
-          </ion-card-subtitle>
-
+          <ion-card-subtitle> {{ libro.autor }} </ion-card-subtitle>
         </ion-card-header>
 
         <ion-card-content>
+          <p>{{ nombreCategoria(libro.categoriaId) }}</p>
 
-          <p>
-            {{ nombreCategoria(libro.categoriaId) }}
-          </p>
+          <p>ISBN: {{ libro.isbn }}</p>
 
-          <p>
-            ISBN: {{ libro.isbn }}
-          </p>
+          <ion-badge *ngIf="libro.disponible" color="success"> Disponible </ion-badge>
 
-          <ion-badge *ngIf="libro.disponible" color="success">
-            Disponible
-          </ion-badge>
-
-          <ion-badge *ngIf="!libro.disponible" color="warning">
-            Prestado
-          </ion-badge>
-
+          <ion-badge *ngIf="!libro.disponible" color="warning"> Prestado </ion-badge>
         </ion-card-content>
-
       </ion-card>
-
     </div>
-
   </div>
-
 </ion-content>

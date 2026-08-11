@@ -6,14 +6,15 @@ import { AutenticacionPage } from './autenticacion.page';
 const routes: Routes = [
   {
     path: '',
-    component: AutenticacionPage
+    component: AutenticacionPage,
   },
   {
     path: 'recuperar-contrasena',
     loadChildren: () =>
-      import('./recuperar-contrasena/recuperar-contrasena.module')
-        .then(m => m.RecuperarContrasenaPageModule)
-  }
+      import('./recuperar-contrasena/recuperar-contrasena.module').then(
+        (m) => m.RecuperarContrasenaPageModule,
+      ),
+  },
 ];
 
 @NgModule({

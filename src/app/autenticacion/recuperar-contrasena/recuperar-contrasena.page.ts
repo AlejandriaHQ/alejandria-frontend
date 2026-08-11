@@ -4,13 +4,10 @@ import { Component, OnInit } from '@angular/core';
   selector: 'app-recuperar-contrasena',
   templateUrl: './recuperar-contrasena.page.html',
   styleUrls: ['./recuperar-contrasena.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class RecuperarContrasenaPage implements OnInit {
+  constructor() {}
 
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+  ngOnInit() {}
 }

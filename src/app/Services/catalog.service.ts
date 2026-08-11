@@ -3,14 +3,13 @@ import { Categoria } from '../models/categoria.model';
 import { Libro } from '../models/libro.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CatalogService {
-
   private categorias: Categoria[] = [
     { id: 1, nombre: 'Novela' },
     { id: 2, nombre: 'Ciencia' },
-    { id: 3, nombre: 'Historia' }
+    { id: 3, nombre: 'Historia' },
   ];
 
   private libros: Libro[] = [
@@ -21,7 +20,7 @@ export class CatalogService {
       isbn: '978-0307474728',
       categoriaId: 1,
       anio: 1967,
-      disponible: true
+      disponible: true,
     },
     {
       id: 2,
@@ -30,7 +29,7 @@ export class CatalogService {
       isbn: '978-8420412146',
       categoriaId: 1,
       anio: 1605,
-      disponible: false
+      disponible: false,
     },
     {
       id: 3,
@@ -39,7 +38,7 @@ export class CatalogService {
       isbn: '978-0000000000',
       categoriaId: 2,
       anio: 2018,
-      disponible: true
+      disponible: true,
     },
     {
       id: 4,
@@ -48,7 +47,7 @@ export class CatalogService {
       isbn: '978-0553380163',
       categoriaId: 2,
       anio: 1988,
-      disponible: true
+      disponible: true,
     },
     {
       id: 5,
@@ -57,8 +56,8 @@ export class CatalogService {
       isbn: '978-8499926223',
       categoriaId: 3,
       anio: 2011,
-      disponible: false
-    }
+      disponible: false,
+    },
   ];
 
   listarCategorias(): Categoria[] {
@@ -69,19 +68,13 @@ export class CatalogService {
     return this.libros;
   }
 
-  buscarLibros(
-    termino?: string,
-    categoriaId?: number
-  ): Libro[] {
-
+  buscarLibros(termino?: string, categoriaId?: number): Libro[] {
     const texto = (termino || '').trim().toLowerCase();
 
     const categoria = categoriaId ?? 0;
 
-    return this.libros.filter(libro => {
-
-      const coincideCategoria =
-        categoria === 0 || libro.categoriaId === categoria;
+    return this.libros.filter((libro) => {
+      const coincideCategoria = categoria === 0 || libro.categoriaId === categoria;
 
       const coincideTexto =
         texto === '' ||
@@ -92,21 +85,16 @@ export class CatalogService {
     });
   }
 
-  agregarLibro(
-    libro: Omit<Libro, 'id'>
-  ): Libro {
-
-    const siguienteId =
-      this.libros.reduce((max, actual) => Math.max(max, actual.id), 0) + 1;
+  agregarLibro(libro: Omit<Libro, 'id'>): Libro {
+    const siguienteId = this.libros.reduce((max, actual) => Math.max(max, actual.id), 0) + 1;
 
     const nuevoLibro: Libro = {
       ...libro,
-      id: siguienteId
+      id: siguienteId,
     };
 
     this.libros.push(nuevoLibro);
 
     return nuevoLibro;
   }
-
 }

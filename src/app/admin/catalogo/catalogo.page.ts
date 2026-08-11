@@ -7,10 +7,9 @@ import { Libro } from '../../models/libro.model';
   selector: 'app-catalogo',
   templateUrl: './catalogo.page.html',
   styleUrls: ['./catalogo.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class CatalogoPage implements OnInit {
-
   termino: string = '';
 
   categoriaId: number = 0;
@@ -29,9 +28,7 @@ export class CatalogoPage implements OnInit {
 
   nuevoAnio: number;
 
-  constructor(
-    private catalogService: CatalogService
-  ) {
+  constructor(private catalogService: CatalogService) {
     this.nuevoAnio = new Date().getFullYear();
   }
 
@@ -40,15 +37,11 @@ export class CatalogoPage implements OnInit {
   }
 
   librosFiltrados(): Libro[] {
-    return this.catalogService.buscarLibros(
-      this.termino,
-      this.categoriaId
-    );
+    return this.catalogService.buscarLibros(this.termino, this.categoriaId);
   }
 
   nombreCategoria(categoriaId: number): string {
-    const categoria =
-      this.categorias.find(c => c.id === categoriaId);
+    const categoria = this.categorias.find((c) => c.id === categoriaId);
 
     return categoria ? categoria.nombre : 'Sin categoría';
   }
@@ -58,7 +51,6 @@ export class CatalogoPage implements OnInit {
   }
 
   agregarLibro() {
-
     if (
       !this.nuevoTitulo.trim() ||
       !this.nuevoAutor.trim() ||
@@ -74,7 +66,7 @@ export class CatalogoPage implements OnInit {
       isbn: this.nuevoIsbn.trim(),
       categoriaId: this.nuevaCategoriaId,
       anio: this.nuevoAnio,
-      disponible: true
+      disponible: true,
     });
 
     this.nuevoTitulo = '';
@@ -85,5 +77,4 @@ export class CatalogoPage implements OnInit {
 
     this.mostrarFormulario = false;
   }
-
 }

@@ -1,0 +1,142 @@
+ion-content {
+  --background: #f4ebdd;
+}
+
+ion-toolbar {
+  --background: #ffffff;
+  --color: #12304a;
+}
+
+.action-card {
+  --background: #ffffff;
+  --color: #12304a;
+}
+
+.admin-page {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.admin-welcome {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(18, 48, 74, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 15px 45px rgba(18, 48, 74, 0.15);
+  padding: 32px 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.welcome-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  background: rgba(35, 122, 120, 0.12);
+  color: #237a78;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.welcome-icon ion-icon {
+  font-size: 32px;
+}
+
+.admin-welcome h1 {
+  margin: 0;
+  color: #12304a;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.admin-welcome p {
+  margin: 8px 0 0;
+  color: #65727c;
+  font-size: 15px;
+}
+
+.admin-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.action-card {
+  margin: 0;
+  border-radius: 18px;
+  box-shadow: none;
+  border: 1px solid rgba(18, 48, 74, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+}
+.action-card:hover {
+  border-color: rgba(35, 122, 120, 0.45);
+}
+.action-card:focus-within {
+  outline: 3px solid #237a78;
+  outline-offset: 2px;
+}
+
+.action-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(35, 122, 120, 0.12);
+  color: #237a78;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.action-icon ion-icon {
+  font-size: 26px;
+}
+
+.action-card--danger .action-icon {
+  background: rgba(179, 38, 30, 0.1);
+  color: #b3261e;
+}
+
+.action-body {
+  flex: 1;
+  min-width: 0;
+}
+.action-body h2 {
+  margin: 0;
+  color: #12304a;
+  font-size: 17px;
+  font-weight: 700;
+}
+.action-body p {
+  margin: 4px 0 0;
+  color: #65727c;
+  font-size: 13px;
+}
+
+.action-chevron {
+  flex-shrink: 0;
+  color: #8b949a;
+  font-size: 20px;
+}
+
+@media (min-width: 768px) {
+  .admin-page {
+    padding: 40px 24px 48px;
+  }
+  .admin-welcome {
+    padding: 44px 32px;
+  }
+  .admin-welcome h1 {
+    font-size: 32px;
+  }
+  .admin-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+  .action-card {
+    padding: 22px;
+  }
+}

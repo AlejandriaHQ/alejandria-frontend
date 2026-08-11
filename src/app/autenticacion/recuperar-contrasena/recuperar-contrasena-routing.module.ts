@@ -6,8 +6,8 @@ import { RecuperarContrasenaPage } from './recuperar-contrasena.page';
 const routes: Routes = [
   {
     path: '',
-    component: RecuperarContrasenaPage
-  }
+    component: RecuperarContrasenaPage,
+  },
 ];
 
 @NgModule({

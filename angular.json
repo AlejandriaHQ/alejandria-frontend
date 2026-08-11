@@ -144,7 +144,7 @@
       "styleext": "scss"
     },
     "@ionic/angular-toolkit:page": {
-      "styleext": "scss"
+      "styleext": "scss",
       "standalone": false
     }
   }

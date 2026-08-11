@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../Services/auth.service';
 
@@ -6,46 +6,86 @@ import { AuthService } from '../Services/auth.service';
   selector: 'app-autenticacion',
   templateUrl: './autenticacion.page.html',
   styleUrls: ['./autenticacion.page.scss'],
-  standalone: false
+  standalone: false,
 })
-export class AutenticacionPage implements OnInit {
-
+export class AutenticacionPage implements OnInit, OnDestroy {
   identificador: string = '';
   contrasena: string = '';
 
   error: string = '';
 
+  cargando: boolean = false;
+
+  mostrarContrasena: boolean = false;
+
+  private temporizadorCarga: any;
+
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.redirigirSiHaySesion();
+  }
 
-  iniciarSesion() {
+  private redirigirSiHaySesion() {
+    const usuario = this.authService.obtenerUsuarioActual();
 
-    this.error = '';
-
-    const rol = this.authService.iniciarSesion(
-      this.identificador,
-      this.contrasena
-    );
-
-    if (rol === 'admin') {
-
+    if (usuario?.rol === 'admin') {
       this.router.navigate(['/admin']);
 
       return;
     }
 
-    if (rol === 'usuario') {
-
+    if (usuario?.rol === 'usuario') {
       this.router.navigate(['/usuario']);
 
       return;
     }
-
-    this.error = 'Identificador o contraseña incorrectos';
   }
 
+  ngOnDestroy() {
+    if (this.temporizadorCarga) {
+      clearTimeout(this.temporizadorCarga);
+
+      this.temporizadorCarga = null;
+    }
+  }
+
+  alternarVisibilidadContrasena() {
+    this.mostrarContrasena = !this.mostrarContrasena;
+  }
+
+  iniciarSesion() {
+    if (this.cargando) {
+      return;
+    }
+
+    this.error = '';
+
+    this.cargando = true;
+
+    this.temporizadorCarga = setTimeout(() => {
+      this.cargando = false;
+
+      this.temporizadorCarga = null;
+
+      const rol = this.authService.iniciarSesion(this.identificador, this.contrasena);
+
+      if (rol === 'admin') {
+        this.router.navigate(['/admin']);
+
+        return;
+      }
+
+      if (rol === 'usuario') {
+        this.router.navigate(['/usuario']);
+
+        return;
+      }
+
+      this.error = 'Identificador o contraseña incorrectos';
+    }, 500);
+  }
 }

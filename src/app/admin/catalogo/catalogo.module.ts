@@ -9,12 +9,7 @@ import { CatalogoPageRoutingModule } from './catalogo-routing.module';
 import { CatalogoPage } from './catalogo.page';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    CatalogoPageRoutingModule
-  ],
-  declarations: [CatalogoPage]
+  imports: [CommonModule, FormsModule, IonicModule, CatalogoPageRoutingModule],
+  declarations: [CatalogoPage],
 })
 export class CatalogoPageModule {}

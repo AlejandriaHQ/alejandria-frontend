@@ -1,7 +1,6 @@
 ion-content {
   --background: #f4ebdd;
 }
-
 .login-page {
   min-height: 100%;
   display: flex;
@@ -9,7 +8,6 @@ ion-content {
   justify-content: center;
   padding: 30px 20px;
 }
-
 .login-card {
   width: 100%;
   max-width: 430px;
@@ -19,27 +17,22 @@ ion-content {
   box-shadow: 0 15px 45px rgba(18, 48, 74, 0.15);
   border: 1px solid rgba(18, 48, 74, 0.08);
 }
-
 .brand {
   text-align: center;
 }
-
 .logo-placeholder {
   width: 160px;
   height: 100px;
   margin: 0 auto 12px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 20px;
   background: #ffffff;
   color: #237a78;
   font-size: 13px;
   font-weight: 700;
 }
-
 .brand h1 {
   margin: 0;
   color: #12304a;
@@ -47,37 +40,30 @@ ion-content {
   font-weight: 800;
   letter-spacing: -1px;
 }
-
 .brand h1 span {
   color: #237a78;
 }
-
 .brand p {
   margin: 8px 0 0;
   color: #12304a;
   font-size: 14px;
 }
-
 .welcome {
   margin-top: 35px;
   text-align: center;
 }
-
 .welcome h2 {
   margin: 0;
   color: #12304a;
   font-size: 25px;
 }
-
 .welcome p {
   margin: 7px 0 0;
   color: #65727c;
 }
-
 .form {
   margin-top: 28px;
 }
-
 ion-item {
   --background: #ffffff;
   --border-radius: 12px;
@@ -85,33 +71,41 @@ ion-item {
   margin-bottom: 15px;
   border: 1px solid rgba(18, 48, 74, 0.12);
 }
-
+ion-item:focus-within {
+  border-color: #237a78;
+  box-shadow: 0 0 0 3px rgba(35, 122, 120, 0.25);
+}
 ion-input {
   --color: #12304a;
   --placeholder-color: #8b949a;
 }
-
+.visibility-toggle {
+  --color: #65727c;
+  --padding-start: 0;
+  --padding-end: 0;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+}
 .login-button {
   --background: #12304a;
   --background-hover: #173b57;
   --border-radius: 12px;
   --box-shadow: none;
-
   height: 50px;
   margin-top: 12px;
   color: #ffffff;
   font-weight: 700;
   letter-spacing: 0.3px;
 }
-
 .login-button::part(native) {
   border-bottom: 3px solid #d9a441;
 }
-
 .forgot-button {
   --color: #237a78;
   margin-top: 10px;
   font-size: 14px;
+  min-height: 44px;
 }
 .logo {
   display: block;
@@ -120,18 +114,26 @@ ion-input {
   height: auto;
   margin: 0 auto 20px;
 }
-
+.login-button:focus-within,
+.forgot-button:focus-within,
+.visibility-toggle:focus-within {
+  outline: 3px solid #237a78;
+  outline-offset: 2px;
+}
 .login-error {
   margin: 8px 0 12px;
   padding: 10px 12px;
-
   border-radius: 10px;
-
   background: #fce8e6;
-
   color: #b3261e;
-
   font-size: 13px;
-
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.login-error ion-icon {
+  flex-shrink: 0;
+  font-size: 18px;
 }
