@@ -6,71 +6,23 @@ import { Book } from '../models/libro.model';
   providedIn: 'root',
 })
 export class CatalogService {
-  private categories: Category[] = [
-    { id: 1, name: 'Novela' },
-    { id: 2, name: 'Ciencia' },
-    { id: 3, name: 'Historia' },
-  ];
+  private readonly booksKey = 'alejandria_books';
 
-  private books: Book[] = [
-    {
-      id: 1,
-      title: 'Cien años de soledad',
-      author: 'Gabriel García Márquez',
-      isbn: '978-0307474728',
-      categoryId: 1,
-      year: 1967,
-      available: true,
-      description:
-        'La historia de la familia Buendía en Macondo, obra maestra del realismo mágico.',
-      cover: 'assets/img/covers/cien-anos-de-soledad.jpg',
-    },
-    {
-      id: 2,
-      title: 'Don Quijote de la Mancha',
-      author: 'Miguel de Cervantes',
-      isbn: '978-8420412146',
-      categoryId: 1,
-      year: 1605,
-      available: false,
-      description: 'Las aventuras del ingenioso hidalgo y su fiel escudero Sancho Panza.',
-      cover: 'assets/img/covers/don-quijote.jpg',
-    },
-    {
-      id: 3,
-      title: 'Introducción a la programación',
-      author: 'Libro académico',
-      isbn: '978-0000000000',
-      categoryId: 2,
-      year: 2018,
-      available: true,
-      description: 'Manual académico con los fundamentos de la programación.',
-      cover: 'assets/img/covers/introduccion-a-la-programacion.jpg',
-    },
-    {
-      id: 4,
-      title: 'Una breve historia del tiempo',
-      author: 'Stephen Hawking',
-      isbn: '978-0553380163',
-      categoryId: 2,
-      year: 1988,
-      available: true,
-      description:
-        'El clásico de divulgación científica sobre el universo, del genial Stephen Hawking.',
-      cover: 'assets/img/covers/breve-historia-del-tiempo.jpg',
-    },
-    {
-      id: 5,
-      title: 'Sapiens: De animales a dioses',
-      author: 'Yuval Noah Harari',
-      isbn: '978-8499926223',
-      categoryId: 3,
-      year: 2011,
-      available: false,
-      description: 'Un recorrido por la historia de la humanidad, de los homínidos a los dioses.',
-      cover: 'assets/img/covers/sapiens.jpg',
-    },
-  ];
+  private readonly categoriesKey = 'alejandria_categories';
+
+  private categories: Category[] = this.loadCategories();
+
+  private books: Book[] = this.loadBooks();
+
+  constructor() {
+    if (!localStorage.getItem(this.categoriesKey)) {
+      this.saveCategories();
+    }
+
+    if (!localStorage.getItem(this.booksKey)) {
+      this.saveBooks();
+    }
+  }
 
   getCategories(): Category[] {
     return this.categories;
@@ -123,6 +75,8 @@ export class CatalogService {
 
     this.books.push(newBook);
 
+    this.saveBooks();
+
     return newBook;
   }
 
@@ -138,6 +92,8 @@ export class CatalogService {
       ...data,
     };
 
+    this.saveBooks();
+
     return this.books[index];
   }
 
@@ -149,6 +105,8 @@ export class CatalogService {
     }
 
     this.books.splice(index, 1);
+
+    this.saveBooks();
 
     return true;
   }
@@ -163,6 +121,8 @@ export class CatalogService {
 
     this.categories.push(newCategory);
 
+    this.saveCategories();
+
     return newCategory;
   }
 
@@ -174,6 +134,8 @@ export class CatalogService {
     }
 
     category.name = name;
+
+    this.saveCategories();
 
     return category;
   }
@@ -193,6 +155,106 @@ export class CatalogService {
 
     this.categories.splice(index, 1);
 
+    this.saveCategories();
+
     return true;
+  }
+
+  private loadCategories(): Category[] {
+    const stored = localStorage.getItem(this.categoriesKey);
+
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        // Dato corrupto: se usan los valores iniciales
+      }
+    }
+
+    return [
+      { id: 1, name: 'Novela' },
+      { id: 2, name: 'Ciencia' },
+      { id: 3, name: 'Historia' },
+    ];
+  }
+
+  private loadBooks(): Book[] {
+    const stored = localStorage.getItem(this.booksKey);
+
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        // Dato corrupto: se usan los valores iniciales
+      }
+    }
+
+    return [
+      {
+        id: 1,
+        title: 'Cien años de soledad',
+        author: 'Gabriel García Márquez',
+        isbn: '978-0307474728',
+        categoryId: 1,
+        year: 1967,
+        available: true,
+        description:
+          'La historia de la familia Buendía en Macondo, obra maestra del realismo mágico.',
+        cover: 'assets/img/covers/cien-anos-de-soledad.jpg',
+      },
+      {
+        id: 2,
+        title: 'Don Quijote de la Mancha',
+        author: 'Miguel de Cervantes',
+        isbn: '978-8420412146',
+        categoryId: 1,
+        year: 1605,
+        available: false,
+        description: 'Las aventuras del ingenioso hidalgo y su fiel escudero Sancho Panza.',
+        cover: 'assets/img/covers/don-quijote.jpg',
+      },
+      {
+        id: 3,
+        title: 'Introducción a la programación',
+        author: 'Libro académico',
+        isbn: '978-0000000000',
+        categoryId: 2,
+        year: 2018,
+        available: true,
+        description: 'Manual académico con los fundamentos de la programación.',
+        cover: 'assets/img/covers/introduccion-a-la-programacion.jpg',
+      },
+      {
+        id: 4,
+        title: 'Una breve historia del tiempo',
+        author: 'Stephen Hawking',
+        isbn: '978-0553380163',
+        categoryId: 2,
+        year: 1988,
+        available: true,
+        description:
+          'El clásico de divulgación científica sobre el universo, del genial Stephen Hawking.',
+        cover: 'assets/img/covers/breve-historia-del-tiempo.jpg',
+      },
+      {
+        id: 5,
+        title: 'Sapiens: De animales a dioses',
+        author: 'Yuval Noah Harari',
+        isbn: '978-8499926223',
+        categoryId: 3,
+        year: 2011,
+        available: false,
+        description: 'Un recorrido por la historia de la humanidad, de los homínidos a los dioses.',
+        cover: 'assets/img/covers/sapiens.jpg',
+      },
+    ];
+  }
+
+  private saveCategories() {
+    localStorage.setItem(this.categoriesKey, JSON.stringify(this.categories));
+  }
+
+  private saveBooks() {
+    localStorage.setItem(this.booksKey, JSON.stringify(this.books));
   }
 }

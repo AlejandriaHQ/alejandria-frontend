@@ -22,8 +22,8 @@ export class AuthService {
 
   private timer: any;
 
-  // La sesión expira a los 30 minutos (RF-03)
-  private inactivityTime = 30 * 60 * 1000;
+  // La sesión expira a las 8 horas (jornada de la biblioteca)
+  private inactivityTime = 8 * 60 * 60 * 1000;
 
   constructor(private router: Router) {
     this.restoreSession();
