@@ -1,9 +1,11 @@
-export interface Prestamo {
+export type LoanStatus = 'active' | 'returned' | 'overdue';
+
+export interface Loan {
   id: number;
-  libroId: number;
-  usuarioId: number;
-  fechaPrestamo: Date;
-  fechaVencimiento: Date;
-  fechaDevolucion?: Date | null;
-  estado: 'activo' | 'devuelto' | 'vencido';
+  bookId: number;
+  userId: number;
+  loanDate: Date;
+  dueDate: Date;
+  returnDate?: Date | null;
+  status: LoanStatus;
 }

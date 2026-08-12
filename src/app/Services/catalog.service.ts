@@ -1,96 +1,96 @@
 import { Injectable } from '@angular/core';
-import { Categoria } from '../models/categoria.model';
-import { Libro } from '../models/libro.model';
+import { Category } from '../models/categoria.model';
+import { Book } from '../models/libro.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CatalogService {
-  private categorias: Categoria[] = [
-    { id: 1, nombre: 'Novela' },
-    { id: 2, nombre: 'Ciencia' },
-    { id: 3, nombre: 'Historia' },
+  private categories: Category[] = [
+    { id: 1, name: 'Novela' },
+    { id: 2, name: 'Ciencia' },
+    { id: 3, name: 'Historia' },
   ];
 
-  private libros: Libro[] = [
+  private books: Book[] = [
     {
       id: 1,
-      titulo: 'Cien años de soledad',
-      autor: 'Gabriel García Márquez',
+      title: 'Cien años de soledad',
+      author: 'Gabriel García Márquez',
       isbn: '978-0307474728',
-      categoriaId: 1,
-      anio: 1967,
-      disponible: true,
-      descripcion:
+      categoryId: 1,
+      year: 1967,
+      available: true,
+      description:
         'La historia de la familia Buendía en Macondo, obra maestra del realismo mágico.',
-      portada: 'assets/img/covers/cien-anos-de-soledad.jpg',
+      cover: 'assets/img/covers/cien-anos-de-soledad.jpg',
     },
     {
       id: 2,
-      titulo: 'Don Quijote de la Mancha',
-      autor: 'Miguel de Cervantes',
+      title: 'Don Quijote de la Mancha',
+      author: 'Miguel de Cervantes',
       isbn: '978-8420412146',
-      categoriaId: 1,
-      anio: 1605,
-      disponible: false,
-      descripcion: 'Las aventuras del ingenioso hidalgo y su fiel escudero Sancho Panza.',
-      portada: 'assets/img/covers/don-quijote.jpg',
+      categoryId: 1,
+      year: 1605,
+      available: false,
+      description: 'Las aventuras del ingenioso hidalgo y su fiel escudero Sancho Panza.',
+      cover: 'assets/img/covers/don-quijote.jpg',
     },
     {
       id: 3,
-      titulo: 'Introducción a la programación',
-      autor: 'Libro académico',
+      title: 'Introducción a la programación',
+      author: 'Libro académico',
       isbn: '978-0000000000',
-      categoriaId: 2,
-      anio: 2018,
-      disponible: true,
-      descripcion: 'Manual académico con los fundamentos de la programación.',
-      portada: 'assets/img/covers/introduccion-a-la-programacion.jpg',
+      categoryId: 2,
+      year: 2018,
+      available: true,
+      description: 'Manual académico con los fundamentos de la programación.',
+      cover: 'assets/img/covers/introduccion-a-la-programacion.jpg',
     },
     {
       id: 4,
-      titulo: 'Una breve historia del tiempo',
-      autor: 'Stephen Hawking',
+      title: 'Una breve historia del tiempo',
+      author: 'Stephen Hawking',
       isbn: '978-0553380163',
-      categoriaId: 2,
-      anio: 1988,
-      disponible: true,
-      descripcion:
+      categoryId: 2,
+      year: 1988,
+      available: true,
+      description:
         'El clásico de divulgación científica sobre el universo, del genial Stephen Hawking.',
-      portada: 'assets/img/covers/breve-historia-del-tiempo.jpg',
+      cover: 'assets/img/covers/breve-historia-del-tiempo.jpg',
     },
     {
       id: 5,
-      titulo: 'Sapiens: De animales a dioses',
-      autor: 'Yuval Noah Harari',
+      title: 'Sapiens: De animales a dioses',
+      author: 'Yuval Noah Harari',
       isbn: '978-8499926223',
-      categoriaId: 3,
-      anio: 2011,
-      disponible: false,
-      descripcion: 'Un recorrido por la historia de la humanidad, de los homínidos a los dioses.',
-      portada: 'assets/img/covers/sapiens.jpg',
+      categoryId: 3,
+      year: 2011,
+      available: false,
+      description: 'Un recorrido por la historia de la humanidad, de los homínidos a los dioses.',
+      cover: 'assets/img/covers/sapiens.jpg',
     },
   ];
 
-  listarCategorias(): Categoria[] {
-    return this.categorias;
+  getCategories(): Category[] {
+    return this.categories;
   }
 
-  listarLibros(): Libro[] {
-    return this.libros;
+  getBooks(): Book[] {
+    return this.books;
   }
 
-  buscarLibros(termino?: string, categoriaId?: number): Libro[] {
-    const categoria = categoriaId ?? 0;
+  searchBooks(query?: string, categoryId?: number): Book[] {
+    const category = categoryId ?? 0;
 
-    const tokens = this.normalizar(termino || '')
+    const tokens = this.normalize(query || '')
       .split(/\s+/)
       .filter(Boolean);
 
-    return this.libros.filter((libro) => {
-      const coincideCategoria = categoria === 0 || libro.categoriaId === categoria;
+    return this.books.filter((book) => {
+      const matchesCategory = category === 0 || book.categoryId === category;
 
-      if (!coincideCategoria) {
+      if (!matchesCategory) {
         return false;
       }
 
@@ -98,14 +98,14 @@ export class CatalogService {
         return true;
       }
 
-      const textoLibro = this.normalizar(`${libro.titulo} ${libro.autor} ${libro.isbn}`);
+      const bookText = this.normalize(`${book.title} ${book.author} ${book.isbn}`);
 
-      return tokens.every((token) => textoLibro.includes(token));
+      return tokens.every((token) => bookText.includes(token));
     });
   }
 
-  private normalizar(texto: string): string {
-    return texto
+  private normalize(text: string): string {
+    return text
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
@@ -113,42 +113,85 @@ export class CatalogService {
       .trim();
   }
 
-  agregarLibro(libro: Omit<Libro, 'id'>): Libro {
-    const siguienteId = this.libros.reduce((max, actual) => Math.max(max, actual.id), 0) + 1;
+  addBook(book: Omit<Book, 'id'>): Book {
+    const nextId = this.books.reduce((max, current) => Math.max(max, current.id), 0) + 1;
 
-    const nuevoLibro: Libro = {
-      ...libro,
-      id: siguienteId,
+    const newBook: Book = {
+      ...book,
+      id: nextId,
     };
 
-    this.libros.push(nuevoLibro);
+    this.books.push(newBook);
 
-    return nuevoLibro;
+    return newBook;
   }
 
-  editarLibro(id: number, datos: Partial<Libro>): Libro | null {
-    const indice = this.libros.findIndex((libro) => libro.id === id);
+  updateBook(id: number, data: Partial<Book>): Book | null {
+    const index = this.books.findIndex((book) => book.id === id);
 
-    if (indice === -1) {
+    if (index === -1) {
       return null;
     }
 
-    this.libros[indice] = {
-      ...this.libros[indice],
-      ...datos,
+    this.books[index] = {
+      ...this.books[index],
+      ...data,
     };
 
-    return this.libros[indice];
+    return this.books[index];
   }
 
-  eliminarLibro(id: number): boolean {
-    const indice = this.libros.findIndex((libro) => libro.id === id);
+  deleteBook(id: number): boolean {
+    const index = this.books.findIndex((book) => book.id === id);
 
-    if (indice === -1) {
+    if (index === -1) {
       return false;
     }
 
-    this.libros.splice(indice, 1);
+    this.books.splice(index, 1);
+
+    return true;
+  }
+
+  addCategory(name: string): Category {
+    const nextId = this.categories.reduce((max, current) => Math.max(max, current.id), 0) + 1;
+
+    const newCategory: Category = {
+      id: nextId,
+      name,
+    };
+
+    this.categories.push(newCategory);
+
+    return newCategory;
+  }
+
+  updateCategory(id: number, name: string): Category | null {
+    const category = this.categories.find((c) => c.id === id);
+
+    if (!category) {
+      return null;
+    }
+
+    category.name = name;
+
+    return category;
+  }
+
+  deleteCategory(id: number): boolean {
+    const inUse = this.books.some((book) => book.categoryId === id);
+
+    if (inUse) {
+      return false;
+    }
+
+    const index = this.categories.findIndex((c) => c.id === id);
+
+    if (index === -1) {
+      return false;
+    }
+
+    this.categories.splice(index, 1);
 
     return true;
   }

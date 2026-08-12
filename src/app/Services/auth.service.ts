@@ -1,147 +1,147 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
-export type RolUsuario = 'admin' | 'usuario';
+export type UserRole = 'admin' | 'user';
 
-interface SesionGuardada {
-  identificador: string;
-  rol: RolUsuario;
-  expiraEn: number;
+interface StoredSession {
+  identifier: string;
+  role: UserRole;
+  expiresAt: number;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly claveSesion = 'alejandria_sesion';
+  private readonly sessionKey = 'alejandria_sesion';
 
-  private usuarioActual: {
-    identificador: string;
-    rol: RolUsuario;
+  private currentUser: {
+    identifier: string;
+    role: UserRole;
   } | null = null;
 
-  private temporizador: any;
+  private timer: any;
 
   // La sesión expira a los 30 minutos (RF-03)
-  private tiempoInactividad = 30 * 60 * 1000;
+  private inactivityTime = 30 * 60 * 1000;
 
   constructor(private router: Router) {
-    this.restaurarSesion();
+    this.restoreSession();
   }
 
-  iniciarSesion(identificador: string, contrasena: string): RolUsuario | null {
-    if (!identificador || !contrasena) {
+  login(identifier: string, password: string): UserRole | null {
+    if (!identifier || !password) {
       return null;
     }
 
     // Administrador
-    if (identificador === 'admin@alejandria.com' && contrasena === 'admin123') {
-      this.usuarioActual = {
-        identificador,
-        rol: 'admin',
+    if (identifier === 'admin@alejandria.com' && password === 'admin123') {
+      this.currentUser = {
+        identifier,
+        role: 'admin',
       };
 
-      this.guardarSesion();
-      this.iniciarTemporizador();
+      this.saveSession();
+      this.startTimer();
 
       return 'admin';
     }
 
     // Usuario
-    if (identificador === 'usuario001' && contrasena === 'usuario123') {
-      this.usuarioActual = {
-        identificador,
-        rol: 'usuario',
+    if (identifier === 'usuario001' && password === 'usuario123') {
+      this.currentUser = {
+        identifier,
+        role: 'user',
       };
 
-      this.guardarSesion();
-      this.iniciarTemporizador();
+      this.saveSession();
+      this.startTimer();
 
-      return 'usuario';
+      return 'user';
     }
 
     return null;
   }
 
-  obtenerUsuarioActual() {
-    return this.usuarioActual;
+  getCurrentUser() {
+    return this.currentUser;
   }
 
-  cerrarSesion() {
-    this.usuarioActual = null;
+  logout() {
+    this.currentUser = null;
 
-    this.limpiarSesionGuardada();
-    this.detenerTemporizador();
+    this.clearStoredSession();
+    this.stopTimer();
 
     this.router.navigate(['/autenticacion']);
   }
 
-  private guardarSesion() {
-    const sesion: SesionGuardada = {
-      identificador: this.usuarioActual!.identificador,
-      rol: this.usuarioActual!.rol,
-      expiraEn: Date.now() + this.tiempoInactividad,
+  private saveSession() {
+    const session: StoredSession = {
+      identifier: this.currentUser!.identifier,
+      role: this.currentUser!.role,
+      expiresAt: Date.now() + this.inactivityTime,
     };
 
-    localStorage.setItem(this.claveSesion, JSON.stringify(sesion));
+    localStorage.setItem(this.sessionKey, JSON.stringify(session));
   }
 
-  private restaurarSesion() {
-    const guardada = localStorage.getItem(this.claveSesion);
+  private restoreSession() {
+    const stored = localStorage.getItem(this.sessionKey);
 
-    if (!guardada) {
+    if (!stored) {
       return;
     }
 
     try {
-      const sesion: SesionGuardada = JSON.parse(guardada);
+      const session: StoredSession = JSON.parse(stored);
 
-      const restante = sesion.expiraEn - Date.now();
+      const remaining = session.expiresAt - Date.now();
 
-      if (restante <= 0) {
-        this.limpiarSesionGuardada();
+      if (remaining <= 0) {
+        this.clearStoredSession();
 
         return;
       }
 
-      this.usuarioActual = {
-        identificador: sesion.identificador,
-        rol: sesion.rol,
+      this.currentUser = {
+        identifier: session.identifier,
+        role: session.role,
       };
 
-      this.temporizador = setTimeout(() => this.expiarSesion(), restante);
+      this.timer = setTimeout(() => this.expireSession(), remaining);
     } catch {
-      this.limpiarSesionGuardada();
+      this.clearStoredSession();
     }
   }
 
-  private iniciarTemporizador() {
-    this.detenerTemporizador();
+  private startTimer() {
+    this.stopTimer();
 
-    this.temporizador = setTimeout(() => this.expiarSesion(), this.tiempoInactividad);
+    this.timer = setTimeout(() => this.expireSession(), this.inactivityTime);
   }
 
-  private expiarSesion() {
-    this.usuarioActual = null;
+  private expireSession() {
+    this.currentUser = null;
 
-    this.temporizador = null;
+    this.timer = null;
 
-    this.limpiarSesionGuardada();
+    this.clearStoredSession();
 
     console.log('Sesión expirada por inactividad');
 
     this.router.navigate(['/autenticacion']);
   }
 
-  private limpiarSesionGuardada() {
-    localStorage.removeItem(this.claveSesion);
+  private clearStoredSession() {
+    localStorage.removeItem(this.sessionKey);
   }
 
-  private detenerTemporizador() {
-    if (this.temporizador) {
-      clearTimeout(this.temporizador);
+  private stopTimer() {
+    if (this.timer) {
+      clearTimeout(this.timer);
 
-      this.temporizador = null;
+      this.timer = null;
     }
   }
 }

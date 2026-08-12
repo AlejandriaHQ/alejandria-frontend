@@ -24,9 +24,50 @@
   color: var(--brand-slate);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.categories-button,
 .add-button,
 .save-button {
   --border-radius: 9999px;
+}
+
+/* Formulario y lista de categorías */
+.category-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.category-form ion-item {
+  --background: var(--brand-paper);
+  --border-radius: 14px;
+  --padding-start: 12px;
+  border: 1px solid var(--brand-border-input);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.category-form ion-item:focus-within {
+  border-color: var(--brand-teal-strong);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+}
+
+.category-form ion-input {
+  --color: var(--brand-navy);
+  --placeholder-color: var(--brand-slate);
+}
+
+.category-list ion-item {
+  --background: var(--brand-paper);
+  border: 1px solid var(--brand-border);
+  border-radius: 12px;
+  margin-bottom: 8px;
 }
 
 /* Formulario del modal */
@@ -34,6 +75,56 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* Selector de portada */
+.portada-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px dashed var(--brand-border-input);
+  border-radius: 14px;
+  background: var(--brand-surface);
+}
+
+.portada-preview {
+  width: 110px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+.portada-placeholder {
+  width: 110px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--brand-slate);
+  border-radius: 8px;
+  border: 1px solid var(--brand-border);
+  background: var(--brand-paper);
+  font-size: 12px;
+}
+
+.portada-placeholder ion-icon {
+  font-size: 36px;
+}
+
+.portada-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portada-actions ion-button {
+  --border-radius: 9999px;
 }
 
 .book-form ion-item {

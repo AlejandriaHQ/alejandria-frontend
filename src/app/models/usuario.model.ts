@@ -1,8 +1,10 @@
-export interface Usuario {
+export type UserRole = 'admin' | 'user';
+
+export interface User {
   id: number;
-  nombre: string;
-  identificador: string;
-  rol: 'admin' | 'usuario';
-  correo: string;
-  telefono: string;
+  name: string;
+  identifier: string;
+  role: UserRole;
+  email: string;
+  phone: string;
 }

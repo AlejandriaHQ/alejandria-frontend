@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../Services/auth.service';
 import { CatalogService } from '../Services/catalog.service';
-import { Categoria } from '../models/categoria.model';
-import { Libro } from '../models/libro.model';
+import { Category } from '../models/categoria.model';
+import { Book } from '../models/libro.model';
 
 @Component({
   selector: 'app-usuario',
@@ -12,13 +12,13 @@ import { Libro } from '../models/libro.model';
   standalone: false,
 })
 export class UsuarioPage implements OnInit {
-  termino: string = '';
+  query: string = '';
 
-  categoriaId: number = 0;
+  categoryId: number = 0;
 
-  categorias: Categoria[] = [];
+  categories: Category[] = [];
 
-  libroSeleccionado: Libro | null = null;
+  selectedBook: Book | null = null;
 
   constructor(
     private authService: AuthService,
@@ -27,28 +27,28 @@ export class UsuarioPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.categorias = this.catalogService.listarCategorias();
+    this.categories = this.catalogService.getCategories();
   }
 
-  verDetalle(libro: Libro) {
-    this.libroSeleccionado = libro;
+  filteredBooks(): Book[] {
+    return this.catalogService.searchBooks(this.query, this.categoryId);
   }
 
-  cerrarDetalle() {
-    this.libroSeleccionado = null;
+  categoryName(categoryId: number): string {
+    const category = this.categories.find((c) => c.id === categoryId);
+
+    return category ? category.name : 'Sin categoría';
   }
 
-  librosFiltrados(): Libro[] {
-    return this.catalogService.buscarLibros(this.termino, this.categoriaId);
+  showDetail(book: Book) {
+    this.selectedBook = book;
   }
 
-  nombreCategoria(categoriaId: number): string {
-    const categoria = this.categorias.find((c) => c.id === categoriaId);
-
-    return categoria ? categoria.nombre : 'Sin categoría';
+  closeDetail() {
+    this.selectedBook = null;
   }
 
-  cerrarSesion() {
-    this.authService.cerrarSesion();
+  logout() {
+    this.authService.logout();
   }
 }

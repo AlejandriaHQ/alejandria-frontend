@@ -1,5 +1,5 @@
-<app-page-header titulo="Alejandría" [mostrarAtras]="false">
-  <ion-button slot="end" fill="clear" (click)="cerrarSesion()" aria-label="Cerrar sesión">
+<app-page-header title="Alejandría" [showBack]="false">
+  <ion-button slot="end" fill="clear" (click)="logout()" aria-label="Cerrar sesión">
     <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
   </ion-button>
 </app-page-header>
@@ -15,8 +15,8 @@
     <div class="filters">
       <ion-searchbar
         placeholder="Buscar por título, autor o ISBN"
-        [(ngModel)]="termino"
-        (ionInput)="librosFiltrados()"
+        [(ngModel)]="query"
+        (ionInput)="filteredBooks()"
       >
       </ion-searchbar>
 
@@ -25,13 +25,13 @@
         label-placement="floating"
         interface="popover"
         placeholder="Todas"
-        [(ngModel)]="categoriaId"
-        (ionChange)="librosFiltrados()"
+        [(ngModel)]="categoryId"
+        (ionChange)="filteredBooks()"
       >
         <ion-select-option [value]="0"> Todas </ion-select-option>
 
-        <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
-          {{ categoria.nombre }}
+        <ion-select-option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
         </ion-select-option>
       </ion-select>
     </div>
@@ -40,32 +40,32 @@
       <ion-card
         button
         class="book-card"
-        *ngFor="let libro of librosFiltrados()"
-        (click)="verDetalle(libro)"
+        *ngFor="let book of filteredBooks()"
+        (click)="showDetail(book)"
       >
         <div class="book-cover">
-          <img *ngIf="libro.portada" [src]="libro.portada" alt="Portada de {{ libro.titulo }}" />
+          <img *ngIf="book.cover" [src]="book.cover" alt="Portada de {{ book.title }}" />
 
-          <div *ngIf="!libro.portada" class="book-cover-placeholder" aria-hidden="true">
+          <div *ngIf="!book.cover" class="book-cover-placeholder" aria-hidden="true">
             <ion-icon name="book-outline"></ion-icon>
           </div>
         </div>
 
         <ion-card-header>
-          <ion-card-title> {{ libro.titulo }} </ion-card-title>
+          <ion-card-title> {{ book.title }} </ion-card-title>
 
-          <ion-card-subtitle> {{ libro.autor }} </ion-card-subtitle>
+          <ion-card-subtitle> {{ book.author }} </ion-card-subtitle>
         </ion-card-header>
 
         <ion-card-content>
-          <p>{{ nombreCategoria(libro.categoriaId) }}</p>
+          <p>{{ categoryName(book.categoryId) }}</p>
 
-          <p class="text-mono">ISBN: {{ libro.isbn }}</p>
+          <p class="text-mono">ISBN: {{ book.isbn }}</p>
 
           <div class="card-status">
-            <ion-badge *ngIf="libro.disponible" color="success"> Disponible </ion-badge>
+            <ion-badge *ngIf="book.available" color="success"> Disponible </ion-badge>
 
-            <ion-badge *ngIf="!libro.disponible" color="warning"> Prestado </ion-badge>
+            <ion-badge *ngIf="!book.available" color="warning"> Prestado </ion-badge>
           </div>
         </ion-card-content>
       </ion-card>
@@ -75,8 +75,8 @@
 
 <!-- Modal: detalle del libro -->
 <ion-modal
-  [isOpen]="!!libroSeleccionado"
-  (ionModalDidDismiss)="cerrarDetalle()"
+  [isOpen]="!!selectedBook"
+  (ionModalDidDismiss)="closeDetail()"
   [initialBreakpoint]="0.8"
   [breakpoints]="[0, 0.5, 0.8, 1]"
 >
@@ -86,58 +86,52 @@
         <ion-title>Detalle del libro</ion-title>
 
         <ion-buttons slot="end">
-          <ion-button (click)="cerrarDetalle()" aria-label="Cerrar">
+          <ion-button (click)="closeDetail()" aria-label="Cerrar">
             <ion-icon slot="icon-only" name="close-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding" *ngIf="libroSeleccionado">
+    <ion-content class="ion-padding" *ngIf="selectedBook">
       <div class="detail-cover">
         <img
-          *ngIf="libroSeleccionado.portada"
-          [src]="libroSeleccionado.portada"
-          alt="Portada de {{ libroSeleccionado.titulo }}"
+          *ngIf="selectedBook.cover"
+          [src]="selectedBook.cover"
+          alt="Portada de {{ selectedBook.title }}"
         />
 
-        <ion-icon
-          *ngIf="!libroSeleccionado.portada"
-          name="book-outline"
-          aria-hidden="true"
-        ></ion-icon>
+        <ion-icon *ngIf="!selectedBook.cover" name="book-outline" aria-hidden="true"></ion-icon>
       </div>
 
-      <h2 class="detail-title">{{ libroSeleccionado.titulo }}</h2>
+      <h2 class="detail-title">{{ selectedBook.title }}</h2>
 
-      <p class="detail-author">{{ libroSeleccionado.autor }}</p>
+      <p class="detail-author">{{ selectedBook.author }}</p>
 
       <div class="detail-status">
-        <ion-badge *ngIf="libroSeleccionado.disponible" color="success"> Disponible </ion-badge>
+        <ion-badge *ngIf="selectedBook.available" color="success"> Disponible </ion-badge>
 
-        <ion-badge *ngIf="!libroSeleccionado.disponible" color="warning"> Prestado </ion-badge>
+        <ion-badge *ngIf="!selectedBook.available" color="warning"> Prestado </ion-badge>
       </div>
 
       <ion-list lines="full" class="detail-list">
         <ion-item>
           <ion-label>Categoría</ion-label>
-          <ion-note slot="end">{{ nombreCategoria(libroSeleccionado.categoriaId) }}</ion-note>
+          <ion-note slot="end">{{ categoryName(selectedBook.categoryId) }}</ion-note>
         </ion-item>
 
         <ion-item>
           <ion-label>ISBN</ion-label>
-          <ion-note slot="end">{{ libroSeleccionado.isbn }}</ion-note>
+          <ion-note slot="end">{{ selectedBook.isbn }}</ion-note>
         </ion-item>
 
         <ion-item>
           <ion-label>Año de publicación</ion-label>
-          <ion-note slot="end">{{ libroSeleccionado.anio }}</ion-note>
+          <ion-note slot="end">{{ selectedBook.year }}</ion-note>
         </ion-item>
       </ion-list>
 
-      <p *ngIf="libroSeleccionado.descripcion" class="detail-desc">
-        {{ libroSeleccionado.descripcion }}
-      </p>
+      <p *ngIf="selectedBook.description" class="detail-desc">{{ selectedBook.description }}</p>
     </ion-content>
   </ng-template>
 </ion-modal>

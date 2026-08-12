@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { CatalogService } from '../../Services/catalog.service';
-import { Categoria } from '../../models/categoria.model';
-import { Libro } from '../../models/libro.model';
+import { Category } from '../../models/categoria.model';
+import { Book } from '../../models/libro.model';
 
 @Component({
   selector: 'app-catalogo',
@@ -11,142 +11,215 @@ import { Libro } from '../../models/libro.model';
   standalone: false,
 })
 export class CatalogoPage implements OnInit {
-  termino: string = '';
+  query: string = '';
 
-  categoriaId: number = 0;
+  categoryId: number = 0;
 
-  categorias: Categoria[] = [];
+  categories: Category[] = [];
 
-  mostrarFormulario: boolean = false;
+  showForm: boolean = false;
 
-  formularioInvalido: boolean = false;
+  formInvalid: boolean = false;
 
-  libroEnEdicion: Libro | null = null;
+  editingBook: Book | null = null;
 
-  libroSeleccionado: Libro | null = null;
+  selectedBook: Book | null = null;
 
-  nuevoTitulo: string = '';
+  showCategories: boolean = false;
 
-  nuevoAutor: string = '';
+  newCategory: string = '';
 
-  nuevoIsbn: string = '';
+  editingCategory: Category | null = null;
 
-  nuevaCategoriaId: number = 0;
+  newTitle: string = '';
 
-  nuevoAnio: number;
+  newAuthor: string = '';
+
+  newIsbn: string = '';
+
+  newCategoryId: number = 0;
+
+  newYear: number;
+
+  newCover: string = '';
 
   constructor(
     private catalogService: CatalogService,
     private alertController: AlertController,
   ) {
-    this.nuevoAnio = new Date().getFullYear();
+    this.newYear = new Date().getFullYear();
   }
 
   ngOnInit() {
-    this.categorias = this.catalogService.listarCategorias();
+    this.categories = this.catalogService.getCategories();
   }
 
-  librosFiltrados(): Libro[] {
-    return this.catalogService.buscarLibros(this.termino, this.categoriaId);
+  filteredBooks(): Book[] {
+    return this.catalogService.searchBooks(this.query, this.categoryId);
   }
 
-  nombreCategoria(categoriaId: number): string {
-    const categoria = this.categorias.find((c) => c.id === categoriaId);
+  categoryName(categoryId: number): string {
+    const category = this.categories.find((c) => c.id === categoryId);
 
-    return categoria ? categoria.nombre : 'Sin categoría';
+    return category ? category.name : 'Sin categoría';
   }
 
-  alternarFormulario() {
-    if (this.mostrarFormulario) {
-      this.cancelarFormulario();
+  toggleForm() {
+    if (this.showForm) {
+      this.closeForm();
     } else {
-      this.abrirFormularioNuevo();
+      this.openNewBookForm();
     }
   }
 
-  abrirFormularioNuevo() {
-    this.libroEnEdicion = null;
+  openNewBookForm() {
+    this.editingBook = null;
 
-    this.limpiarFormulario();
+    this.resetForm();
 
-    this.mostrarFormulario = true;
+    this.showForm = true;
   }
 
-  abrirFormularioEdicion(libro: Libro) {
-    this.libroEnEdicion = libro;
+  openEditBookForm(book: Book) {
+    this.editingBook = book;
 
-    this.formularioInvalido = false;
+    this.formInvalid = false;
 
-    this.nuevoTitulo = libro.titulo;
-    this.nuevoAutor = libro.autor;
-    this.nuevoIsbn = libro.isbn;
-    this.nuevaCategoriaId = libro.categoriaId;
-    this.nuevoAnio = libro.anio;
+    this.newTitle = book.title;
+    this.newAuthor = book.author;
+    this.newIsbn = book.isbn;
+    this.newCategoryId = book.categoryId;
+    this.newYear = book.year;
+    this.newCover = book.cover ?? '';
 
-    this.mostrarFormulario = true;
+    this.showForm = true;
   }
 
-  cancelarFormulario() {
-    this.mostrarFormulario = false;
+  closeForm() {
+    this.showForm = false;
 
-    this.libroEnEdicion = null;
+    this.editingBook = null;
 
-    this.limpiarFormulario();
+    this.resetForm();
   }
 
-  verDetalle(libro: Libro) {
-    this.libroSeleccionado = libro;
+  private resetForm() {
+    this.newTitle = '';
+    this.newAuthor = '';
+    this.newIsbn = '';
+    this.newCategoryId = 0;
+    this.newYear = new Date().getFullYear();
+    this.newCover = '';
+    this.formInvalid = false;
   }
 
-  cerrarDetalle() {
-    this.libroSeleccionado = null;
-  }
-
-  private limpiarFormulario() {
-    this.nuevoTitulo = '';
-    this.nuevoAutor = '';
-    this.nuevoIsbn = '';
-    this.nuevaCategoriaId = 0;
-    this.nuevoAnio = new Date().getFullYear();
-    this.formularioInvalido = false;
-  }
-
-  guardarLibro() {
+  saveBook() {
     if (
-      !this.nuevoTitulo.trim() ||
-      !this.nuevoAutor.trim() ||
-      !this.nuevoIsbn.trim() ||
-      this.nuevaCategoriaId === 0
+      !this.newTitle.trim() ||
+      !this.newAuthor.trim() ||
+      !this.newIsbn.trim() ||
+      this.newCategoryId === 0
     ) {
-      this.formularioInvalido = true;
+      this.formInvalid = true;
 
       return;
     }
 
-    const datos = {
-      titulo: this.nuevoTitulo.trim(),
-      autor: this.nuevoAutor.trim(),
-      isbn: this.nuevoIsbn.trim(),
-      categoriaId: this.nuevaCategoriaId,
-      anio: this.nuevoAnio,
+    const data = {
+      title: this.newTitle.trim(),
+      author: this.newAuthor.trim(),
+      isbn: this.newIsbn.trim(),
+      categoryId: this.newCategoryId,
+      year: this.newYear,
+      cover: this.newCover || undefined,
     };
 
-    if (this.libroEnEdicion) {
-      this.catalogService.editarLibro(this.libroEnEdicion.id, datos);
+    if (this.editingBook) {
+      this.catalogService.updateBook(this.editingBook.id, data);
     } else {
-      this.catalogService.agregarLibro({
-        ...datos,
-        disponible: true,
+      this.catalogService.addBook({
+        ...data,
+        available: true,
       });
     }
 
-    this.cancelarFormulario();
+    this.closeForm();
   }
 
-  async eliminarLibro(libro: Libro) {
+  showDetail(book: Book) {
+    this.selectedBook = book;
+  }
+
+  closeDetail() {
+    this.selectedBook = null;
+  }
+
+  onCoverSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      this.newCover = reader.result as string;
+    };
+
+    reader.readAsDataURL(file);
+
+    input.value = '';
+  }
+
+  removeCover() {
+    this.newCover = '';
+  }
+
+  openCategories() {
+    this.showCategories = true;
+  }
+
+  closeCategories() {
+    this.showCategories = false;
+
+    this.editingCategory = null;
+
+    this.newCategory = '';
+  }
+
+  addCategory() {
+    const name = this.newCategory.trim();
+
+    if (!name) {
+      return;
+    }
+
+    if (this.editingCategory) {
+      this.catalogService.updateCategory(this.editingCategory.id, name);
+    } else {
+      this.catalogService.addCategory(name);
+    }
+
+    this.editingCategory = null;
+
+    this.newCategory = '';
+
+    this.categories = this.catalogService.getCategories();
+  }
+
+  startEditCategory(category: Category) {
+    this.editingCategory = category;
+
+    this.newCategory = category.name;
+  }
+
+  async deleteCategory(category: Category) {
     const alert = await this.alertController.create({
-      header: 'Eliminar libro',
-      message: `¿Seguro que deseas eliminar "${libro.titulo}"?`,
+      header: 'Eliminar categoría',
+      message: `¿Seguro que deseas eliminar "${category.name}"?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -154,7 +227,49 @@ export class CatalogoPage implements OnInit {
         },
         {
           text: 'Eliminar',
-          handler: () => this.catalogService.eliminarLibro(libro.id),
+          handler: () => {
+            const deleted = this.catalogService.deleteCategory(category.id);
+
+            if (!deleted) {
+              this.showCategoryInUseError(category);
+            }
+
+            this.categories = this.catalogService.getCategories();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private async showCategoryInUseError(category: Category) {
+    const alert = await this.alertController.create({
+      header: 'No se puede eliminar',
+      message: `La categoría "${category.name}" tiene libros asignados. Reasigna o elimina esos libros primero.`,
+      buttons: [
+        {
+          text: 'Entendido',
+          role: 'cancel',
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async deleteBook(book: Book) {
+    const alert = await this.alertController.create({
+      header: 'Eliminar libro',
+      message: `¿Seguro que deseas eliminar "${book.title}"?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          handler: () => this.catalogService.deleteBook(book.id),
         },
       ],
     });

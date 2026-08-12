@@ -1,11 +1,11 @@
-export interface Libro {
+export interface Book {
   id: number;
-  titulo: string;
-  autor: string;
+  title: string;
+  author: string;
   isbn: string;
-  categoriaId: number;
-  anio: number;
-  disponible: boolean;
-  descripcion?: string;
-  portada?: string;
+  categoryId: number;
+  year: number;
+  available: boolean;
+  description?: string;
+  cover?: string;
 }

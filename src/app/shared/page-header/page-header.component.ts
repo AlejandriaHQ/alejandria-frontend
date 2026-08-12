@@ -9,30 +9,30 @@ import { AuthService } from '../../Services/auth.service';
   standalone: false,
 })
 export class PageHeaderComponent {
-  @Input() titulo = '';
+  @Input() title = '';
 
-  @Input() mostrarAtras = true;
+  @Input() showBack = true;
 
-  @Input() rutaAtras = '/';
+  @Input() backRoute = '/';
 
   constructor(
     public themeService: ThemeService,
     private authService: AuthService,
   ) {}
 
-  get usuario() {
-    return this.authService.obtenerUsuarioActual();
+  get currentUser() {
+    return this.authService.getCurrentUser();
   }
 
-  get nombreUsuario() {
-    if (!this.usuario) {
+  get userName() {
+    if (!this.currentUser) {
       return '';
     }
 
-    return this.usuario.rol === 'admin' ? 'Administrador' : 'Usuario';
+    return this.currentUser.role === 'admin' ? 'Administrador' : 'Usuario';
   }
 
-  get inicial() {
-    return (this.usuario?.identificador || 'A').charAt(0).toUpperCase();
+  get initial() {
+    return (this.currentUser?.identifier || 'A').charAt(0).toUpperCase();
   }
 }

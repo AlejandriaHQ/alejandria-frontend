@@ -9,16 +9,17 @@ import { AuthService } from '../Services/auth.service';
   standalone: false,
 })
 export class AutenticacionPage implements OnInit, OnDestroy {
-  identificador: string = '';
-  contrasena: string = '';
+  identifier: string = '';
+
+  password: string = '';
 
   error: string = '';
 
-  cargando: boolean = false;
+  loading: boolean = false;
 
-  mostrarContrasena: boolean = false;
+  showPassword: boolean = false;
 
-  private temporizadorCarga: any;
+  private loadingTimer: any;
 
   constructor(
     private authService: AuthService,
@@ -26,60 +27,44 @@ export class AutenticacionPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.redirigirSiHaySesion();
-  }
-
-  private redirigirSiHaySesion() {
-    const usuario = this.authService.obtenerUsuarioActual();
-
-    if (usuario?.rol === 'admin') {
-      this.router.navigate(['/admin']);
-
-      return;
-    }
-
-    if (usuario?.rol === 'usuario') {
-      this.router.navigate(['/usuario']);
-
-      return;
-    }
+    this.redirectIfAuthenticated();
   }
 
   ngOnDestroy() {
-    if (this.temporizadorCarga) {
-      clearTimeout(this.temporizadorCarga);
+    if (this.loadingTimer) {
+      clearTimeout(this.loadingTimer);
 
-      this.temporizadorCarga = null;
+      this.loadingTimer = null;
     }
   }
 
-  alternarVisibilidadContrasena() {
-    this.mostrarContrasena = !this.mostrarContrasena;
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
-  iniciarSesion() {
-    if (this.cargando) {
+  login() {
+    if (this.loading) {
       return;
     }
 
     this.error = '';
 
-    this.cargando = true;
+    this.loading = true;
 
-    this.temporizadorCarga = setTimeout(() => {
-      this.cargando = false;
+    this.loadingTimer = setTimeout(() => {
+      this.loading = false;
 
-      this.temporizadorCarga = null;
+      this.loadingTimer = null;
 
-      const rol = this.authService.iniciarSesion(this.identificador, this.contrasena);
+      const role = this.authService.login(this.identifier, this.password);
 
-      if (rol === 'admin') {
+      if (role === 'admin') {
         this.router.navigate(['/admin']);
 
         return;
       }
 
-      if (rol === 'usuario') {
+      if (role === 'user') {
         this.router.navigate(['/usuario']);
 
         return;
@@ -87,5 +72,21 @@ export class AutenticacionPage implements OnInit, OnDestroy {
 
       this.error = 'Identificador o contraseña incorrectos';
     }, 500);
+  }
+
+  private redirectIfAuthenticated() {
+    const user = this.authService.getCurrentUser();
+
+    if (user?.role === 'admin') {
+      this.router.navigate(['/admin']);
+
+      return;
+    }
+
+    if (user?.role === 'user') {
+      this.router.navigate(['/usuario']);
+
+      return;
+    }
   }
 }

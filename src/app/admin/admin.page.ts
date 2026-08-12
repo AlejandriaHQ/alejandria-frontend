@@ -10,7 +10,7 @@ import { AuthService } from '../Services/auth.service';
 export class AdminPage {
   constructor(private authService: AuthService) {}
 
-  cerrarSesion() {
-    this.authService.cerrarSesion();
+  logout() {
+    this.authService.logout();
   }
 }

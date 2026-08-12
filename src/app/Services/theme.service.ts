@@ -4,31 +4,31 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ThemeService {
-  private readonly claveTema = 'alejandria_tema';
+  private readonly themeKey = 'alejandria_tema';
 
-  esOscuro: boolean = false;
+  isDark: boolean = false;
 
   constructor() {
-    this.esOscuro = localStorage.getItem(this.claveTema) === 'dark';
+    this.isDark = localStorage.getItem(this.themeKey) === 'dark';
 
-    this.aplicar();
+    this.apply();
   }
 
-  alternarTema() {
-    this.esOscuro = !this.esOscuro;
+  toggleTheme() {
+    this.isDark = !this.isDark;
 
-    localStorage.setItem(this.claveTema, this.esOscuro ? 'dark' : 'light');
+    localStorage.setItem(this.themeKey, this.isDark ? 'dark' : 'light');
 
-    this.aplicar();
+    this.apply();
   }
 
-  private aplicar() {
-    const raiz = document.documentElement;
+  private apply() {
+    const root = document.documentElement;
 
-    if (this.esOscuro) {
-      raiz.setAttribute('data-theme', 'dark');
+    if (this.isDark) {
+      root.setAttribute('data-theme', 'dark');
     } else {
-      raiz.removeAttribute('data-theme');
+      root.removeAttribute('data-theme');
     }
   }
 }
