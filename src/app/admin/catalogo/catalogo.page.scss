@@ -110,6 +110,29 @@ ion-card {
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
   border: 1px solid var(--brand-border);
+  overflow: hidden;
+}
+
+.book-cover {
+  width: 100%;
+  height: 200px;
+  background: var(--brand-surface);
+}
+
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-teal-strong);
+  font-size: 48px;
 }
 
 .book-card:hover {
@@ -139,19 +162,25 @@ ion-card-content p {
 }
 
 .detail-cover {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 16px;
+  width: 150px;
+  height: 210px;
+  margin: 0 auto 18px;
   border-radius: 12px;
-  background: var(--brand-hover);
-  color: var(--brand-teal-strong);
+  overflow: hidden;
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--brand-teal-strong);
+  font-size: 48px;
 }
 
-.detail-cover ion-icon {
-  font-size: 36px;
+.detail-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .detail-title {

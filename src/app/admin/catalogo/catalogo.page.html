@@ -45,6 +45,14 @@
         *ngFor="let libro of librosFiltrados()"
         (click)="verDetalle(libro)"
       >
+        <div class="book-cover">
+          <img *ngIf="libro.portada" [src]="libro.portada" alt="Portada de {{ libro.titulo }}" />
+
+          <div *ngIf="!libro.portada" class="book-cover-placeholder" aria-hidden="true">
+            <ion-icon name="book-outline"></ion-icon>
+          </div>
+        </div>
+
         <ion-card-header>
           <ion-card-title> {{ libro.titulo }} </ion-card-title>
 
@@ -215,8 +223,18 @@
     </ion-header>
 
     <ion-content class="ion-padding" *ngIf="libroSeleccionado">
-      <div class="detail-cover" aria-hidden="true">
-        <ion-icon name="book-outline"></ion-icon>
+      <div class="detail-cover">
+        <img
+          *ngIf="libroSeleccionado.portada"
+          [src]="libroSeleccionado.portada"
+          alt="Portada de {{ libroSeleccionado.titulo }}"
+        />
+
+        <ion-icon
+          *ngIf="!libroSeleccionado.portada"
+          name="book-outline"
+          aria-hidden="true"
+        ></ion-icon>
       </div>
 
       <h2 class="detail-title">{{ libroSeleccionado.titulo }}</h2>

@@ -23,6 +23,7 @@ export class CatalogService {
       disponible: true,
       descripcion:
         'La historia de la familia Buendía en Macondo, obra maestra del realismo mágico.',
+      portada: 'assets/img/covers/cien-anos-de-soledad.jpg',
     },
     {
       id: 2,
@@ -33,6 +34,7 @@ export class CatalogService {
       anio: 1605,
       disponible: false,
       descripcion: 'Las aventuras del ingenioso hidalgo y su fiel escudero Sancho Panza.',
+      portada: 'assets/img/covers/don-quijote.jpg',
     },
     {
       id: 3,
@@ -43,6 +45,7 @@ export class CatalogService {
       anio: 2018,
       disponible: true,
       descripcion: 'Manual académico con los fundamentos de la programación.',
+      portada: 'assets/img/covers/introduccion-a-la-programacion.jpg',
     },
     {
       id: 4,
@@ -54,6 +57,7 @@ export class CatalogService {
       disponible: true,
       descripcion:
         'El clásico de divulgación científica sobre el universo, del genial Stephen Hawking.',
+      portada: 'assets/img/covers/breve-historia-del-tiempo.jpg',
     },
     {
       id: 5,
@@ -64,6 +68,7 @@ export class CatalogService {
       anio: 2011,
       disponible: false,
       descripcion: 'Un recorrido por la historia de la humanidad, de los homínidos a los dioses.',
+      portada: 'assets/img/covers/sapiens.jpg',
     },
   ];
 

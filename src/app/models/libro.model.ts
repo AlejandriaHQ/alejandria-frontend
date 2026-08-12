@@ -7,4 +7,5 @@ export interface Libro {
   anio: number;
   disponible: boolean;
   descripcion?: string;
+  portada?: string;
 }
