@@ -21,6 +21,8 @@ export class CatalogService {
       categoriaId: 1,
       anio: 1967,
       disponible: true,
+      descripcion:
+        'La historia de la familia Buendía en Macondo, obra maestra del realismo mágico.',
     },
     {
       id: 2,
@@ -30,6 +32,7 @@ export class CatalogService {
       categoriaId: 1,
       anio: 1605,
       disponible: false,
+      descripcion: 'Las aventuras del ingenioso hidalgo y su fiel escudero Sancho Panza.',
     },
     {
       id: 3,
@@ -39,6 +42,7 @@ export class CatalogService {
       categoriaId: 2,
       anio: 2018,
       disponible: true,
+      descripcion: 'Manual académico con los fundamentos de la programación.',
     },
     {
       id: 4,
@@ -48,6 +52,8 @@ export class CatalogService {
       categoriaId: 2,
       anio: 1988,
       disponible: true,
+      descripcion:
+        'El clásico de divulgación científica sobre el universo, del genial Stephen Hawking.',
     },
     {
       id: 5,
@@ -57,6 +63,7 @@ export class CatalogService {
       categoriaId: 3,
       anio: 2011,
       disponible: false,
+      descripcion: 'Un recorrido por la historia de la humanidad, de los homínidos a los dioses.',
     },
   ];
 
@@ -69,20 +76,36 @@ export class CatalogService {
   }
 
   buscarLibros(termino?: string, categoriaId?: number): Libro[] {
-    const texto = (termino || '').trim().toLowerCase();
-
     const categoria = categoriaId ?? 0;
+
+    const tokens = this.normalizar(termino || '')
+      .split(/\s+/)
+      .filter(Boolean);
 
     return this.libros.filter((libro) => {
       const coincideCategoria = categoria === 0 || libro.categoriaId === categoria;
 
-      const coincideTexto =
-        texto === '' ||
-        libro.titulo.toLowerCase().includes(texto) ||
-        libro.autor.toLowerCase().includes(texto);
+      if (!coincideCategoria) {
+        return false;
+      }
 
-      return coincideCategoria && coincideTexto;
+      if (tokens.length === 0) {
+        return true;
+      }
+
+      const textoLibro = this.normalizar(`${libro.titulo} ${libro.autor} ${libro.isbn}`);
+
+      return tokens.every((token) => textoLibro.includes(token));
     });
+  }
+
+  private normalizar(texto: string): string {
+    return texto
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .trim();
   }
 
   agregarLibro(libro: Omit<Libro, 'id'>): Libro {
@@ -96,5 +119,32 @@ export class CatalogService {
     this.libros.push(nuevoLibro);
 
     return nuevoLibro;
+  }
+
+  editarLibro(id: number, datos: Partial<Libro>): Libro | null {
+    const indice = this.libros.findIndex((libro) => libro.id === id);
+
+    if (indice === -1) {
+      return null;
+    }
+
+    this.libros[indice] = {
+      ...this.libros[indice],
+      ...datos,
+    };
+
+    return this.libros[indice];
+  }
+
+  eliminarLibro(id: number): boolean {
+    const indice = this.libros.findIndex((libro) => libro.id === id);
+
+    if (indice === -1) {
+      return false;
+    }
+
+    this.libros.splice(indice, 1);
+
+    return true;
   }
 }

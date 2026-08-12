@@ -1,0 +1,75 @@
+ion-toolbar {
+  --background: var(--brand-paper);
+  --color: var(--brand-navy);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+ion-back-button {
+  --color: var(--brand-teal-strong);
+  --color-hover: var(--brand-navy);
+}
+
+ion-title {
+  font-weight: 700;
+}
+
+.header-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  margin-left: 4px;
+  object-fit: cover;
+}
+
+.theme-toggle {
+  --color: var(--brand-slate);
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
+  margin-right: 12px;
+  padding-left: 14px;
+  border-left: 1px solid var(--brand-border);
+}
+
+.header-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  background: var(--brand-navy);
+  color: var(--brand-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.header-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.header-user-info strong {
+  color: var(--brand-navy);
+  font-size: 13px;
+}
+
+.header-user-info span {
+  color: var(--brand-slate);
+  font-size: 11px;
+}
+
+@media (max-width: 520px) {
+  .header-user-info {
+    display: none;
+  }
+}

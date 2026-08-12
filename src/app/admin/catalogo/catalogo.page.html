@@ -1,20 +1,16 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Catálogo</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-page-header titulo="Catálogo" rutaAtras="/admin"></app-page-header>
 
 <ion-content>
   <div class="catalogo-page">
     <div class="catalogo-header">
       <div>
         <h1>Catálogo</h1>
-        <p>Administra los libros de AlejandriaHQ</p>
+        <p>Administra los libros de Alejandría</p>
       </div>
 
-      <ion-button class="add-button" (click)="alternarFormulario()">
+      <ion-button color="primary" class="add-button" (click)="abrirFormularioNuevo()">
         <ion-icon name="add-outline" slot="start"></ion-icon>
-        {{ mostrarFormulario ? 'Cancelar' : 'Agregar libro' }}
+        Agregar libro
       </ion-button>
     </div>
 
@@ -42,48 +38,13 @@
       </ion-select>
     </div>
 
-    <div *ngIf="mostrarFormulario" class="book-form">
-      <ion-list>
-        <ion-item>
-          <ion-label position="floating">Título</ion-label>
-          <ion-input [(ngModel)]="nuevoTitulo" name="titulo"></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">Autor</ion-label>
-          <ion-input [(ngModel)]="nuevoAutor" name="autor"></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">ISBN</ion-label>
-          <ion-input [(ngModel)]="nuevoIsbn" name="isbn"></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label>Categoría</ion-label>
-          <ion-select
-            [(ngModel)]="nuevaCategoriaId"
-            name="categoria"
-            interface="popover"
-            placeholder="Selecciona una categoría"
-          >
-            <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
-              {{ categoria.nombre }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">Año</ion-label>
-          <ion-input type="number" [(ngModel)]="nuevoAnio" name="anio"></ion-input>
-        </ion-item>
-      </ion-list>
-
-      <ion-button expand="block" (click)="agregarLibro()"> Guardar libro </ion-button>
-    </div>
-
     <div class="books-grid">
-      <ion-card *ngFor="let libro of librosFiltrados()">
+      <ion-card
+        button
+        class="book-card"
+        *ngFor="let libro of librosFiltrados()"
+        (click)="verDetalle(libro)"
+      >
         <ion-card-header>
           <ion-card-title> {{ libro.titulo }} </ion-card-title>
 
@@ -93,13 +54,201 @@
         <ion-card-content>
           <p>{{ nombreCategoria(libro.categoriaId) }}</p>
 
-          <p>ISBN: {{ libro.isbn }}</p>
+          <p class="text-mono">ISBN: {{ libro.isbn }}</p>
 
-          <ion-badge *ngIf="libro.disponible" color="success"> Disponible </ion-badge>
+          <div class="card-actions">
+            <div>
+              <ion-badge *ngIf="libro.disponible" color="success"> Disponible </ion-badge>
 
-          <ion-badge *ngIf="!libro.disponible" color="warning"> Prestado </ion-badge>
+              <ion-badge *ngIf="!libro.disponible" color="warning"> Prestado </ion-badge>
+            </div>
+
+            <ion-buttons>
+              <ion-button
+                fill="clear"
+                color="medium"
+                (click)="abrirFormularioEdicion(libro); $event.stopPropagation()"
+                aria-label="Editar libro"
+              >
+                <ion-icon slot="icon-only" name="pencil-outline"></ion-icon>
+              </ion-button>
+
+              <ion-button
+                fill="clear"
+                color="danger"
+                (click)="eliminarLibro(libro); $event.stopPropagation()"
+                aria-label="Eliminar libro"
+              >
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </div>
         </ion-card-content>
       </ion-card>
     </div>
   </div>
 </ion-content>
+
+<!-- Modal: nuevo o editar libro -->
+<ion-modal
+  [isOpen]="mostrarFormulario"
+  (ionModalDidDismiss)="cancelarFormulario()"
+  [initialBreakpoint]="0.9"
+  [breakpoints]="[0, 0.6, 0.9, 1]"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ libroEnEdicion ? 'Editar libro' : 'Nuevo libro' }}</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-button (click)="cancelarFormulario()" aria-label="Cerrar">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form class="book-form" novalidate (ngSubmit)="guardarLibro()">
+        <ion-item>
+          <ion-input
+            label="Título"
+            labelPlacement="floating"
+            name="titulo"
+            [(ngModel)]="nuevoTitulo"
+            placeholder="Nombre del libro"
+            required
+            aria-label="Título"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Autor"
+            labelPlacement="floating"
+            name="autor"
+            [(ngModel)]="nuevoAutor"
+            placeholder="Autor o autores"
+            required
+            aria-label="Autor"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="ISBN"
+            labelPlacement="floating"
+            name="isbn"
+            [(ngModel)]="nuevoIsbn"
+            placeholder="Ej. 978-0307474728"
+            required
+            aria-label="ISBN"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Categoría"
+            labelPlacement="floating"
+            name="categoria"
+            interface="popover"
+            [(ngModel)]="nuevaCategoriaId"
+            placeholder="Selecciona una categoría"
+            required
+            aria-label="Categoría"
+          >
+            <ion-select-option *ngFor="let categoria of categorias" [value]="categoria.id">
+              {{ categoria.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Año de publicación"
+            labelPlacement="floating"
+            name="anio"
+            type="number"
+            [(ngModel)]="nuevoAnio"
+            placeholder="Ej. 2001"
+            aria-label="Año de publicación"
+          ></ion-input>
+        </ion-item>
+
+        <p *ngIf="formularioInvalido" class="form-error" role="alert">
+          Completa los campos obligatorios: título, autor, ISBN y categoría.
+        </p>
+
+        <div class="form-actions">
+          <ion-button fill="outline" color="primary" (click)="cancelarFormulario()">
+            Cancelar
+          </ion-button>
+
+          <ion-button type="submit" color="primary" class="save-button">
+            {{ libroEnEdicion ? 'Guardar cambios' : 'Guardar libro' }}
+          </ion-button>
+        </div>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal: detalle del libro -->
+<ion-modal
+  [isOpen]="!!libroSeleccionado"
+  (ionModalDidDismiss)="cerrarDetalle()"
+  [initialBreakpoint]="0.8"
+  [breakpoints]="[0, 0.5, 0.8, 1]"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Detalle del libro</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarDetalle()" aria-label="Cerrar">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding" *ngIf="libroSeleccionado">
+      <div class="detail-cover" aria-hidden="true">
+        <ion-icon name="book-outline"></ion-icon>
+      </div>
+
+      <h2 class="detail-title">{{ libroSeleccionado.titulo }}</h2>
+
+      <p class="detail-author">{{ libroSeleccionado.autor }}</p>
+
+      <div class="detail-status">
+        <ion-badge *ngIf="libroSeleccionado.disponible" color="success"> Disponible </ion-badge>
+
+        <ion-badge *ngIf="!libroSeleccionado.disponible" color="warning"> Prestado </ion-badge>
+      </div>
+
+      <ion-list lines="full" class="detail-list">
+        <ion-item>
+          <ion-label>Categoría</ion-label>
+          <ion-note slot="end">{{ nombreCategoria(libroSeleccionado.categoriaId) }}</ion-note>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>ISBN</ion-label>
+          <ion-note slot="end">{{ libroSeleccionado.isbn }}</ion-note>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Año de publicación</ion-label>
+          <ion-note slot="end">{{ libroSeleccionado.anio }}</ion-note>
+        </ion-item>
+      </ion-list>
+
+      <p *ngIf="libroSeleccionado.descripcion" class="detail-desc">
+        {{ libroSeleccionado.descripcion }}
+      </p>
+    </ion-content>
+  </ng-template>
+</ion-modal>

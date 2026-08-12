@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
 import { AuthService } from '../Services/auth.service';
 
 @Component({
@@ -8,13 +7,8 @@ import { AuthService } from '../Services/auth.service';
   styleUrls: ['./admin.page.scss'],
   standalone: false,
 })
-export class AdminPage implements OnInit {
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-  ) {}
-
-  ngOnInit() {}
+export class AdminPage {
+  constructor(private authService: AuthService) {}
 
   cerrarSesion() {
     this.authService.cerrarSesion();

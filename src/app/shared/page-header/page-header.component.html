@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        *ngIf="mostrarAtras"
+        [defaultHref]="rutaAtras"
+        aria-label="Volver"
+      ></ion-back-button>
+
+      <img class="header-logo" src="assets/img/ale_icono2.jpeg" alt="Logo de Alejandría" />
+    </ion-buttons>
+
+    <ion-title>{{ titulo }}</ion-title>
+
+    <ion-button
+      slot="end"
+      fill="clear"
+      class="theme-toggle"
+      (click)="themeService.alternarTema()"
+      [attr.aria-label]="themeService.esOscuro ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+    >
+      <ion-icon
+        slot="icon-only"
+        [name]="themeService.esOscuro ? 'sunny-outline' : 'moon-outline'"
+      ></ion-icon>
+    </ion-button>
+
+    <div slot="end" class="header-user" *ngIf="usuario">
+      <div class="header-user-avatar" aria-hidden="true">{{ inicial }}</div>
+
+      <div class="header-user-info">
+        <strong>{{ nombreUsuario }}</strong>
+        <span>{{ usuario.identificador }}</span>
+      </div>
+    </div>
+
+    <ng-content select="[slot='end']"></ng-content>
+  </ion-toolbar>
+</ion-header>

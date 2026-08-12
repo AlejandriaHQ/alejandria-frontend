@@ -1,0 +1,150 @@
+.usuario-page {
+  padding: 25px 20px;
+  max-width: 1440px;
+  margin: auto;
+}
+
+.usuario-header {
+  margin-bottom: 25px;
+}
+
+.usuario-header h1 {
+  margin: 0;
+  color: var(--brand-navy);
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.usuario-header p {
+  margin: 6px 0 0;
+  color: var(--brand-slate);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+ion-searchbar {
+  --background: var(--brand-paper);
+  --color: var(--brand-navy);
+  --placeholder-color: var(--brand-slate);
+  --border-radius: 8px;
+  --box-shadow: none;
+}
+
+ion-select {
+  background: var(--brand-paper);
+  border-radius: 8px;
+  padding: 5px 12px;
+  color: var(--brand-navy);
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+ion-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--brand-border);
+}
+
+.book-card:hover {
+  background: var(--brand-hover);
+}
+
+ion-card-title {
+  color: var(--brand-navy);
+  font-weight: 700;
+}
+
+ion-card-content p {
+  color: var(--brand-slate);
+}
+
+.card-status {
+  margin-top: 10px;
+}
+
+.detail-cover {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  background: var(--brand-hover);
+  color: var(--brand-teal-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-cover ion-icon {
+  font-size: 36px;
+}
+
+.detail-title {
+  margin: 0;
+  color: var(--brand-navy);
+  font-size: 24px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.detail-author {
+  margin: 6px 0 0;
+  color: var(--brand-slate);
+  text-align: center;
+}
+
+.detail-status {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.detail-list {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--brand-border);
+}
+
+.detail-list ion-note {
+  color: var(--brand-navy);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.detail-desc {
+  margin: 16px 4px 0;
+  color: var(--brand-slate);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 800px) {
+  .books-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .usuario-page {
+    padding: 18px 16px;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .books-grid {
+    grid-template-columns: 1fr;
+  }
+}

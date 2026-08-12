@@ -6,4 +6,5 @@ export interface Libro {
   categoriaId: number;
   anio: number;
   disponible: boolean;
+  descripcion?: string;
 }

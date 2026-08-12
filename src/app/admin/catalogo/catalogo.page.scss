@@ -1,10 +1,6 @@
-ion-content {
-  --background: #f4ebdd;
-}
-
 .catalogo-page {
-  padding: 25px;
-  max-width: 1200px;
+  padding: 25px 20px;
+  max-width: 1440px;
   margin: auto;
 }
 
@@ -18,22 +14,67 @@ ion-content {
 
 .catalogo-header h1 {
   margin: 0;
-  color: #12304a;
+  color: var(--brand-navy);
   font-size: 30px;
   font-weight: 800;
 }
 
 .catalogo-header p {
   margin: 6px 0 0;
-  color: #65727c;
+  color: var(--brand-slate);
 }
 
-.add-button {
-  --background: #12304a;
-  --border-radius: 12px;
-  --box-shadow: none;
-  color: #f3f3f3;
-  font-weight: 700;
+.add-button,
+.save-button {
+  --border-radius: 9999px;
+}
+
+/* Formulario del modal */
+.book-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.book-form ion-item {
+  --background: var(--brand-paper);
+  --border-radius: 14px;
+  --padding-start: 12px;
+  border: 1px solid var(--brand-border-input);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.book-form ion-item:focus-within {
+  border-color: var(--brand-teal-strong);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+}
+
+.book-form ion-input,
+.book-form ion-select {
+  --color: var(--brand-navy);
+  --placeholder-color: var(--brand-slate);
+}
+
+.form-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ffdad6;
+  color: #93000a;
+  font-size: 13px;
+  text-align: center;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.form-actions ion-button {
+  flex: 1;
+  --border-radius: 9999px;
 }
 
 .filters {
@@ -44,34 +85,18 @@ ion-content {
 }
 
 ion-searchbar {
-  --background: #ffffff;
-  --color: #12304a;
-  --placeholder-color: #8b949a;
-  --border-radius: 12px;
+  --background: var(--brand-paper);
+  --color: var(--brand-navy);
+  --placeholder-color: var(--brand-slate);
+  --border-radius: 8px;
+  --box-shadow: none;
 }
 
 ion-select {
-  background: #ffffff;
-  border-radius: 12px;
+  background: var(--brand-paper);
+  border-radius: 8px;
   padding: 5px 12px;
-  color: #12304a;
-}
-
-.book-form {
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(18, 48, 74, 0.1);
-  padding: 15px;
-  margin-bottom: 25px;
-}
-
-.book-form ion-button {
-  margin-top: 15px;
-  --background: #12304a;
-  --border-radius: 12px;
-  --box-shadow: none;
-  color: #f3f3f3;
-  font-weight: 700;
+  color: var(--brand-navy);
 }
 
 .books-grid {
@@ -82,21 +107,92 @@ ion-select {
 
 ion-card {
   margin: 0;
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(18, 48, 74, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--brand-border);
+}
+
+.book-card:hover {
+  background: var(--brand-hover);
 }
 
 ion-card-title {
-  color: #fdfeff;
+  color: var(--brand-navy);
   font-weight: 700;
 }
 
 ion-card-subtitle {
   margin-top: 5px;
+  color: var(--brand-slate);
 }
 
 ion-card-content p {
-  color: #65727c;
+  color: var(--brand-slate);
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.detail-cover {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  background: var(--brand-hover);
+  color: var(--brand-teal-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-cover ion-icon {
+  font-size: 36px;
+}
+
+.detail-title {
+  margin: 0;
+  color: var(--brand-navy);
+  font-size: 24px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.detail-author {
+  margin: 6px 0 0;
+  color: var(--brand-slate);
+  text-align: center;
+}
+
+.detail-status {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.detail-list {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--brand-border);
+}
+
+.detail-list ion-note {
+  color: var(--brand-navy);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.detail-desc {
+  margin: 16px 4px 0;
+  color: var(--brand-slate);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 @media (max-width: 800px) {
@@ -107,7 +203,7 @@ ion-card-content p {
 
 @media (max-width: 600px) {
   .catalogo-page {
-    padding: 18px;
+    padding: 18px 16px;
   }
 
   .catalogo-header {

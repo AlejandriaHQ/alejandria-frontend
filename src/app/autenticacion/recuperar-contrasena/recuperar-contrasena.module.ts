@@ -8,8 +8,16 @@ import { RecuperarContrasenaPageRoutingModule } from './recuperar-contrasena-rou
 
 import { RecuperarContrasenaPage } from './recuperar-contrasena.page';
 
+import { SharedModule } from '../../shared/shared.module';
+
 @NgModule({
-  imports: [CommonModule, FormsModule, IonicModule, RecuperarContrasenaPageRoutingModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    RecuperarContrasenaPageRoutingModule,
+    SharedModule,
+  ],
   declarations: [RecuperarContrasenaPage],
 })
 export class RecuperarContrasenaPageModule {}
