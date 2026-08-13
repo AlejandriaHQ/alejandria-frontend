@@ -35,4 +35,12 @@ export class PageHeaderComponent {
   get initial() {
     return (this.currentUser?.identifier || 'A').charAt(0).toUpperCase();
   }
+
+  get inUserView(): boolean {
+    return this.authService.inUserView;
+  }
+
+  exitUserView() {
+    this.authService.exitUserView();
+  }
 }

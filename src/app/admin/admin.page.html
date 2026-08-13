@@ -54,6 +54,23 @@
         </div>
       </ion-card>
 
+      <ion-card button class="action-card" (click)="enterUserView()">
+        <div class="action-blob action-blob--teal" aria-hidden="true"></div>
+
+        <div class="action-icon" aria-hidden="true">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+
+        <h2>Vista usuario</h2>
+
+        <p>Prueba la app como usuario: solicita préstamos y revisa tu historial.</p>
+
+        <div class="action-link">
+          <span>Entrar como usuario</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </div>
+      </ion-card>
+
       <ion-card button class="action-card action-card--danger" (click)="logout()">
         <div class="action-blob action-blob--danger" aria-hidden="true"></div>
 

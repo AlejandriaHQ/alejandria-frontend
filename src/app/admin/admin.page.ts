@@ -13,4 +13,8 @@ export class AdminPage {
   logout() {
     this.authService.logout();
   }
+
+  enterUserView() {
+    this.authService.enterUserView();
+  }
 }

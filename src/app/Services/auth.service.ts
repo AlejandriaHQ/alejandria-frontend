@@ -22,6 +22,11 @@ export class AuthService {
 
   private timer: any;
 
+  private originalUser: {
+    identifier: string;
+    role: UserRole;
+  } | null = null;
+
   // La sesión expira a las 8 horas (jornada de la biblioteca)
   private inactivityTime = 8 * 60 * 60 * 1000;
 
@@ -67,8 +72,51 @@ export class AuthService {
     return this.currentUser;
   }
 
+  get inUserView(): boolean {
+    return this.originalUser !== null;
+  }
+
+  // Solo administradores: entrar a la vista de usuario para probar la app
+
+  enterUserView() {
+    const user = this.getCurrentUser();
+
+    if (!user || user.role !== 'admin' || this.inUserView) {
+      return;
+    }
+
+    this.originalUser = user;
+
+    this.currentUser = {
+      identifier: 'usuario001',
+      role: 'user',
+    };
+
+    this.saveSession();
+    this.startTimer();
+
+    this.router.navigate(['/usuario']);
+  }
+
+  exitUserView() {
+    if (!this.inUserView) {
+      return;
+    }
+
+    this.currentUser = this.originalUser;
+
+    this.originalUser = null;
+
+    this.saveSession();
+    this.startTimer();
+
+    this.router.navigate(['/admin']);
+  }
+
   logout() {
     this.currentUser = null;
+
+    this.originalUser = null;
 
     this.clearStoredSession();
     this.stopTimer();

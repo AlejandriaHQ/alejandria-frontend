@@ -25,6 +25,17 @@
       ></ion-icon>
     </ion-button>
 
+    <ion-button
+      *ngIf="inUserView"
+      slot="end"
+      fill="clear"
+      class="back-admin-button"
+      (click)="exitUserView()"
+      aria-label="Volver a la vista de administrador"
+    >
+      <ion-icon slot="icon-only" name="return-up-back-outline"></ion-icon>
+    </ion-button>
+
     <div slot="end" class="header-user" *ngIf="currentUser">
       <div class="header-user-avatar" aria-hidden="true">{{ initial }}</div>
 
