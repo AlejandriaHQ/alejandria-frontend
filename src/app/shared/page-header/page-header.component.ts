@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { ThemeService } from '../../Services/theme.service';
 import { AuthService } from '../../Services/auth.service';
 
@@ -15,10 +15,9 @@ export class PageHeaderComponent {
 
   @Input() backRoute = '/';
 
-  constructor(
-    public themeService: ThemeService,
-    private authService: AuthService,
-  ) {}
+  public readonly themeService = inject(ThemeService);
+
+  private readonly authService = inject(AuthService);
 
   get currentUser() {
     return this.authService.getCurrentUser();

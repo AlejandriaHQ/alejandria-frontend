@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AuthService } from '../Services/auth.service';
 
 @Component({
@@ -8,7 +8,7 @@ import { AuthService } from '../Services/auth.service';
   standalone: false,
 })
 export class AdminPage {
-  constructor(private authService: AuthService) {}
+  private readonly authService = inject(AuthService);
 
   logout() {
     this.authService.logout();

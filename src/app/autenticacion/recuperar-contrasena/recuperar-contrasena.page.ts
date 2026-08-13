@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-recuperar-contrasena',
@@ -6,8 +6,4 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./recuperar-contrasena.page.scss'],
   standalone: false,
 })
-export class RecuperarContrasenaPage implements OnInit {
-  constructor() {}
-
-  ngOnInit() {}
-}
+export class RecuperarContrasenaPage {}

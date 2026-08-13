@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { CatalogService } from '../../Services/catalog.service';
 import { LoanService } from '../../Services/loan.service';
@@ -51,11 +51,13 @@ export class CatalogoPage implements OnInit {
 
   libroParaPrestar: Book | null = null;
 
-  constructor(
-    private catalogService: CatalogService,
-    private loanService: LoanService,
-    private alertController: AlertController,
-  ) {
+  private readonly catalogService = inject(CatalogService);
+
+  private readonly loanService = inject(LoanService);
+
+  private readonly alertController = inject(AlertController);
+
+  constructor() {
     this.newYear = new Date().getFullYear();
   }
 
