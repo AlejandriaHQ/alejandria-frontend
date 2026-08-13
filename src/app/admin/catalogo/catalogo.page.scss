@@ -70,6 +70,35 @@
   margin-bottom: 8px;
 }
 
+/* Modal de préstamo */
+.lend-intro {
+  margin: 0 4px 14px;
+  color: var(--brand-slate);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.user-list ion-item {
+  --background: var(--brand-paper);
+  border: 1px solid var(--brand-border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.user-avatar-mini {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: var(--brand-navy);
+  color: var(--brand-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  margin-right: 12px;
+}
+
 /* Formulario del modal */
 .book-form {
   display: flex;

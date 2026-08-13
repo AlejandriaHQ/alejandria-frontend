@@ -85,6 +85,16 @@
 
             <ion-buttons>
               <ion-button
+                *ngIf="book.available"
+                fill="clear"
+                color="success"
+                (click)="openLendModal(book); $event.stopPropagation()"
+                aria-label="Prestar libro"
+              >
+                <ion-icon slot="icon-only" name="swap-horizontal-outline"></ion-icon>
+              </ion-button>
+
+              <ion-button
                 fill="clear"
                 color="medium"
                 (click)="openEditBookForm(book); $event.stopPropagation()"
@@ -370,6 +380,46 @@
               <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal: prestar libro -->
+<ion-modal
+  [isOpen]="!!libroParaPrestar"
+  (ionModalDidDismiss)="closeLendModal()"
+  [initialBreakpoint]="0.6"
+  [breakpoints]="[0, 0.5, 0.6, 1]"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Prestar libro</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-button (click)="closeLendModal()" aria-label="Cerrar">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding" *ngIf="libroParaPrestar">
+      <p class="lend-intro">
+        Elige el usuario al que prestarás <strong>{{ libroParaPrestar.title }}</strong>.
+        Vencimiento: 7 días.
+      </p>
+
+      <ion-list lines="none" class="user-list">
+        <ion-item *ngFor="let user of users" button (click)="confirmLend(user)">
+          <div class="user-avatar-mini" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+
+          <ion-label>
+            <h2>{{ user.name }}</h2>
+            <p class="text-mono">{{ user.identifier }}</p>
+          </ion-label>
         </ion-item>
       </ion-list>
     </ion-content>

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { CatalogService } from '../../Services/catalog.service';
+import { LoanService } from '../../Services/loan.service';
 import { Category } from '../../models/categoria.model';
 import { Book } from '../../models/libro.model';
+import { User } from '../../models/usuario.model';
 
 @Component({
   selector: 'app-catalogo',
@@ -43,8 +45,13 @@ export class CatalogoPage implements OnInit {
 
   newCover: string = '';
 
+  users: User[] = [];
+
+  libroParaPrestar: Book | null = null;
+
   constructor(
     private catalogService: CatalogService,
+    private loanService: LoanService,
     private alertController: AlertController,
   ) {
     this.newYear = new Date().getFullYear();
@@ -52,6 +59,8 @@ export class CatalogoPage implements OnInit {
 
   ngOnInit() {
     this.categories = this.catalogService.getCategories();
+
+    this.users = this.loanService.getUsers();
   }
 
   filteredBooks(): Book[] {
@@ -269,7 +278,60 @@ export class CatalogoPage implements OnInit {
         },
         {
           text: 'Eliminar',
-          handler: () => this.catalogService.deleteBook(book.id),
+          handler: () => {
+            const deleted = this.catalogService.deleteBook(book.id);
+
+            if (!deleted) {
+              this.showMessage('No se pudo eliminar', 'El libro no se encontró.');
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  openLendModal(book: Book) {
+    this.libroParaPrestar = book;
+  }
+
+  closeLendModal() {
+    this.libroParaPrestar = null;
+  }
+
+  async confirmLend(user: User) {
+    if (!this.libroParaPrestar) {
+      return;
+    }
+
+    const loan = this.loanService.createLoan(this.libroParaPrestar.id, user.id);
+
+    if (!loan) {
+      await this.showMessage(
+        'No se pudo prestar',
+        'Verifica que el libro esté disponible y que el usuario no tenga 3 préstamos activos ni vencidos sin devolver.',
+      );
+
+      return;
+    }
+
+    await this.showMessage(
+      'Préstamo registrado',
+      `"${this.libroParaPrestar.title}" prestado a ${user.name} por 7 días.`,
+    );
+
+    this.closeLendModal();
+  }
+
+  private async showMessage(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: [
+        {
+          text: 'Entendido',
+          role: 'cancel',
         },
       ],
     });

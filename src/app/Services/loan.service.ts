@@ -119,6 +119,51 @@ export class LoanService {
     return true;
   }
 
+  // ADM: registrar préstamo directo en mostrador (RF-18 + reglas RN)
+
+  createLoan(bookId: number, userId: number): Loan | null {
+    const book = this.catalogService.getBooks().find((b) => b.id === bookId);
+
+    if (!book || !book.available) {
+      return null;
+    }
+
+    // RN-02 / RF-20: máximo 3 ejemplares simultáneos
+    if (this.countActiveLoans(userId) >= 3) {
+      return null;
+    }
+
+    // RN-04 / RF-25: bloqueo si hay vencidos sin devolver
+    if (this.hasOverdue(userId)) {
+      return null;
+    }
+
+    const loanDate = new Date();
+
+    // RN-01: vencimiento = fecha del préstamo + 7 días
+    const dueDate = new Date(loanDate);
+    dueDate.setDate(dueDate.getDate() + 7);
+
+    const loan: Loan = {
+      id: this.nextLoanId(),
+      bookId,
+      userId,
+      loanDate,
+      dueDate,
+      returnDate: null,
+      status: 'active',
+    };
+
+    this.loans.push(loan);
+
+    // RF-21: actualizar disponibilidad
+    this.catalogService.updateBook(bookId, { available: false });
+
+    this.saveLoans();
+
+    return loan;
+  }
+
   // ADM: aprobar la solicitud y registrar el préstamo (RF-18 + reglas RN)
 
   approveRequest(requestId: number): Loan | null {
