@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../Services/auth.service';
 
@@ -21,10 +21,9 @@ export class AutenticacionPage implements OnInit, OnDestroy {
 
   private loadingTimer: any;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-  ) {}
+  private readonly authService = inject(AuthService);
+
+  private readonly router = inject(Router);
 
   ngOnInit() {
     this.redirectIfAuthenticated();

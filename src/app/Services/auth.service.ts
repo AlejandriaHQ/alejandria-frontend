@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 export type UserRole = 'admin' | 'user';
@@ -7,6 +7,10 @@ interface StoredSession {
   identifier: string;
   role: UserRole;
   expiresAt: number;
+  originalUser?: {
+    identifier: string;
+    role: UserRole;
+  } | null;
 }
 
 @Injectable({
@@ -30,7 +34,9 @@ export class AuthService {
   // La sesión expira a las 8 horas (jornada de la biblioteca)
   private inactivityTime = 8 * 60 * 60 * 1000;
 
-  constructor(private router: Router) {
+  private readonly router = inject(Router);
+
+  constructor() {
     this.restoreSession();
   }
 
@@ -129,6 +135,7 @@ export class AuthService {
       identifier: this.currentUser!.identifier,
       role: this.currentUser!.role,
       expiresAt: Date.now() + this.inactivityTime,
+      originalUser: this.originalUser,
     };
 
     localStorage.setItem(this.sessionKey, JSON.stringify(session));
@@ -156,6 +163,8 @@ export class AuthService {
         identifier: session.identifier,
         role: session.role,
       };
+
+      this.originalUser = session.originalUser ?? null;
 
       this.timer = setTimeout(() => this.expireSession(), remaining);
     } catch {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { AuthService } from '../../Services/auth.service';
 import { CatalogService } from '../../Services/catalog.service';
@@ -24,12 +24,13 @@ export class PrestamosPage implements OnInit {
 
   historyLoans: Loan[] = [];
 
-  constructor(
-    private authService: AuthService,
-    private loanService: LoanService,
-    private catalogService: CatalogService,
-    private alertController: AlertController,
-  ) {}
+  private readonly authService = inject(AuthService);
+
+  private readonly loanService = inject(LoanService);
+
+  private readonly catalogService = inject(CatalogService);
+
+  private readonly alertController = inject(AlertController);
 
   ngOnInit() {
     const identifier = this.authService.getCurrentUser()?.identifier ?? '';
