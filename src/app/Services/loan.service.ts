@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CatalogService } from './catalog.service';
 import { Book } from '../models/libro.model';
 import { Loan } from '../models/prestamo.model';
@@ -21,7 +21,9 @@ export class LoanService {
 
   private users: User[] = this.loadUsers();
 
-  constructor(private catalogService: CatalogService) {
+  private readonly catalogService = inject(CatalogService);
+
+  constructor() {
     if (!localStorage.getItem(this.loansKey)) {
       this.saveLoans();
     }

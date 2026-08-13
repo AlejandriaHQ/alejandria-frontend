@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { AuthService } from '../Services/auth.service';
@@ -24,13 +24,15 @@ export class UsuarioPage implements OnInit {
 
   currentUserId: number = 0;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private catalogService: CatalogService,
-    private loanService: LoanService,
-    private alertController: AlertController,
-  ) {}
+  private readonly authService = inject(AuthService);
+
+  private readonly router = inject(Router);
+
+  private readonly catalogService = inject(CatalogService);
+
+  private readonly loanService = inject(LoanService);
+
+  private readonly alertController = inject(AlertController);
 
   ngOnInit() {
     this.categories = this.catalogService.getCategories();

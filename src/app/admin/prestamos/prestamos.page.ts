@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { CatalogService } from '../../Services/catalog.service';
 import { LoanService } from '../../Services/loan.service';
@@ -20,11 +20,11 @@ export class PrestamosPage implements OnInit {
 
   overdueLoans: Loan[] = [];
 
-  constructor(
-    private loanService: LoanService,
-    private catalogService: CatalogService,
-    private alertController: AlertController,
-  ) {}
+  private readonly loanService = inject(LoanService);
+
+  private readonly catalogService = inject(CatalogService);
+
+  private readonly alertController = inject(AlertController);
 
   ngOnInit() {
     this.loadData();

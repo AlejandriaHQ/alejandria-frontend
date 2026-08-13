@@ -4,14 +4,25 @@ import type { CanActivateFn } from '@angular/router';
 
 import { AuthService } from '../Services/auth.service';
 
-export const authGuard: CanActivateFn = (_route, _state) => {
+export const authGuard: CanActivateFn = (route, _state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.getCurrentUser()) {
-    return true;
+  const user = authService.getCurrentUser();
+
+  if (!user) {
+    router.navigate(['/autenticacion']);
+
+    return false;
   }
 
-  router.navigate(['/autenticacion']);
-  return false;
+  const roles = route.data?.['roles'] as string[] | undefined;
+
+  if (roles && !roles.includes(user.role)) {
+    router.navigate([user.role === 'admin' ? '/admin' : '/usuario']);
+
+    return false;
+  }
+
+  return true;
 };
