@@ -83,6 +83,20 @@ export class LoanService {
     return this.requests.filter((request) => request.userId === userId);
   }
 
+  // RF-07 / RN-06: validar si un libro puede eliminarse
+
+  hasActiveLoansForBook(bookId: number): boolean {
+    return this.loans.some(
+      (loan) => loan.bookId === bookId && (loan.status === 'active' || loan.status === 'overdue'),
+    );
+  }
+
+  hasPendingRequestsForBook(bookId: number): boolean {
+    return this.requests.some(
+      (request) => request.bookId === bookId && request.status === 'pending',
+    );
+  }
+
   // RF-35: el usuario solicita un préstamo en línea (reserva para mostrador)
 
   requestLoan(bookId: number, userId: number): LoanRequest | null {

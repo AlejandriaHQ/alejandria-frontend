@@ -45,6 +45,8 @@ export class CatalogoPage implements OnInit {
 
   newCover: string = '';
 
+  newAvailable: boolean = true;
+
   users: User[] = [];
 
   libroParaPrestar: Book | null = null;
@@ -100,6 +102,7 @@ export class CatalogoPage implements OnInit {
     this.newCategoryId = book.categoryId;
     this.newYear = book.year;
     this.newCover = book.cover ?? '';
+    this.newAvailable = book.available;
 
     this.showForm = true;
   }
@@ -119,6 +122,7 @@ export class CatalogoPage implements OnInit {
     this.newCategoryId = 0;
     this.newYear = new Date().getFullYear();
     this.newCover = '';
+    this.newAvailable = true;
     this.formInvalid = false;
   }
 
@@ -141,15 +145,13 @@ export class CatalogoPage implements OnInit {
       categoryId: this.newCategoryId,
       year: this.newYear,
       cover: this.newCover || undefined,
+      available: this.newAvailable,
     };
 
     if (this.editingBook) {
       this.catalogService.updateBook(this.editingBook.id, data);
     } else {
-      this.catalogService.addBook({
-        ...data,
-        available: true,
-      });
+      this.catalogService.addBook(data);
     }
 
     this.closeForm();
@@ -268,6 +270,21 @@ export class CatalogoPage implements OnInit {
   }
 
   async deleteBook(book: Book) {
+    const active = this.loanService.hasActiveLoansForBook(book.id);
+
+    const pending = this.loanService.hasPendingRequestsForBook(book.id);
+
+    if (active || pending) {
+      await this.showMessage(
+        'No se puede eliminar',
+        active
+          ? `"${book.title}" tiene préstamos sin devolver. Devuélvelos primero.`
+          : `"${book.title}" tiene solicitudes pendientes. Resuélvelas primero.`,
+      );
+
+      return;
+    }
+
     const alert = await this.alertController.create({
       header: 'Eliminar libro',
       message: `¿Seguro que deseas eliminar "${book.title}"?`,
