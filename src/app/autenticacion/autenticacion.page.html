@@ -1,12 +1,16 @@
 <ion-content [fullscreen]="true">
   <div class="login-page">
+    <div class="login-blob login-blob--teal" aria-hidden="true"></div>
+
+    <div class="login-blob login-blob--secondary" aria-hidden="true"></div>
+
     <div class="login-card">
       <div class="brand">
         <div class="logo-placeholder">
           <img src="assets/img/ale_icono2.jpeg" alt="Logo de Alejandría" class="logo" />
         </div>
 
-        <h1>Alejandria<span>HQ</span></h1>
+        <h1>Alejandría</h1>
 
         <p>Gestión de Bibliotecas Inteligente</p>
       </div>
@@ -16,16 +20,23 @@
         <p>Inicia sesión para continuar</p>
       </div>
 
-      <form class="form" novalidate [attr.aria-busy]="cargando" (ngSubmit)="iniciarSesion()">
+      <form class="form" novalidate [attr.aria-busy]="loading" (ngSubmit)="login()">
         <ion-item lines="none">
+          <ion-icon
+            slot="start"
+            name="person-outline"
+            class="input-icon"
+            aria-hidden="true"
+          ></ion-icon>
+
           <ion-input
-            id="identificador"
-            name="identificador"
+            id="identifier"
+            name="identifier"
             label="Identificador"
             labelPlacement="floating"
             type="text"
             placeholder="Correo o código de miembro"
-            [(ngModel)]="identificador"
+            [(ngModel)]="identifier"
             required
             autocomplete="username"
             enterkeyhint="next"
@@ -38,14 +49,21 @@
         </ion-item>
 
         <ion-item lines="none">
+          <ion-icon
+            slot="start"
+            name="lock-closed-outline"
+            class="input-icon"
+            aria-hidden="true"
+          ></ion-icon>
+
           <ion-input
-            id="contrasena"
-            name="contrasena"
+            id="password"
+            name="password"
             label="Contraseña"
             labelPlacement="floating"
-            [type]="mostrarContrasena ? 'text' : 'password'"
+            [type]="showPassword ? 'text' : 'password'"
             placeholder="Ingresa tu contraseña"
-            [(ngModel)]="contrasena"
+            [(ngModel)]="password"
             required
             autocomplete="current-password"
             enterkeyhint="go"
@@ -61,14 +79,14 @@
             type="button"
             fill="clear"
             class="visibility-toggle"
-            (click)="alternarVisibilidadContrasena()"
-            [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-            [attr.aria-pressed]="mostrarContrasena"
-            aria-controls="contrasena"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-pressed]="showPassword"
+            aria-controls="password"
           >
             <ion-icon
               slot="icon-only"
-              [name]="mostrarContrasena ? 'eye-off-outline' : 'eye-outline'"
+              [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
               aria-hidden="true"
             >
             </ion-icon>
@@ -80,10 +98,16 @@
           <span>{{ error }}</span>
         </div>
 
-        <ion-button expand="block" type="submit" class="login-button" [disabled]="cargando">
-          <ion-spinner name="crescent" *ngIf="cargando"> </ion-spinner>
+        <ion-button
+          expand="block"
+          type="submit"
+          color="primary"
+          class="login-button"
+          [disabled]="loading"
+        >
+          <ion-spinner name="crescent" *ngIf="loading"> </ion-spinner>
 
-          <span>{{ cargando ? 'Iniciando sesión' : 'Iniciar sesión' }}</span>
+          <span>{{ loading ? 'Iniciando sesión' : 'Iniciar sesión' }}</span>
         </ion-button>
       </form>
 

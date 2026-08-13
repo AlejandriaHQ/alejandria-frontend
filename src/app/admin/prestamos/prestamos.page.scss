@@ -1,0 +1,73 @@
+.prestamos-page {
+  padding: 25px 20px;
+  max-width: 1024px;
+  margin: auto;
+}
+
+.loan-section {
+  margin-bottom: 28px;
+}
+
+.loan-section h2 {
+  margin: 0 0 14px;
+  color: var(--brand-navy);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.empty-state {
+  padding: 18px;
+  border: 1px dashed var(--brand-border);
+  border-radius: 12px;
+  color: var(--brand-slate);
+  text-align: center;
+  font-size: 14px;
+}
+
+.loan-card {
+  margin: 0 0 12px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+  border: 1px solid var(--brand-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.loan-card--overdue {
+  border-color: rgba(186, 26, 26, 0.4);
+}
+
+.loan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.loan-info strong {
+  color: var(--brand-navy);
+  font-size: 15px;
+}
+
+.loan-info span {
+  color: var(--brand-slate);
+  font-size: 13px;
+}
+
+.loan-actions {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .loan-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .loan-actions {
+    justify-content: flex-end;
+  }
+}

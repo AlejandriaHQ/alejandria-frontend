@@ -1,55 +1,92 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title> AlejandriaHQ </ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-page-header title="Alejandría" [showBack]="false"></app-page-header>
 
 <ion-content>
   <div class="admin-page">
-    <section class="admin-welcome">
-      <div class="welcome-icon" aria-hidden="true">
+    <section class="hero-card">
+      <div class="hero-blob hero-blob--teal" aria-hidden="true"></div>
+
+      <div class="hero-blob hero-blob--secondary" aria-hidden="true"></div>
+
+      <div class="hero-icon" aria-hidden="true">
         <ion-icon name="library-outline"></ion-icon>
       </div>
 
       <h1>Bienvenido, admin</h1>
 
-      <p>Área de administración de AlejandriaHQ.</p>
+      <p>Área principal de administración de Alejandría.</p>
     </section>
 
-    <section class="admin-actions" aria-label="Acciones de administración">
+    <div class="actions-grid">
       <ion-card button class="action-card" routerLink="/admin/catalogo">
+        <div class="action-blob action-blob--teal" aria-hidden="true"></div>
+
         <div class="action-icon" aria-hidden="true">
           <ion-icon name="book-outline"></ion-icon>
         </div>
 
-        <div class="action-body">
-          <h2>Catálogo</h2>
-          <p>Administra los libros de la biblioteca</p>
-        </div>
+        <h2>Catálogo</h2>
 
-        <ion-icon
-          class="action-chevron"
-          name="chevron-forward-outline"
-          aria-hidden="true"
-        ></ion-icon>
+        <p>
+          Administra y gestiona todo el inventario de libros, colecciones y autores de la
+          biblioteca.
+        </p>
+
+        <div class="action-link">
+          <span>Ir al catálogo</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </div>
       </ion-card>
 
-      <ion-card button class="action-card action-card--danger" (click)="cerrarSesion()">
+      <ion-card button class="action-card" routerLink="/admin/prestamos">
+        <div class="action-blob action-blob--teal" aria-hidden="true"></div>
+
+        <div class="action-icon" aria-hidden="true">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+        </div>
+
+        <h2>Préstamos</h2>
+
+        <p>Gestiona solicitudes, préstamos activos, vencidos y devoluciones.</p>
+
+        <div class="action-link">
+          <span>Ir a préstamos</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </div>
+      </ion-card>
+
+      <ion-card button class="action-card" (click)="enterUserView()">
+        <div class="action-blob action-blob--teal" aria-hidden="true"></div>
+
+        <div class="action-icon" aria-hidden="true">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+
+        <h2>Vista usuario</h2>
+
+        <p>Prueba la app como usuario: solicita préstamos y revisa tu historial.</p>
+
+        <div class="action-link">
+          <span>Entrar como usuario</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </div>
+      </ion-card>
+
+      <ion-card button class="action-card action-card--danger" (click)="logout()">
+        <div class="action-blob action-blob--danger" aria-hidden="true"></div>
+
         <div class="action-icon" aria-hidden="true">
           <ion-icon name="log-out-outline"></ion-icon>
         </div>
 
-        <div class="action-body">
-          <h2>Cerrar sesión</h2>
-          <p>Salir de tu cuenta</p>
-        </div>
+        <h2>Cerrar sesión</h2>
 
-        <ion-icon
-          class="action-chevron"
-          name="chevron-forward-outline"
-          aria-hidden="true"
-        ></ion-icon>
+        <p>Finaliza tu sesión actual de forma segura y vuelve a la pantalla de inicio.</p>
+
+        <div class="action-link action-link--danger">
+          <span>Salir ahora</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </div>
       </ion-card>
-    </section>
+    </div>
   </div>
 </ion-content>

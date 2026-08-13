@@ -1,13 +1,170 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title> AlejandriaHQ </ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-page-header title="Alejandría" [showBack]="false">
+  <ion-button slot="end" fill="clear" (click)="logout()" aria-label="Cerrar sesión">
+    <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+  </ion-button>
+</app-page-header>
 
-<ion-content class="ion-padding">
-  <h1>Bienvenido, Usuario</h1>
+<ion-content>
+  <div class="usuario-page">
+    <div class="usuario-header">
+      <div>
+        <h1>Consulta del catálogo</h1>
 
-  <p>Área de usuario de AlejandriaHQ.</p>
+        <p>Busca libros disponibles en la biblioteca</p>
+      </div>
 
-  <ion-button expand="block" (click)="cerrarSesion()"> Cerrar sesión </ion-button>
+      <ion-button
+        fill="outline"
+        color="primary"
+        class="mis-prestamos-button"
+        routerLink="/usuario/prestamos"
+      >
+        <ion-icon name="swap-horizontal-outline" slot="start"></ion-icon>
+        Mis préstamos
+      </ion-button>
+    </div>
+
+    <div class="filters">
+      <ion-searchbar
+        placeholder="Buscar por título, autor o ISBN"
+        [(ngModel)]="query"
+        (ionInput)="filteredBooks()"
+      >
+      </ion-searchbar>
+
+      <ion-select
+        label="Categoría"
+        label-placement="floating"
+        interface="popover"
+        placeholder="Todas"
+        [(ngModel)]="categoryId"
+        (ionChange)="filteredBooks()"
+      >
+        <ion-select-option [value]="0"> Todas </ion-select-option>
+
+        <ion-select-option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </ion-select-option>
+      </ion-select>
+    </div>
+
+    <div class="books-grid">
+      <ion-card
+        button
+        class="book-card"
+        *ngFor="let book of filteredBooks()"
+        (click)="showDetail(book)"
+      >
+        <div class="book-cover">
+          <img *ngIf="book.cover" [src]="book.cover" alt="Portada de {{ book.title }}" />
+
+          <div *ngIf="!book.cover" class="book-cover-placeholder" aria-hidden="true">
+            <ion-icon name="book-outline"></ion-icon>
+          </div>
+        </div>
+
+        <ion-card-header>
+          <ion-card-title> {{ book.title }} </ion-card-title>
+
+          <ion-card-subtitle> {{ book.author }} </ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p>{{ categoryName(book.categoryId) }}</p>
+
+          <p class="text-mono">ISBN: {{ book.isbn }}</p>
+
+          <div class="card-status">
+            <ion-badge *ngIf="book.available" color="success"> Disponible </ion-badge>
+
+            <ion-badge *ngIf="!book.available" color="warning"> Prestado </ion-badge>
+          </div>
+
+          <ion-button
+            *ngIf="book.available && !hasPendingRequest(book.id)"
+            expand="block"
+            fill="outline"
+            color="primary"
+            class="request-button"
+            (click)="requestLoan(book); $event.stopPropagation()"
+          >
+            Solicitar préstamo
+          </ion-button>
+
+          <ion-button
+            *ngIf="hasPendingRequest(book.id)"
+            expand="block"
+            color="medium"
+            class="request-button"
+            disabled
+          >
+            Solicitud enviada
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
 </ion-content>
+
+<!-- Modal: detalle del libro -->
+<ion-modal
+  [isOpen]="!!selectedBook"
+  (ionModalDidDismiss)="closeDetail()"
+  [initialBreakpoint]="0.8"
+  [breakpoints]="[0, 0.5, 0.8, 1]"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Detalle del libro</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-button (click)="closeDetail()" aria-label="Cerrar">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding" *ngIf="selectedBook">
+      <div class="detail-cover">
+        <img
+          *ngIf="selectedBook.cover"
+          [src]="selectedBook.cover"
+          alt="Portada de {{ selectedBook.title }}"
+        />
+
+        <ion-icon *ngIf="!selectedBook.cover" name="book-outline" aria-hidden="true"></ion-icon>
+      </div>
+
+      <h2 class="detail-title">{{ selectedBook.title }}</h2>
+
+      <p class="detail-author">{{ selectedBook.author }}</p>
+
+      <div class="detail-status">
+        <ion-badge *ngIf="selectedBook.available" color="success"> Disponible </ion-badge>
+
+        <ion-badge *ngIf="!selectedBook.available" color="warning"> Prestado </ion-badge>
+      </div>
+
+      <ion-list lines="full" class="detail-list">
+        <ion-item>
+          <ion-label>Categoría</ion-label>
+          <ion-note slot="end">{{ categoryName(selectedBook.categoryId) }}</ion-note>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>ISBN</ion-label>
+          <ion-note slot="end">{{ selectedBook.isbn }}</ion-note>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Año de publicación</ion-label>
+          <ion-note slot="end">{{ selectedBook.year }}</ion-note>
+        </ion-item>
+      </ion-list>
+
+      <p *ngIf="selectedBook.description" class="detail-desc">{{ selectedBook.description }}</p>
+    </ion-content>
+  </ng-template>
+</ion-modal>

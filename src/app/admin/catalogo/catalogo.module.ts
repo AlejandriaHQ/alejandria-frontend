@@ -8,8 +8,10 @@ import { CatalogoPageRoutingModule } from './catalogo-routing.module';
 
 import { CatalogoPage } from './catalogo.page';
 
+import { SharedModule } from '../../shared/shared.module';
+
 @NgModule({
-  imports: [CommonModule, FormsModule, IonicModule, CatalogoPageRoutingModule],
+  imports: [CommonModule, FormsModule, IonicModule, CatalogoPageRoutingModule, SharedModule],
   declarations: [CatalogoPage],
 })
 export class CatalogoPageModule {}

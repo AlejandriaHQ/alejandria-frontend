@@ -1,0 +1,69 @@
+<app-page-header title="Préstamos" backRoute="/admin"></app-page-header>
+
+<ion-content>
+  <div class="prestamos-page">
+    <section class="loan-section">
+      <h2>Solicitudes pendientes</h2>
+
+      <div *ngIf="pendingRequests.length === 0" class="empty-state">
+        Sin solicitudes pendientes.
+      </div>
+
+      <ion-card *ngFor="let request of pendingRequests" class="loan-card">
+        <div class="loan-info">
+          <strong>{{ bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span>{{ userById(request.userId)?.name ?? 'Usuario' }}</span>
+          <span class="text-mono">Solicitado: {{ formatDate(request.requestedDate) }}</span>
+        </div>
+
+        <ion-buttons class="loan-actions">
+          <ion-button color="success" (click)="approveRequest(request)"> Aprobar </ion-button>
+
+          <ion-button fill="outline" color="danger" (click)="rejectRequest(request)">
+            Rechazar
+          </ion-button>
+        </ion-buttons>
+      </ion-card>
+    </section>
+
+    <section class="loan-section">
+      <h2>Préstamos vencidos</h2>
+
+      <div *ngIf="overdueLoans.length === 0" class="empty-state">Sin préstamos vencidos.</div>
+
+      <ion-card *ngFor="let loan of overdueLoans" class="loan-card loan-card--overdue">
+        <div class="loan-info">
+          <strong>{{ bookById(loan.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span>{{ userById(loan.userId)?.name ?? 'Usuario' }}</span>
+          <span class="text-mono">
+            Vence: {{ formatDate(loan.dueDate) }} · Prestado: {{ formatDate(loan.loanDate) }}
+          </span>
+        </div>
+
+        <ion-buttons class="loan-actions">
+          <ion-button color="primary" (click)="returnLoan(loan)"> Devolver </ion-button>
+        </ion-buttons>
+      </ion-card>
+    </section>
+
+    <section class="loan-section">
+      <h2>Préstamos activos</h2>
+
+      <div *ngIf="activeLoans.length === 0" class="empty-state">Sin préstamos activos.</div>
+
+      <ion-card *ngFor="let loan of activeLoans" class="loan-card">
+        <div class="loan-info">
+          <strong>{{ bookById(loan.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span>{{ userById(loan.userId)?.name ?? 'Usuario' }}</span>
+          <span class="text-mono">
+            Vence: {{ formatDate(loan.dueDate) }} · Prestado: {{ formatDate(loan.loanDate) }}
+          </span>
+        </div>
+
+        <ion-buttons class="loan-actions">
+          <ion-button color="primary" (click)="returnLoan(loan)"> Devolver </ion-button>
+        </ion-buttons>
+      </ion-card>
+    </section>
+  </div>
+</ion-content>
