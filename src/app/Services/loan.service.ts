@@ -47,6 +47,10 @@ export class LoanService {
     return this.users.find((user) => user.id === id) ?? null;
   }
 
+  getUserByIdentifier(identifier: string): User | null {
+    return this.users.find((user) => user.identifier === identifier) ?? null;
+  }
+
   // Préstamos
 
   getLoans(): Loan[] {

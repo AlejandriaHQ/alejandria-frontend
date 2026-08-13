@@ -1,0 +1,88 @@
+<app-page-header title="Mis préstamos" backRoute="/usuario"></app-page-header>
+
+<ion-content>
+  <div class="prestamos-page">
+    <section class="loan-section">
+      <h2>Solicitudes</h2>
+
+      <div *ngIf="requests.length === 0" class="empty-state">No has solicitado libros.</div>
+
+      <ion-card *ngFor="let request of requests" class="loan-card">
+        <div class="loan-info">
+          <strong>{{ bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span class="text-mono">Solicitado: {{ formatDate(request.requestedDate) }}</span>
+        </div>
+
+        <div class="loan-right">
+          <ion-badge [color]="request.status === 'pending' ? 'warning' : 'medium'">
+            {{ requestStatusLabel(request.status) }}
+          </ion-badge>
+
+          <ion-button
+            *ngIf="request.status === 'pending'"
+            fill="clear"
+            color="danger"
+            (click)="cancelRequest(request)"
+          >
+            Cancelar
+          </ion-button>
+        </div>
+      </ion-card>
+    </section>
+
+    <section class="loan-section">
+      <h2>Préstamos vencidos</h2>
+
+      <div *ngIf="overdueLoans.length === 0" class="empty-state">Sin préstamos vencidos.</div>
+
+      <ion-card *ngFor="let loan of overdueLoans" class="loan-card loan-card--overdue">
+        <div class="loan-info">
+          <strong>{{ bookById(loan.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span class="text-mono"> Vencimiento: {{ formatDate(loan.dueDate) }} </span>
+        </div>
+
+        <div class="loan-right">
+          <ion-badge color="danger"> Vencido </ion-badge>
+        </div>
+      </ion-card>
+    </section>
+
+    <section class="loan-section">
+      <h2>Préstamos activos</h2>
+
+      <div *ngIf="activeLoans.length === 0" class="empty-state">Sin préstamos activos.</div>
+
+      <ion-card *ngFor="let loan of activeLoans" class="loan-card">
+        <div class="loan-info">
+          <strong>{{ bookById(loan.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span class="text-mono">
+            Prestado: {{ formatDate(loan.loanDate) }} · Vence: {{ formatDate(loan.dueDate) }}
+          </span>
+        </div>
+
+        <div class="loan-right">
+          <ion-badge color="success"> Activo </ion-badge>
+        </div>
+      </ion-card>
+    </section>
+
+    <section class="loan-section">
+      <h2>Historial</h2>
+
+      <div *ngIf="historyLoans.length === 0" class="empty-state">Sin devoluciones registradas.</div>
+
+      <ion-card *ngFor="let loan of historyLoans" class="loan-card">
+        <div class="loan-info">
+          <strong>{{ bookById(loan.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span class="text-mono">
+            Prestado: {{ formatDate(loan.loanDate) }} · Devuelto: {{ formatDate(loan.returnDate) }}
+          </span>
+        </div>
+
+        <div class="loan-right">
+          <ion-badge color="medium"> Devuelto </ion-badge>
+        </div>
+      </ion-card>
+    </section>
+  </div>
+</ion-content>

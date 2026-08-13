@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { AuthService } from '../Services/auth.service';
 import { CatalogService } from '../Services/catalog.service';
+import { LoanService } from '../Services/loan.service';
 import { Category } from '../models/categoria.model';
 import { Book } from '../models/libro.model';
 
@@ -20,14 +22,22 @@ export class UsuarioPage implements OnInit {
 
   selectedBook: Book | null = null;
 
+  currentUserId: number = 0;
+
   constructor(
     private authService: AuthService,
     private router: Router,
     private catalogService: CatalogService,
+    private loanService: LoanService,
+    private alertController: AlertController,
   ) {}
 
   ngOnInit() {
     this.categories = this.catalogService.getCategories();
+
+    const identifier = this.authService.getCurrentUser()?.identifier ?? '';
+
+    this.currentUserId = this.loanService.getUserByIdentifier(identifier)?.id ?? 0;
   }
 
   filteredBooks(): Book[] {
@@ -50,5 +60,58 @@ export class UsuarioPage implements OnInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  hasPendingRequest(bookId: number): boolean {
+    return this.loanService
+      .getRequestsByUser(this.currentUserId)
+      .some((request) => request.bookId === bookId && request.status === 'pending');
+  }
+
+  async requestLoan(book: Book) {
+    if (!book.available || this.hasPendingRequest(book.id)) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Solicitar préstamo',
+      message: `¿Deseas solicitar "${book.title}"? La recoges en el mostrador cuando el administrador la apruebe.`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Solicitar',
+          handler: () => {
+            const request = this.loanService.requestLoan(book.id, this.currentUserId);
+
+            if (request) {
+              this.showMessage(
+                'Solicitud enviada',
+                `Solicitaste "${book.title}". El administrador la procesará en el mostrador.`,
+              );
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private async showMessage(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: [
+        {
+          text: 'Entendido',
+          role: 'cancel',
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

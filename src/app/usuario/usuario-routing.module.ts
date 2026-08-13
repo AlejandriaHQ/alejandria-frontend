@@ -8,6 +8,10 @@ const routes: Routes = [
     path: '',
     component: UsuarioPage,
   },
+  {
+    path: 'prestamos',
+    loadChildren: () => import('./prestamos/prestamos.module').then((m) => m.PrestamosPageModule),
+  },
 ];
 
 @NgModule({

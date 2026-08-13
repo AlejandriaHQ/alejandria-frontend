@@ -7,9 +7,21 @@
 <ion-content>
   <div class="usuario-page">
     <div class="usuario-header">
-      <h1>Consulta del catálogo</h1>
+      <div>
+        <h1>Consulta del catálogo</h1>
 
-      <p>Busca libros disponibles en la biblioteca</p>
+        <p>Busca libros disponibles en la biblioteca</p>
+      </div>
+
+      <ion-button
+        fill="outline"
+        color="primary"
+        class="mis-prestamos-button"
+        routerLink="/usuario/prestamos"
+      >
+        <ion-icon name="swap-horizontal-outline" slot="start"></ion-icon>
+        Mis préstamos
+      </ion-button>
     </div>
 
     <div class="filters">
@@ -67,6 +79,27 @@
 
             <ion-badge *ngIf="!book.available" color="warning"> Prestado </ion-badge>
           </div>
+
+          <ion-button
+            *ngIf="book.available && !hasPendingRequest(book.id)"
+            expand="block"
+            fill="outline"
+            color="primary"
+            class="request-button"
+            (click)="requestLoan(book); $event.stopPropagation()"
+          >
+            Solicitar préstamo
+          </ion-button>
+
+          <ion-button
+            *ngIf="hasPendingRequest(book.id)"
+            expand="block"
+            color="medium"
+            class="request-button"
+            disabled
+          >
+            Solicitud enviada
+          </ion-button>
         </ion-card-content>
       </ion-card>
     </div>

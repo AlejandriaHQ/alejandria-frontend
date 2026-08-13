@@ -5,7 +5,28 @@
 }
 
 .usuario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 25px;
+}
+
+.mis-prestamos-button {
+  --border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.request-button {
+  --border-radius: 9999px;
+  margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  .usuario-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .usuario-header h1 {
