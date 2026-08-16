@@ -1,0 +1,114 @@
+<app-page-header title="Dashboard y reportes" backRoute="/admin"></app-page-header>
+<ion-content
+  ><main class="reports-page">
+    <section class="metrics">
+      <ion-card
+        ><ion-card-content
+          ><span>Libros en catálogo</span><strong>{{ dashboard.books }}</strong></ion-card-content
+        ></ion-card
+      ><ion-card
+        ><ion-card-content
+          ><span>Usuarios registrados</span><strong>{{ dashboard.users }}</strong></ion-card-content
+        ></ion-card
+      ><ion-card
+        ><ion-card-content
+          ><span>Préstamos activos</span><strong>{{ dashboard.active }}</strong></ion-card-content
+        ></ion-card
+      ><ion-card
+        ><ion-card-content
+          ><span>Préstamos vencidos</span><strong>{{ dashboard.overdue }}</strong></ion-card-content
+        ></ion-card
+      ><ion-card
+        ><ion-card-content
+          ><span>Préstamos del mes</span><strong>{{ dashboard.month }}</strong></ion-card-content
+        ></ion-card
+      >
+    </section>
+    <section class="toolbar">
+      <ion-select label="Reporte" labelPlacement="stacked" [(ngModel)]="kind" interface="alert" [interfaceOptions]="reportSelectOptions" (ionChange)="load()"
+        ><ion-select-option value="loans">Préstamos</ion-select-option
+        ><ion-select-option value="returns">Devoluciones</ion-select-option
+        ><ion-select-option value="inventory">Inventario por categoría</ion-select-option
+        ><ion-select-option value="topBooks">Top 10 libros</ion-select-option
+        ><ion-select-option value="topUsers">Top 10 usuarios</ion-select-option></ion-select
+      ><ion-input
+        *ngIf="kind === 'loans' || kind === 'returns'"
+        type="date"
+        label="Desde"
+        labelPlacement="stacked"
+        [(ngModel)]="start"
+      ></ion-input
+      ><ion-input
+        *ngIf="kind === 'loans' || kind === 'returns'"
+        type="date"
+        label="Hasta"
+        labelPlacement="stacked"
+        [(ngModel)]="end"
+      ></ion-input
+      ><ion-button (click)="load()">Consultar</ion-button
+      ><ion-button fill="outline" (click)="exportCsv()">CSV</ion-button
+      ><ion-button fill="outline" (click)="exportPdf()">PDF</ion-button>
+    </section>
+    <section class="data">
+      <table *ngIf="rows.length">
+        <thead>
+          <tr>
+            <th>Libro</th>
+            <th>Usuario</th>
+            <th>Préstamo</th>
+            <th>Vence</th>
+            <th>Devolución</th>
+            <th>Extemporánea</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of rows">
+            <td>{{ row.book }}</td>
+            <td>{{ row.user }}</td>
+            <td>{{ format(row.loanDate) }}</td>
+            <td>{{ format(row.dueDate) }}</td>
+            <td>{{ format(row.returnDate) }}</td>
+            <td>{{ row.lateReturn ? 'Sí' : 'No' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table *ngIf="inventory.length">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Total</th>
+            <th>Prestados</th>
+            <th>Disponibles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of inventory">
+            <td>{{ row.category }}</td>
+            <td>{{ row.total }}</td>
+            <td>{{ row.borrowed }}</td>
+            <td>{{ row.available }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table *ngIf="ranking.length">
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Nombre</th>
+            <th>Préstamos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of ranking; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ row.label }}</td>
+            <td>{{ row.total }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!rows.length && !inventory.length && !ranking.length">
+        No hay datos para los filtros seleccionados.
+      </p>
+    </section>
+  </main></ion-content
+>

@@ -54,6 +54,18 @@
         </div>
       </ion-card>
 
+      <ion-card button class="action-card" routerLink="/admin/usuarios">
+        <div class="action-blob action-blob--teal" aria-hidden="true"></div><div class="action-icon"><ion-icon name="people-outline"></ion-icon></div>
+        <h2>Usuarios</h2><p>Registra, edita y desactiva miembros y administradores.</p>
+        <div class="action-link"><span>Gestionar usuarios</span><ion-icon name="arrow-forward-outline"></ion-icon></div>
+      </ion-card>
+
+      <ion-card button class="action-card" routerLink="/admin/reportes">
+        <div class="action-blob action-blob--teal" aria-hidden="true"></div><div class="action-icon"><ion-icon name="bar-chart-outline"></ion-icon></div>
+        <h2>Dashboard y reportes</h2><p>Consulta métricas, rankings, inventario y exportaciones.</p>
+        <div class="action-link"><span>Ver reportes</span><ion-icon name="arrow-forward-outline"></ion-icon></div>
+      </ion-card>
+
       <ion-card button class="action-card" (click)="enterUserView()">
         <div class="action-blob action-blob--teal" aria-hidden="true"></div>
 

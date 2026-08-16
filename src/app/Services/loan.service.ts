@@ -4,6 +4,7 @@ import { Book } from '../models/libro.model';
 import { Loan } from '../models/prestamo.model';
 import { LoanRequest } from '../models/solicitud-prestamo.model';
 import { User } from '../models/usuario.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +23,8 @@ export class LoanService {
   private users: User[] = this.loadUsers();
 
   private readonly catalogService = inject(CatalogService);
+
+  private readonly authService = inject(AuthService);
 
   constructor() {
     if (!localStorage.getItem(this.loansKey)) {
@@ -42,7 +45,7 @@ export class LoanService {
   // Usuarios
 
   getUsers(): User[] {
-    return this.users;
+    return [...this.users];
   }
 
   getUserById(id: number): User | null {
@@ -51,6 +54,50 @@ export class LoanService {
 
   getUserByIdentifier(identifier: string): User | null {
     return this.users.find((user) => user.identifier === identifier) ?? null;
+  }
+
+  // RF-12, RF-13, RF-14 y RF-16. En la futura API estas operaciones deben
+  // ejecutarse dentro de una transacción y respaldarse con índices UNIQUE.
+  createUser(data: Omit<User, 'id' | 'identifier' | 'registrationDate' | 'status'>): User {
+    this.ensureAdministrator();
+    this.assertUniqueUser(data.cedula, data.email);
+    const year = new Date().getFullYear();
+    const sequence = String(this.nextUserId()).padStart(4, '0');
+    const user: User = {
+      ...data,
+      id: this.nextUserId(),
+      identifier: data.role === 'admin' ? `ADM-${year}-${sequence}` : `MEM-${year}-${sequence}`,
+      registrationDate: new Date(),
+      status: 'active',
+    };
+    this.users.push(user);
+    this.saveUsers();
+    return user;
+  }
+
+  updateUser(id: number, data: Partial<Omit<User, 'id' | 'identifier' | 'registrationDate'>>): User | null {
+    this.ensureAdministrator();
+    const user = this.getUserById(id);
+    if (!user) return null;
+    this.assertUniqueUser(data.cedula ?? user.cedula, data.email ?? user.email, id);
+    Object.assign(user, data);
+    this.saveUsers();
+    return user;
+  }
+
+  /** RN-08: elimina físicamente solo si el miembro nunca tuvo préstamos. */
+  removeUser(id: number): 'deleted' | 'deactivated' | 'not-found' {
+    this.ensureAdministrator();
+    const index = this.users.findIndex((user) => user.id === id);
+    if (index === -1) return 'not-found';
+    if (this.loans.some((loan) => loan.userId === id)) {
+      this.users[index].status = 'inactive';
+      this.saveUsers();
+      return 'deactivated';
+    }
+    this.users.splice(index, 1);
+    this.saveUsers();
+    return 'deleted';
   }
 
   // Préstamos
@@ -317,6 +364,23 @@ export class LoanService {
     return this.requests.reduce((max, request) => Math.max(max, request.id), 0) + 1;
   }
 
+  private nextUserId(): number {
+    return this.users.reduce((max, user) => Math.max(max, user.id), 0) + 1;
+  }
+
+  private assertUniqueUser(cedula?: string, email?: string, excludeId?: number): void {
+    const duplicated = this.users.some((user) =>
+      user.id !== excludeId && ((cedula && user.cedula === cedula) || (email && user.email.toLowerCase() === email.toLowerCase())),
+    );
+    if (duplicated) throw new Error('La cédula o el correo ya están registrados.');
+  }
+
+  private ensureAdministrator(): void {
+    if (this.authService.getCurrentUser()?.role !== 'admin') {
+      throw new Error('Solo un administrador autenticado puede gestionar usuarios.');
+    }
+  }
+
   private loadLoans(): Loan[] {
     const stored = localStorage.getItem(this.loansKey);
 
@@ -364,6 +428,10 @@ export class LoanService {
         role: 'user',
         email: 'usuario001@alejandria.com',
         phone: '809-000-0001',
+        cedula: '001-0000000-1',
+        address: 'Santo Domingo',
+        registrationDate: new Date(),
+        status: 'active',
       },
       {
         id: 2,
@@ -372,6 +440,10 @@ export class LoanService {
         role: 'user',
         email: 'maria@alejandria.com',
         phone: '809-000-0002',
+        cedula: '001-0000000-2',
+        address: 'Santo Domingo',
+        registrationDate: new Date(),
+        status: 'active',
       },
       {
         id: 3,
@@ -380,6 +452,10 @@ export class LoanService {
         role: 'user',
         email: 'carlos@alejandria.com',
         phone: '809-000-0003',
+        cedula: '001-0000000-3',
+        address: 'Santo Domingo',
+        registrationDate: new Date(),
+        status: 'active',
       },
     ];
   }

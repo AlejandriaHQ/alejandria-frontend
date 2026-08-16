@@ -1,0 +1,83 @@
+.reports-page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px 20px;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+ion-card {
+  margin: 0;
+}
+.metrics ion-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--brand-slate);
+}
+.metrics strong {
+  font-size: 30px;
+  color: var(--brand-navy);
+}
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  margin: 26px 0;
+  flex-wrap: wrap;
+}
+.toolbar ion-input,
+.toolbar ion-select {
+  min-width: 150px;
+  border: 1px solid var(--brand-border);
+  border-radius: 8px;
+  --background: var(--brand-paper);
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--brand-slate);
+  --highlight-color-focused: var(--brand-teal-strong);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+  color: var(--ion-text-color);
+}
+
+.toolbar ion-input::part(native),
+.toolbar ion-select::part(native) {
+  padding-inline: 12px;
+}
+
+.toolbar ion-input[type='date']::part(native) {
+  color-scheme: light;
+}
+
+:host-context(:root[data-theme='dark']) .toolbar ion-input[type='date']::part(native) {
+  color-scheme: dark;
+}
+.data {
+  overflow: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--brand-paper);
+  color: var(--ion-text-color);
+}
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--brand-border);
+  text-align: left;
+  color: var(--ion-text-color);
+}
+th {
+  color: var(--brand-navy);
+  background: var(--brand-surface);
+}
+@media (max-width: 800px) {
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

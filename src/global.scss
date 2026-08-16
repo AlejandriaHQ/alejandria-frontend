@@ -59,6 +59,25 @@ ion-title {
   font-family: var(--font-mono);
 }
 
+/* El selector de reportes muestra sus opciones en un panel fuera del componente. */
+ion-alert.report-select-alert {
+  --background: var(--brand-paper);
+  --color: var(--ion-text-color);
+}
+
+ion-alert.report-select-alert .alert-radio-label,
+ion-alert.report-select-alert .alert-title {
+  color: var(--ion-text-color);
+}
+
+ion-alert.report-select-alert .alert-radio-icon {
+  border-color: var(--brand-slate);
+}
+
+ion-alert.report-select-alert [aria-checked='true'] .alert-radio-inner {
+  background-color: var(--brand-teal-strong);
+}
+
 /* Reduce motion: respeta la preferencia de movimiento reducido del usuario */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -1,0 +1,72 @@
+<app-page-header title="Gestión de usuarios" backRoute="/admin"></app-page-header>
+<ion-content
+  ><main class="users-page">
+    <section class="form-card">
+      <h1>{{ editingId ? 'Editar usuario' : 'Registrar usuario' }}</h1>
+      <p>Los miembros reciben un código automático; cédula y correo son únicos.</p>
+      <ion-item
+        ><ion-input
+          label="Nombre completo"
+          labelPlacement="stacked"
+          [(ngModel)]="form.name"
+        ></ion-input></ion-item
+      ><ion-item
+        ><ion-input
+          label="Cédula"
+          labelPlacement="stacked"
+          [(ngModel)]="form.cedula"
+        ></ion-input></ion-item
+      ><ion-item
+        ><ion-input
+          type="email"
+          label="Correo"
+          labelPlacement="stacked"
+          [(ngModel)]="form.email"
+        ></ion-input></ion-item
+      ><ion-item
+        ><ion-input
+          label="Teléfono"
+          labelPlacement="stacked"
+          [(ngModel)]="form.phone"
+        ></ion-input></ion-item
+      ><ion-item
+        ><ion-input
+          label="Dirección"
+          labelPlacement="stacked"
+          [(ngModel)]="form.address"
+        ></ion-input></ion-item
+      ><ion-item
+        ><ion-select label="Rol" labelPlacement="stacked" [(ngModel)]="form.role"
+          ><ion-select-option value="user">Miembro</ion-select-option
+          ><ion-select-option value="admin">Administrador</ion-select-option></ion-select
+        ></ion-item
+      >
+      <p *ngIf="error" class="error">{{ error }}</p>
+      <div class="actions">
+        <ion-button (click)="save()">{{ editingId ? 'Guardar cambios' : 'Registrar' }}</ion-button
+        ><ion-button *ngIf="editingId" fill="outline" (click)="cancel()">Cancelar</ion-button>
+      </div>
+    </section>
+    <section>
+      <h2>Usuarios registrados</h2>
+      <ion-card *ngFor="let user of users"
+        ><ion-card-content
+          ><div>
+            <strong>{{ user.name }}</strong>
+            <p>{{ user.identifier }} · {{ user.email }}</p>
+            <ion-badge [color]="user.status === 'inactive' ? 'medium' : 'success'"
+              >{{ user.status === 'inactive' ? 'Inactivo' : 'Activo' }}</ion-badge
+            >
+            <ion-badge color="primary"
+              >{{ user.role === 'admin' ? 'Administrador' : 'Miembro' }}</ion-badge
+            >
+          </div>
+          <div>
+            <ion-button fill="clear" (click)="edit(user)">Editar</ion-button
+            ><ion-button fill="clear" color="danger" (click)="remove(user)">Desactivar</ion-button>
+          </div></ion-card-content
+        ></ion-card
+      >
+    </section>
+  </main></ion-content
+>

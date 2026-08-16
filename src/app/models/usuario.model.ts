@@ -7,4 +7,9 @@ export interface User {
   role: UserRole;
   email: string;
   phone: string;
+  /** Campos de miembro. Se conservan los nombres existentes para no romper pantallas actuales. */
+  cedula?: string;
+  address?: string;
+  registrationDate?: Date | string;
+  status?: 'active' | 'inactive';
 }
