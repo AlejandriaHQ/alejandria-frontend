@@ -1,5 +1,5 @@
 {
-  "name": "Alejandría — Gestión de Bibliotecas",
+  "name": "Alejandría - Gestión de Bibliotecas",
   "short_name": "Alejandría",
   "description": "Gestión de Bibliotecas Inteligente",
   "start_url": "/",
@@ -9,12 +9,12 @@
   "theme_color": "#12304a",
   "icons": [
     {
-      "src": "assets/icon/icon-192.png",
+      "src": "/assets/icon/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "assets/icon/icon-512.png",
+      "src": "/assets/icon/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

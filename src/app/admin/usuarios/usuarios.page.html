@@ -1,85 +1,190 @@
 <app-page-header title="Gestión de usuarios" backRoute="/admin"></app-page-header>
 <ion-content
   ><main class="users-page">
-    <section class="form-card">
-      <h1>{{ editingId ? 'Editar usuario' : 'Registrar usuario' }}</h1>
-      <p>Los miembros reciben un código automático; cédula y correo son únicos.</p>
-      <ion-item
-        ><ion-input
-          label="Nombre completo"
-          labelPlacement="stacked"
-          [(ngModel)]="form.name"
-        ></ion-input></ion-item
-      ><ion-item
-        ><ion-input
-          label="Cédula"
-          labelPlacement="stacked"
-          [(ngModel)]="form.cedula"
-        ></ion-input></ion-item
-      ><ion-item
-        ><ion-input
-          type="email"
-          label="Correo"
-          labelPlacement="stacked"
-          [(ngModel)]="form.email"
-        ></ion-input></ion-item
-      ><ion-item *ngIf="!editingId"
-        ><ion-input
-          type="password"
-          label="Contraseña"
-          labelPlacement="stacked"
-          placeholder="Mínimo 6 caracteres"
-          [(ngModel)]="form.password"
-        ></ion-input></ion-item
-      ><ion-item
-        ><ion-input
-          label="Teléfono"
-          labelPlacement="stacked"
-          [(ngModel)]="form.phone"
-        ></ion-input></ion-item
-      ><ion-item
-        ><ion-input
-          label="Dirección"
-          labelPlacement="stacked"
-          [(ngModel)]="form.address"
-        ></ion-input></ion-item
-      ><ion-item
-        ><ion-select label="Rol" labelPlacement="stacked" [(ngModel)]="form.role"
-          ><ion-select-option value="user">Miembro</ion-select-option
-          ><ion-select-option value="admin">Administrador</ion-select-option></ion-select
-        ></ion-item
-      >
-      <p *ngIf="error" class="error">{{ error }}</p>
-      <div class="actions">
-        <ion-button (click)="save()">{{ editingId ? 'Guardar cambios' : 'Registrar' }}</ion-button
-        ><ion-button *ngIf="editingId" fill="outline" (click)="cancel()">Cancelar</ion-button>
+    <div class="users-toolbar">
+      <div>
+        <h2>Usuarios registrados</h2>
+        <p class="users-subtitle">Los miembros reciben un código automático; cédula y correo son únicos.</p>
       </div>
-    </section>
-    <section>
-      <h2>Usuarios registrados</h2>
-      <ion-card *ngFor="let user of users"
+      <ion-button color="primary" (click)="openNew()">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon>
+        Registrar usuario
+      </ion-button>
+    </div>
+      <ion-card *ngFor="let user of users" class="user-card"
         ><ion-card-content
-          ><div>
-            <strong>{{ user.name }}</strong>
-            <p>{{ user.identifier }} · {{ user.email }}</p>
-            <ion-badge [color]="user.status === 'inactive' ? 'medium' : 'success'"
-              >{{ user.status === 'inactive' ? 'Inactivo' : 'Activo' }}</ion-badge
-            >
-            <ion-badge color="primary"
-              >{{ user.role === 'admin' ? 'Administrador' : 'Miembro' }}</ion-badge
-            >
+          ><div class="user-info">
+            <strong class="user-name">{{ user.name }}</strong>
+            <p class="user-meta">{{ user.identifier }} · {{ user.email }}</p>
+            <div class="badges">
+              <ion-badge class="badge-status" [class.is-inactive]="user.status === 'inactive'"
+                >{{ user.status === 'inactive' ? 'Inactivo' : 'Activo' }}</ion-badge
+              >
+              <ion-badge class="badge-role" [class.is-admin]="user.role === 'admin'"
+                >{{ user.role === 'admin' ? 'Administrador' : 'Miembro' }}</ion-badge
+              >
+            </div>
           </div>
-          <div>
-            <ion-button fill="clear" (click)="edit(user)">Editar</ion-button
+          <div class="user-actions">
+            <ion-button fill="outline" size="small" (click)="edit(user)"
+              ><ion-icon slot="start" name="pencil-outline"></ion-icon>Editar</ion-button
             ><ion-button
-              fill="clear"
+              size="small"
               [color]="user.status === 'inactive' ? 'success' : 'danger'"
               (click)="user.status === 'inactive' ? reactivate(user) : remove(user)"
+              ><ion-icon slot="start" [name]="user.status === 'inactive' ? 'person-add-outline' : 'power-outline'"></ion-icon
               >{{ user.status === 'inactive' ? 'Activar' : 'Desactivar' }}</ion-button
             >
           </div></ion-card-content
         ></ion-card
       >
-    </section>
-  </main></ion-content
+  </main>
+</ion-content>
+
+<!-- Modal: registrar o editar usuario -->
+<ion-modal
+  [isOpen]="showForm"
+  (ionModalDidDismiss)="closeForm()"
+  [initialBreakpoint]="1"
+  [breakpoints]="[0, 1]"
 >
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ editingId ? 'Editar usuario' : 'Registrar usuario' }}</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-button (click)="closeForm()" aria-label="Cerrar">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding user-modal-content">
+      <p class="form-hint">Los miembros reciben un código automático; cédula y correo son únicos.</p>
+
+      <section class="form-section">
+        <h3 class="form-section-title">Datos personales</h3>
+
+        <ion-item class="form-field" [class.has-error]="fieldErrors['name']" lines="none">
+          <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            labelPlacement="floating"
+            [attr.aria-required]="true"
+            maxlength="100"
+            autocomplete="name"
+            [(ngModel)]="form.name"
+          >
+            <span slot="label">Nombre completo <span class="required-mark" aria-hidden="true">*</span></span>
+          </ion-input>
+        </ion-item>
+        <p class="field-error" *ngIf="fieldErrors['name']">{{ fieldErrors['name'] }}</p>
+
+        <ion-item class="form-field" [class.has-error]="fieldErrors['cedula']" lines="none">
+          <ion-icon slot="start" name="card-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            labelPlacement="floating"
+            [attr.aria-required]="true"
+            maxlength="15"
+            inputmode="numeric"
+            autocomplete="off"
+            [(ngModel)]="form.cedula"
+          >
+            <span slot="label">Cédula <span class="required-mark" aria-hidden="true">*</span></span>
+          </ion-input>
+        </ion-item>
+        <p class="field-error" *ngIf="fieldErrors['cedula']">{{ fieldErrors['cedula'] }}</p>
+
+        <ion-item class="form-field" [class.has-error]="fieldErrors['email']" lines="none">
+          <ion-icon slot="start" name="mail-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            type="email"
+            labelPlacement="floating"
+            [attr.aria-required]="true"
+            maxlength="120"
+            autocomplete="email"
+            [(ngModel)]="form.email"
+          >
+            <span slot="label">Correo <span class="required-mark" aria-hidden="true">*</span></span>
+          </ion-input>
+        </ion-item>
+        <p class="field-error" *ngIf="fieldErrors['email']">{{ fieldErrors['email'] }}</p>
+
+        <ion-item class="form-field" [class.has-error]="fieldErrors['phone']" lines="none">
+          <ion-icon slot="start" name="call-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            type="tel"
+            inputmode="tel"
+            maxlength="20"
+            autocomplete="tel"
+            labelPlacement="floating"
+            [attr.aria-required]="true"
+            [(ngModel)]="form.phone"
+          >
+            <span slot="label">Teléfono <span class="required-mark" aria-hidden="true">*</span></span>
+          </ion-input>
+        </ion-item>
+        <p class="field-error" *ngIf="fieldErrors['phone']">{{ fieldErrors['phone'] }}</p>
+
+        <ion-item class="form-field" [class.has-error]="fieldErrors['address']" lines="none">
+          <ion-icon slot="start" name="home-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            maxlength="200"
+            labelPlacement="floating"
+            [attr.aria-required]="true"
+            [(ngModel)]="form.address"
+          >
+            <span slot="label">Dirección <span class="required-mark" aria-hidden="true">*</span></span>
+          </ion-input>
+        </ion-item>
+        <p class="field-error" *ngIf="fieldErrors['address']">{{ fieldErrors['address'] }}</p>
+      </section>
+
+      <section class="form-section">
+        <h3 class="form-section-title">Acceso</h3>
+
+        <ion-item *ngIf="!editingId" class="form-field" [class.has-error]="fieldErrors['password']" lines="none">
+          <ion-icon slot="start" name="key-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            type="password"
+            labelPlacement="floating"
+            placeholder="Mínimo 6 caracteres"
+            autocomplete="new-password"
+            [attr.aria-required]="true"
+            maxlength="64"
+            [(ngModel)]="form.password"
+          >
+            <span slot="label">Contraseña <span class="required-mark" aria-hidden="true">*</span></span>
+          </ion-input>
+        </ion-item>
+        <p class="field-error" *ngIf="fieldErrors['password']">{{ fieldErrors['password'] }}</p>
+
+        <ion-item class="form-field" lines="none">
+          <ion-icon slot="start" name="shield-checkmark-outline" aria-hidden="true"></ion-icon>
+          <ion-select
+            label="Rol"
+            labelPlacement="floating"
+            [(ngModel)]="form.role"
+          >
+            <ion-select-option value="user">Miembro</ion-select-option>
+            <ion-select-option value="admin">Administrador</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </section>
+
+      <p *ngIf="error" class="error">{{ error }}</p>
+
+      <div class="modal-actions">
+        <ion-button color="primary" (click)="save()">
+          <ion-icon slot="start" [name]="editingId ? 'save-outline' : 'person-add-outline'"></ion-icon>
+          {{ editingId ? 'Guardar cambios' : 'Registrar' }}
+        </ion-button>
+        <ion-button fill="outline" (click)="closeForm()">
+          <ion-icon slot="start" name="close-outline"></ion-icon>
+          Cancelar
+        </ion-button>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

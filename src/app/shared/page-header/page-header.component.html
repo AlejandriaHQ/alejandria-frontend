@@ -17,12 +17,14 @@
       fill="clear"
       class="theme-toggle"
       (click)="themeService.toggleTheme()"
-      [attr.aria-label]="themeService.isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+      [title]="themeService.isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
     >
       <ion-icon
         slot="icon-only"
         [name]="themeService.isDark ? 'sunny-outline' : 'moon-outline'"
+        aria-hidden="true"
       ></ion-icon>
+      <span class="sr-only">{{ themeService.isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro' }}</span>
     </ion-button>
 
     <ion-button

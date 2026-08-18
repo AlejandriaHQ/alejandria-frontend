@@ -384,10 +384,21 @@ export class LoanService {
   }
 
   private assertUniqueUser(cedula?: string, email?: string, excludeId?: number): void {
-    const duplicated = this.users.some((user) =>
-      user.id !== excludeId && ((cedula && user.cedula === cedula) || (email && user.email.toLowerCase() === email.toLowerCase())),
+    const duplicateCedula = this.users.some(
+      (user) => user.id !== excludeId && !!cedula && user.cedula === cedula,
     );
-    if (duplicated) throw new Error('La cédula o el correo ya están registrados.');
+    const duplicateEmail = this.users.some(
+      (user) =>
+        user.id !== excludeId &&
+        !!email &&
+        user.email.toLowerCase() === email.toLowerCase(),
+    );
+    if (duplicateCedula) {
+      throw new Error('La cédula ya está registrada.');
+    }
+    if (duplicateEmail) {
+      throw new Error('El correo ya está registrado.');
+    }
   }
 
   private ensureAdministrator(): void {

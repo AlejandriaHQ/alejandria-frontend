@@ -12,6 +12,11 @@ type UserForm = {
   address: string;
   role: UserRole;
 };
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_MIN_LENGTH = 2;
+const NAME_PATTERN = /^[\p{L}\s.'-]+$/u;
+const CEDULA_PATTERN = /^\d{3}-\d{7}-\d{1}$/;
+const PHONE_PATTERN = /^\+?[\d\s-]{7,15}$/;
 @Component({
   selector: 'app-usuarios',
   templateUrl: './usuarios.page.html',
@@ -22,7 +27,9 @@ export class UsuariosPage implements OnInit {
   users: User[] = [];
   editingId: number | null = null;
   error = '';
+  fieldErrors: Record<string, string> = {};
   form: UserForm = this.emptyForm();
+  showForm = false;
   private readonly loanService = inject(LoanService);
   private readonly alerts = inject(AlertController);
   ngOnInit() {
@@ -31,9 +38,17 @@ export class UsuariosPage implements OnInit {
   load() {
     this.users = this.loanService.getUsers();
   }
+  openNew() {
+    this.editingId = null;
+    this.error = '';
+    this.fieldErrors = {};
+    this.form = this.emptyForm();
+    this.showForm = true;
+  }
   edit(user: User) {
     this.editingId = user.id;
     this.error = '';
+    this.fieldErrors = {};
     this.form = {
       name: user.name,
       cedula: user.cedula ?? '',
@@ -43,38 +58,93 @@ export class UsuariosPage implements OnInit {
       address: user.address ?? '',
       role: user.role,
     };
+    this.showForm = true;
   }
   cancel() {
     this.editingId = null;
     this.error = '';
+    this.fieldErrors = {};
     this.form = this.emptyForm();
   }
-  save() {
-    if (!this.form.name || !this.form.cedula || !this.form.email) {
-      this.error = 'Nombre, cédula y correo son obligatorios.';
-      return;
+  closeForm() {
+    this.showForm = false;
+    this.editingId = null;
+    this.error = '';
+    this.fieldErrors = {};
+    this.form = this.emptyForm();
+  }
+  async save() {
+    this.fieldErrors = {};
+    const name = this.form.name.trim();
+    const cedula = this.form.cedula.trim();
+    const email = this.form.email.trim();
+    const phone = this.form.phone.trim();
+    const address = this.form.address.trim();
+
+    if (name.length < NAME_MIN_LENGTH) {
+      this.fieldErrors['name'] = 'El nombre completo es obligatorio.';
+    } else if (!NAME_PATTERN.test(name)) {
+      this.fieldErrors['name'] = 'El nombre solo puede contener letras, espacios, puntos y apóstrofes.';
+    }
+    if (!cedula) {
+      this.fieldErrors['cedula'] = 'La cédula es obligatoria.';
+    } else if (!CEDULA_PATTERN.test(cedula)) {
+      this.fieldErrors['cedula'] = 'La cédula debe tener el formato 000-0000000-0.';
+    }
+    if (!email) {
+      this.fieldErrors['email'] = 'El correo es obligatorio.';
+    } else if (!EMAIL_PATTERN.test(email)) {
+      this.fieldErrors['email'] = 'El correo no es válido.';
     }
     if (!this.editingId && this.form.password.length < 6) {
-      this.error = 'La contraseña debe tener al menos 6 caracteres.';
+      this.fieldErrors['password'] = 'La contraseña debe tener al menos 6 caracteres.';
+    }
+    if (!phone) {
+      this.fieldErrors['phone'] = 'El teléfono es obligatorio.';
+    } else if (!PHONE_PATTERN.test(phone)) {
+      this.fieldErrors['phone'] = 'El teléfono no es válido (ejemplo: 809-000-0000).';
+    }
+    if (!address) {
+      this.fieldErrors['address'] = 'La dirección es obligatoria.';
+    }
+    if (Object.keys(this.fieldErrors).length > 0) {
+      this.error = '';
       return;
     }
+
     try {
+      const wasEditing = this.editingId !== null;
+      const payload = {
+        name,
+        cedula,
+        email,
+        phone,
+        address,
+        role: this.form.role,
+      };
       if (this.editingId) {
-        this.loanService.updateUser(this.editingId, {
-          name: this.form.name,
-          cedula: this.form.cedula,
-          email: this.form.email,
-          phone: this.form.phone,
-          address: this.form.address,
-          role: this.form.role,
-        });
+        this.loanService.updateUser(this.editingId, payload);
       } else {
-        this.loanService.createUser(this.form);
+        this.loanService.createUser({ ...payload, password: this.form.password });
       }
-      this.cancel();
+      this.closeForm();
       this.load();
+      await this.showMessage(
+        wasEditing ? 'Cambios guardados' : 'Usuario registrado',
+        wasEditing
+          ? 'Los datos del usuario fueron actualizados.'
+          : 'El usuario fue registrado correctamente.',
+      );
     } catch (error) {
-      this.error = error instanceof Error ? error.message : 'No fue posible guardar el usuario.';
+      const message = error instanceof Error ? error.message : 'No fue posible guardar el usuario.';
+      // Mapea el error de unicidad del servicio al campo correspondiente
+      if (message.includes('cédula')) {
+        this.fieldErrors['cedula'] = message;
+      } else if (message.includes('correo')) {
+        this.fieldErrors['email'] = message;
+      } else {
+        this.error = message;
+      }
     }
   }
   async remove(user: User) {

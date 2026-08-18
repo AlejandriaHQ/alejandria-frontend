@@ -1,53 +1,281 @@
 .users-page {
-  max-width: 1100px;
+  max-width: 800px;
   margin: auto;
   padding: 24px 20px;
-  display: grid;
-  grid-template-columns: minmax(300px, 0.9fr) 1.4fr;
-  gap: 24px;
-}
-.form-card {
-  padding: 20px;
-  border: 1px solid var(--brand-border);
-  border-radius: 14px;
-  background: var(--brand-paper);
-  height: max-content;
-}
-ion-item {
-  --background: transparent;
-  --color: var(--ion-text-color);
+  display: block;
 }
 
-.form-card ion-input,
-.form-card ion-select {
+.users-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.users-toolbar h2 {
+  font-family: var(--font-headline);
+  font-size: 1.1rem;
+  margin: 0 0 4px;
+  color: var(--ion-text-color);
+}
+
+.users-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--brand-slate);
+}
+
+.form-hint {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  color: var(--brand-slate);
+}
+
+/* Caja redondeada: mismo patrón visual que el formulario "Nuevo Libro"
+   del catálogo (borde completo + fondo sólido, sin fill en los inputs). */
+.form-field {
+  --background: var(--brand-paper);
+  --color: var(--ion-text-color);
+  --border-radius: 14px;
+  --padding-start: 12px;
+  --inner-padding-end: 8px;
+  --min-height: 56px;
+  border: 1px solid var(--brand-border-input);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.form-field:focus-within {
+  border-color: var(--brand-teal-strong);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+}
+
+.user-modal-content ion-input,
+.user-modal-content ion-select {
   --color: var(--ion-text-color);
   --placeholder-color: var(--brand-slate);
   --highlight-color-focused: var(--brand-teal-strong);
 }
 
-.form-card ion-select::part(text),
-.form-card ion-select::part(icon) {
-  color: var(--ion-text-color);
-}
-ion-card-content {
+.modal-actions {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
 }
-p {
-  color: var(--brand-slate);
-}
-.actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-}
+
 .error {
   color: var(--ion-color-danger);
+  font-size: 0.875rem;
+  margin: 8px 0 0;
 }
+
+.form-section-title {
+  margin: 6px 0 4px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand-slate);
+}
+
+/* Separación clara entre las dos secciones del formulario */
+.form-section + .form-section {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--brand-border);
+}
+
+.required-mark {
+  color: var(--ion-color-danger);
+  margin-left: 2px;
+}
+
+.field-error {
+  margin: 0 0 0 12px;
+  font-size: 0.75rem;
+  color: var(--ion-color-danger);
+}
+
+.form-field ion-icon {
+  color: var(--brand-slate);
+  font-size: 1.25rem;
+  margin-inline-end: 10px;
+}
+
+.form-field.has-error ion-input,
+.form-field.has-error ion-select {
+  --border-color: var(--ion-color-danger);
+  --background: rgb(186 26 26 / 0.08);
+}
+
+:host-context(:root[data-theme='dark']) .form-field.has-error ion-input,
+:host-context(:root[data-theme='dark']) .form-field.has-error ion-select {
+  --background: rgb(248 113 113 / 0.12);
+}
+
+/* ---- Lista de usuarios ---- */
+
+.user-card {
+  margin: 0 0 12px;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 2px 8px rgb(15 23 42 / 0.04);
+}
+
+.user-card ion-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+}
+
+.user-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name {
+  font-family: var(--font-headline);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--brand-slate);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.badge-status {
+  --background: var(--brand-seafoam);
+  --color: #0f766e;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.badge-status.is-inactive {
+  --background: var(--brand-surface);
+  --color: var(--brand-slate);
+}
+
+.badge-role {
+  --background: transparent;
+  --color: var(--brand-slate);
+  border: 1px solid var(--brand-border-input);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.badge-role.is-admin {
+  --color: var(--brand-teal-strong);
+  border-color: var(--brand-teal);
+}
+
+.user-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.user-actions ion-button {
+  --border-radius: 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.user-actions ion-button[fill='outline'] {
+  --border-color: var(--brand-border-input);
+  --color: var(--brand-slate);
+}
+
+/* Fondo tonal para activar/desactivar */
+.user-actions ion-button[color='danger'] {
+  --background: rgb(186 26 26 / 0.10);
+  --color: var(--ion-color-danger);
+  --background-activated: rgb(186 26 26 / 0.18);
+  --background-hover: rgb(186 26 26 / 0.14);
+}
+
+.user-actions ion-button[color='success'] {
+  --background: rgb(45 212 191 / 0.14);
+  --color: var(--brand-teal-strong);
+  --background-activated: rgb(45 212 191 / 0.22);
+  --background-hover: rgb(45 212 191 / 0.18);
+}
+
+/* Dark mode */
+:host-context(:root[data-theme='dark']) .user-card {
+  border-color: var(--brand-border);
+}
+
+:host-context(:root[data-theme='dark']) .form-field {
+  border-color: var(--brand-border);
+}
+
+:host-context(:root[data-theme='dark']) .badge-status {
+  --background: #042f2a;
+  --color: var(--brand-teal);
+}
+
+:host-context(:root[data-theme='dark']) .badge-status.is-inactive {
+  --background: #1e293b;
+  --color: #94a3b8;
+}
+
+:host-context(:root[data-theme='dark']) .badge-role {
+  --color: #94a3b8;
+  border-color: #475569;
+}
+
+:host-context(:root[data-theme='dark']) .badge-role.is-admin {
+  --color: var(--brand-teal);
+  border-color: var(--brand-teal-strong);
+}
+
+:host-context(:root[data-theme='dark']) .user-actions ion-button[color='danger'] {
+  --background: rgb(186 26 26 / 0.16);
+  --color: #ff8a8a;
+}
+
+:host-context(:root[data-theme='dark']) .user-actions ion-button[color='success'] {
+  --background: rgb(45 212 191 / 0.16);
+  --color: var(--brand-teal);
+}
+
 @media (max-width: 720px) {
-  .users-page {
-    grid-template-columns: 1fr;
+  .users-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .users-toolbar ion-button {
+    width: 100%;
+  }
+  .user-card ion-card-content {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
