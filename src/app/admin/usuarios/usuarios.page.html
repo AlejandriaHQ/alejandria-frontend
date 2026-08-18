@@ -11,7 +11,16 @@
         Registrar usuario
       </ion-button>
     </div>
-      <ion-card *ngFor="let user of users" class="user-card"
+
+    <ion-searchbar
+      placeholder="Buscar por nombre, cédula o código"
+      [(ngModel)]="query"
+      (ionInput)="onSearch()"
+      class="users-search"
+      debounce="200"
+    ></ion-searchbar>
+
+    <ion-card *ngFor="let user of filteredUsers" class="user-card"
         ><ion-card-content
           ><div class="user-info">
             <strong class="user-name">{{ user.name }}</strong>
@@ -38,6 +47,11 @@
           </div></ion-card-content
         ></ion-card
       >
+
+      <div class="users-empty" *ngIf="query.trim() && filteredUsers.length === 0">
+        <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+        <p>No se encontraron usuarios para la búsqueda.</p>
+      </div>
   </main>
 </ion-content>
 

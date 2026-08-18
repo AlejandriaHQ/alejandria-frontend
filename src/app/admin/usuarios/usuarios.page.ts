@@ -25,6 +25,8 @@ const PHONE_PATTERN = /^\+?[\d\s-]{7,15}$/;
 })
 export class UsuariosPage implements OnInit {
   users: User[] = [];
+  filteredUsers: User[] = [];
+  query = '';
   editingId: number | null = null;
   error = '';
   fieldErrors: Record<string, string> = {};
@@ -37,6 +39,23 @@ export class UsuariosPage implements OnInit {
   }
   load() {
     this.users = this.loanService.getUsers();
+    this.applyFilter();
+  }
+  onSearch() {
+    this.applyFilter();
+  }
+  private applyFilter(): void {
+    const q = this.query.trim().toLowerCase();
+    if (!q) {
+      this.filteredUsers = this.users;
+      return;
+    }
+    this.filteredUsers = this.users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(q) ||
+        (user.cedula ?? '').toLowerCase().includes(q) ||
+        user.identifier.toLowerCase().includes(q),
+    );
   }
   openNew() {
     this.editingId = null;
