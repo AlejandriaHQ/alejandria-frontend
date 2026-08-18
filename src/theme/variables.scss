@@ -120,6 +120,28 @@
   --ion-item-color: #e2e8f0;
   --ion-border-color: #334155;
 
+  // Pasos de color de Ionic (texto de overlays como alert/select).
+  // En modo claro van de oscuro a claro; aquí se invierten para que los
+  // textos (p.ej. opciones de select) queden claros sobre fondo oscuro.
+  --ion-color-step-50: #0b1220;
+  --ion-color-step-100: #131c2e;
+  --ion-color-step-150: #1b263c;
+  --ion-color-step-200: #23304a;
+  --ion-color-step-250: #2b3a58;
+  --ion-color-step-300: #334466;
+  --ion-color-step-350: #3b4e74;
+  --ion-color-step-400: #435882;
+  --ion-color-step-450: #4b6290;
+  --ion-color-step-500: #536c9e;
+  --ion-color-step-550: #5b76ac;
+  --ion-color-step-600: #6380ba;
+  --ion-color-step-650: #6b8ac8;
+  --ion-color-step-700: #7394d6;
+  --ion-color-step-750: #7b9ee4;
+  --ion-color-step-800: #83a8f2;
+  --ion-color-step-850: #8bb2ff;
+  --ion-color-step-900: #cbd5e1;
+
   // En oscuro el CTA pasa a teal para mantener contraste con el fondo navy
   --ion-color-primary: #2dd4bf;
   --ion-color-primary-rgb: 45, 212, 191;

@@ -61,6 +61,9 @@ export class LoanService {
   createUser(data: Omit<User, 'id' | 'identifier' | 'registrationDate' | 'status'>): User {
     this.ensureAdministrator();
     this.assertUniqueUser(data.cedula, data.email);
+    if (!data.password || data.password.length < 6) {
+      throw new Error('La contraseña debe tener al menos 6 caracteres.');
+    }
     const year = new Date().getFullYear();
     const sequence = String(this.nextUserId()).padStart(4, '0');
     const user: User = {
@@ -98,6 +101,18 @@ export class LoanService {
     this.users.splice(index, 1);
     this.saveUsers();
     return 'deleted';
+  }
+
+  /** RN-08: reactiva un usuario desactivado para que pueda volver a iniciar sesión. */
+  reactivateUser(id: number): 'active' | 'not-found' {
+    this.ensureAdministrator();
+    const user = this.getUserById(id);
+    if (!user) {
+      return 'not-found';
+    }
+    user.status = 'active';
+    this.saveUsers();
+    return 'active';
   }
 
   // Préstamos
@@ -369,10 +384,21 @@ export class LoanService {
   }
 
   private assertUniqueUser(cedula?: string, email?: string, excludeId?: number): void {
-    const duplicated = this.users.some((user) =>
-      user.id !== excludeId && ((cedula && user.cedula === cedula) || (email && user.email.toLowerCase() === email.toLowerCase())),
+    const duplicateCedula = this.users.some(
+      (user) => user.id !== excludeId && !!cedula && user.cedula === cedula,
     );
-    if (duplicated) throw new Error('La cédula o el correo ya están registrados.');
+    const duplicateEmail = this.users.some(
+      (user) =>
+        user.id !== excludeId &&
+        !!email &&
+        user.email.toLowerCase() === email.toLowerCase(),
+    );
+    if (duplicateCedula) {
+      throw new Error('La cédula ya está registrada.');
+    }
+    if (duplicateEmail) {
+      throw new Error('El correo ya está registrado.');
+    }
   }
 
   private ensureAdministrator(): void {
@@ -424,9 +450,10 @@ export class LoanService {
       {
         id: 1,
         name: 'Usuario Demo',
-        identifier: 'usuario001',
+        identifier: 'MEM-2026-0001',
         role: 'user',
         email: 'usuario001@alejandria.com',
+        password: 'usuario123',
         phone: '809-000-0001',
         cedula: '001-0000000-1',
         address: 'Santo Domingo',
@@ -436,9 +463,10 @@ export class LoanService {
       {
         id: 2,
         name: 'María López',
-        identifier: 'U-2026-002',
+        identifier: 'MEM-2026-0002',
         role: 'user',
         email: 'maria@alejandria.com',
+        password: 'maria123',
         phone: '809-000-0002',
         cedula: '001-0000000-2',
         address: 'Santo Domingo',
@@ -448,11 +476,25 @@ export class LoanService {
       {
         id: 3,
         name: 'Carlos Pérez',
-        identifier: 'U-2026-003',
+        identifier: 'MEM-2026-0003',
         role: 'user',
         email: 'carlos@alejandria.com',
+        password: 'carlos123',
         phone: '809-000-0003',
         cedula: '001-0000000-3',
+        address: 'Santo Domingo',
+        registrationDate: new Date(),
+        status: 'active',
+      },
+      {
+        id: 4,
+        name: 'Administrador Demo',
+        identifier: 'ADM-2026-0001',
+        role: 'admin',
+        email: 'admin@alejandria.com',
+        password: 'admin123',
+        phone: '809-000-0000',
+        cedula: '001-0000000-0',
         address: 'Santo Domingo',
         registrationDate: new Date(),
         status: 'active',

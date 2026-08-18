@@ -80,8 +80,6 @@
             fill="clear"
             class="visibility-toggle"
             (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-            [attr.aria-pressed]="showPassword"
             aria-controls="password"
           >
             <ion-icon
@@ -90,6 +88,7 @@
               aria-hidden="true"
             >
             </ion-icon>
+            <span class="sr-only">{{ showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }}</span>
           </ion-button>
         </ion-item>
 
