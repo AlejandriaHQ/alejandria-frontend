@@ -23,9 +23,10 @@ export class ReportService {
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     const loans = this.loans.getLoans();
+    const activeUsers = this.loans.getUsers().filter((user) => user.status !== 'inactive');
     return {
       books: this.catalog.getBooks().length,
-      users: this.loans.getUsers().length,
+      users: activeUsers.length,
       active: loans.filter((l) => l.status === 'active').length,
       overdue: loans.filter((l) => l.status === 'overdue').length,
       month: loans.filter((l) => { const d = new Date(l.loanDate); return d.getMonth() === currentMonth && d.getFullYear() === currentYear; }).length,
@@ -51,12 +52,13 @@ export class ReportService {
 
   topBooks() {
     return this.catalog.getBooks().map((book) => ({ label: book.title, total: this.loans.getLoans().filter((l) => l.bookId === book.id).length }))
-      .sort((a, b) => b.total - a.total).slice(0, 10);
+      .sort((a, b) => b.total - a.total).filter((entry) => entry.total > 0).slice(0, 10);
   }
 
   topUsers() {
-    return this.loans.getUsers().map((user) => ({ label: user.name, total: this.loans.getLoans().filter((l) => l.userId === user.id).length }))
-      .sort((a, b) => b.total - a.total).slice(0, 10);
+    return this.loans.getUsers().filter((user) => user.status !== 'inactive')
+      .map((user) => ({ label: user.name, total: this.loans.getLoans().filter((l) => l.userId === user.id).length }))
+      .sort((a, b) => b.total - a.total).filter((entry) => entry.total > 0).slice(0, 10);
   }
 
   private rows(): ReportRow[] {

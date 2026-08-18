@@ -7,6 +7,7 @@ type UserForm = {
   name: string;
   cedula: string;
   email: string;
+  password: string;
   phone: string;
   address: string;
   role: UserRole;
@@ -37,6 +38,7 @@ export class UsuariosPage implements OnInit {
       name: user.name,
       cedula: user.cedula ?? '',
       email: user.email,
+      password: '',
       phone: user.phone,
       address: user.address ?? '',
       role: user.role,
@@ -52,9 +54,23 @@ export class UsuariosPage implements OnInit {
       this.error = 'Nombre, cédula y correo son obligatorios.';
       return;
     }
+    if (!this.editingId && this.form.password.length < 6) {
+      this.error = 'La contraseña debe tener al menos 6 caracteres.';
+      return;
+    }
     try {
-      if (this.editingId) this.loanService.updateUser(this.editingId, this.form);
-      else this.loanService.createUser(this.form);
+      if (this.editingId) {
+        this.loanService.updateUser(this.editingId, {
+          name: this.form.name,
+          cedula: this.form.cedula,
+          email: this.form.email,
+          phone: this.form.phone,
+          address: this.form.address,
+          role: this.form.role,
+        });
+      } else {
+        this.loanService.createUser(this.form);
+      }
       this.cancel();
       this.load();
     } catch (error) {
@@ -62,16 +78,44 @@ export class UsuariosPage implements OnInit {
     }
   }
   async remove(user: User) {
+    const hasLoans = this.loanService.getLoansByUser(user.id).length > 0;
     const alert = await this.alerts.create({
       header: 'Desactivar o eliminar',
-      message: `¿Procesar a ${user.name}? Si tiene préstamos se desactivará para conservar el historial.`,
+      message: hasLoans
+        ? `${user.name} tiene préstamos asociados y se desactivará (conservando su historial).`
+        : `${user.name} no tiene préstamos y se eliminará definitivamente.`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Confirmar',
-          handler: () => {
-            this.loanService.removeUser(user.id);
+          handler: async () => {
+            const result = this.loanService.removeUser(user.id);
             this.cancel();
+            this.load();
+            if (result === 'deleted') {
+              await this.showMessage('Usuario eliminado', 'Usuario eliminado definitivamente.');
+            } else if (result === 'deactivated') {
+              await this.showMessage(
+                'Usuario desactivado',
+                'Usuario desactivado; su historial se conserva.',
+              );
+            }
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+  async reactivate(user: User) {
+    const alert = await this.alerts.create({
+      header: 'Activar usuario',
+      message: `¿Reactivar a ${user.name}? Podrá iniciar sesión nuevamente.`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Activar',
+          handler: () => {
+            this.loanService.reactivateUser(user.id);
             this.load();
           },
         },
@@ -79,7 +123,15 @@ export class UsuariosPage implements OnInit {
     });
     await alert.present();
   }
+  private async showMessage(header: string, message: string) {
+    const alert = await this.alerts.create({
+      header,
+      message,
+      buttons: [{ text: 'Entendido', role: 'cancel' }],
+    });
+    await alert.present();
+  }
   private emptyForm(): UserForm {
-    return { name: '', cedula: '', email: '', phone: '', address: '', role: 'user' };
+    return { name: '', cedula: '', email: '', password: '', phone: '', address: '', role: 'user' };
   }
 }

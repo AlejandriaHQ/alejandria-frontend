@@ -1,5 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { LoanService } from './loan.service';
 
 export type UserRole = 'admin' | 'user';
 
@@ -36,6 +37,10 @@ export class AuthService {
 
   private readonly router = inject(Router);
 
+  // LoanService se resuelve de forma perezosa: LoanService ya inyecta AuthService,
+  // por lo que inyectarlo aquí directamente crearía una dependencia circular.
+  private readonly injector = inject(Injector);
+
   constructor() {
     this.restoreSession();
   }
@@ -45,7 +50,35 @@ export class AuthService {
       return null;
     }
 
-    // Administrador
+    // Usuarios persistidos en alejandria_users: se valida por correo o identificador
+    // más contraseña, y el rol sale del propio usuario guardado.
+    const savedUser = this.injector
+      .get(LoanService)
+      .getUsers()
+      .find(
+        (user) =>
+          user.password === password &&
+          (user.email.toLowerCase() === identifier.toLowerCase() || user.identifier === identifier),
+      );
+
+    if (savedUser) {
+      // RN-08: un usuario desactivado no puede volver a iniciar sesión.
+      if (savedUser.status === 'inactive') {
+        return null;
+      }
+
+      this.currentUser = {
+        identifier: savedUser.identifier,
+        role: savedUser.role,
+      };
+
+      this.saveSession();
+      this.startTimer();
+
+      return savedUser.role;
+    }
+
+    // Administrador (respaldo de la demo; coincide con la semilla ADM-2026-0001)
     if (identifier === 'admin@alejandria.com' && password === 'admin123') {
       this.currentUser = {
         identifier,
@@ -58,10 +91,10 @@ export class AuthService {
       return 'admin';
     }
 
-    // Usuario
+    // Usuario demo (respaldo; la sesión guarda el identificador unificado MEM-2026-0001)
     if (identifier === 'usuario001' && password === 'usuario123') {
       this.currentUser = {
-        identifier,
+        identifier: 'MEM-2026-0001',
         role: 'user',
       };
 
@@ -94,7 +127,7 @@ export class AuthService {
     this.originalUser = user;
 
     this.currentUser = {
-      identifier: 'usuario001',
+      identifier: 'MEM-2026-0001',
       role: 'user',
     };
 

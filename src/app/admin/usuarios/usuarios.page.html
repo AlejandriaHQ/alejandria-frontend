@@ -23,6 +23,14 @@
           labelPlacement="stacked"
           [(ngModel)]="form.email"
         ></ion-input></ion-item
+      ><ion-item *ngIf="!editingId"
+        ><ion-input
+          type="password"
+          label="Contraseña"
+          labelPlacement="stacked"
+          placeholder="Mínimo 6 caracteres"
+          [(ngModel)]="form.password"
+        ></ion-input></ion-item
       ><ion-item
         ><ion-input
           label="Teléfono"
@@ -63,7 +71,12 @@
           </div>
           <div>
             <ion-button fill="clear" (click)="edit(user)">Editar</ion-button
-            ><ion-button fill="clear" color="danger" (click)="remove(user)">Desactivar</ion-button>
+            ><ion-button
+              fill="clear"
+              [color]="user.status === 'inactive' ? 'success' : 'danger'"
+              (click)="user.status === 'inactive' ? reactivate(user) : remove(user)"
+              >{{ user.status === 'inactive' ? 'Activar' : 'Desactivar' }}</ion-button
+            >
           </div></ion-card-content
         ></ion-card
       >
