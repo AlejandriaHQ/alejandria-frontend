@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { DatetimeCustomEvent } from '@ionic/angular';
 import { ReportRow, ReportService } from '../../Services/report.service';
 
 type ReportKind = 'loans' | 'returns' | 'inventory' | 'topBooks' | 'topUsers';
@@ -34,10 +35,16 @@ export class ReportesPage implements OnInit {
     cssClass: 'report-select-alert',
   };
 
+  /** True cuando la consulta actual devuelve datos exportables. */
+  get hasData(): boolean {
+    return this.rows.length > 0 || this.inventory.length > 0 || this.ranking.length > 0;
+  }
+
   private readonly reports = inject(ReportService);
 
   ngOnInit() {
-    this.load();
+    // Rango por defecto: último mes, para que la vista ya traiga datos.
+    this.setRange(30);
   }
 
   load() {
@@ -57,7 +64,28 @@ export class ReportesPage implements OnInit {
     return value ? new Date(value).toLocaleDateString('es-ES') : '—';
   }
 
+  /** Establece un rango de fechas terminando hoy y recarga los datos. */
+  setRange(days: number): void {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - days);
+    this.start = this.toIsoDate(start);
+    this.end = this.toIsoDate(end);
+    this.load();
+  }
+
+  onStartChange(event: DatetimeCustomEvent): void {
+    this.start = this.toDateOnly(event.detail.value);
+    this.load();
+  }
+
+  onEndChange(event: DatetimeCustomEvent): void {
+    this.end = this.toDateOnly(event.detail.value);
+    this.load();
+  }
+
   exportCsv() {
+    if (!this.hasData) return;
     const csv = this.tabularData()
       .map((line) => line.map((value) => this.escape(value)).join(','))
       .join('\n');
@@ -71,6 +99,7 @@ export class ReportesPage implements OnInit {
   }
 
   exportPdf() {
+    if (!this.hasData) return;
     const popup = window.open('', '_blank');
 
     if (!popup) return;
@@ -132,5 +161,26 @@ export class ReportesPage implements OnInit {
     const element = document.createElement('span');
     element.textContent = value;
     return element.innerHTML;
+  }
+
+  /**
+   * Normaliza el valor ISO-8601 que emite ion-datetime (p. ej. '2026-08-18'
+   * o '2026-08-18T00:00:00') a solo 'YYYY-MM-DD'. No pasa por new Date()
+   * cuando el valor ya es una fecha pura, porque new Date('YYYY-MM-DD') se
+   * interpreta como UTC y desplazaría el día en zonas horarias negativas.
+   */
+  private toDateOnly(value: string | string[] | null | undefined): string {
+    const text = String(value ?? '').trim();
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(text);
+    if (match) return `${match[1]}-${match[2]}-${match[3]}`;
+    const date = new Date(text);
+    return Number.isNaN(date.getTime()) ? '' : this.toIsoDate(date);
+  }
+
+  private toIsoDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }

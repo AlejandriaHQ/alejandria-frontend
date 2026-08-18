@@ -2,82 +2,423 @@
   max-width: 1200px;
   margin: auto;
   padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
+
+/* ---------- Métricas ---------- */
+
 .metrics {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 14px;
 }
-ion-card {
+
+/* Caja redondeada: mismo patrón visual que usuarios/catálogo
+   (borde completo + fondo sólido, radius 14px). */
+.metric-card {
   margin: 0;
+  background: var(--brand-paper);
+  border: 1px solid var(--brand-border-input);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  overflow: hidden;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
-.metrics ion-card-content {
+
+.metric-card:hover {
+  border-color: var(--brand-teal-strong);
+}
+
+.metric-card ion-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.metric-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--brand-seafoam);
+  color: var(--brand-teal-strong);
+  font-size: 1.15rem;
+}
+
+.metric-text {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.metric-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--brand-slate);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.metrics strong {
-  font-size: 30px;
+
+.metric-value {
+  font-family: var(--font-headline);
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 800;
+  line-height: 1.1;
   color: var(--brand-navy);
+  font-variant-numeric: tabular-nums;
 }
-.toolbar {
+
+/* ---------- Filtros ---------- */
+
+.filter-card {
+  background: var(--brand-paper);
+  border: 1px solid var(--brand-border-input);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.report-toolbar {
   display: flex;
+  align-items: center;
   gap: 12px;
-  align-items: end;
-  margin: 26px 0;
   flex-wrap: wrap;
 }
-.toolbar ion-input,
-.toolbar ion-select {
-  min-width: 150px;
-  border: 1px solid var(--brand-border);
-  border-radius: 8px;
-  --background: var(--brand-paper);
+
+.report-toolbar ion-select {
+  width: 200px;
+  --padding-top: 0;
+  --padding-bottom: 0;
   --color: var(--ion-text-color);
   --placeholder-color: var(--brand-slate);
   --highlight-color-focused: var(--brand-teal-strong);
-  --padding-start: 12px;
-  --padding-end: 12px;
-  --padding-top: 6px;
-  --padding-bottom: 6px;
   color: var(--ion-text-color);
 }
 
-.toolbar ion-input::part(native),
-.toolbar ion-select::part(native) {
-  padding-inline: 12px;
+/* Controles compactos (~44px): sobreescribe el min-height 56px que
+   Ionic aplica a los label-placement="floating". */
+.report-toolbar ion-select.select-label-placement-floating {
+  min-height: 44px;
 }
 
-.toolbar ion-input[type='date']::part(native) {
-  color-scheme: light;
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-:host-context(:root[data-theme='dark']) .toolbar ion-input[type='date']::part(native) {
-  color-scheme: dark;
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
 }
+
+.date-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--brand-slate);
+  margin-bottom: 2px;
+}
+
+.date-field ion-datetime-button {
+  width: 100%;
+  min-width: 0;
+  --background: var(--brand-paper);
+  --background-hover: var(--brand-hover);
+  --background-activated: var(--brand-hover);
+  --color: var(--ion-text-color);
+  --border-color: var(--brand-border-input);
+  --border-radius: 10px;
+}
+
+/* Alinea la etiqueta "a" con el botón de fecha, no con el label superior. */
+.date-separator {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brand-slate);
+  padding-top: 20px;
+}
+
+.range-presets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-presets ion-button {
+  flex: none;
+  height: 36px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  --border-radius: 10px;
+  --border-color: var(--brand-border-input);
+  --color: var(--brand-navy);
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.toolbar-actions ion-button {
+  --border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.toolbar-actions ion-button[fill='outline'] {
+  --border-color: var(--brand-border-input);
+  --color: var(--brand-navy);
+}
+
+/* Botones de exportación deshabilitados cuando no hay datos */
+.toolbar-actions ion-button[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ---------- Datos / tablas ---------- */
+
 .data {
   overflow: auto;
+  background: var(--brand-paper);
+  border: 1px solid var(--brand-border);
+  border-radius: 14px;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--brand-paper);
   color: var(--ion-text-color);
 }
+
 th,
 td {
-  padding: 12px;
-  border-bottom: 1px solid var(--brand-border);
+  padding: 10px 12px;
+  font-size: 0.875rem;
   text-align: left;
   color: var(--ion-text-color);
+  border-bottom: 1px solid var(--brand-border);
 }
+
 th {
-  color: var(--brand-navy);
   background: var(--brand-surface);
+  color: var(--brand-navy);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  white-space: nowrap;
 }
-@media (max-width: 800px) {
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr {
+  transition: background-color 120ms ease;
+}
+
+tbody tr:hover {
+  background: var(--brand-hover);
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Estados y rankings ---------- */
+
+.state-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: var(--brand-seafoam);
+  color: #0f766e;
+}
+
+.state-badge--late {
+  background: rgb(186 26 26 / 0.1);
+  color: var(--ion-color-danger);
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--brand-surface);
+  color: var(--brand-slate);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.rank-badge--first {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.rank-badge--second {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.rank-badge--third {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+/* ---------- Estado vacío ---------- */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: var(--brand-slate);
+  text-align: center;
+}
+
+.empty-state ion-icon {
+  font-size: 2.25rem;
+  opacity: 0.7;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* ---------- Dark mode ---------- */
+
+:host-context(:root[data-theme='dark']) .metric-card,
+:host-context(:root[data-theme='dark']) .filter-card {
+  border-color: var(--brand-border);
+}
+
+:host-context(:root[data-theme='dark']) .metric-icon {
+  background: #042f2a;
+  color: var(--brand-teal);
+}
+
+:host-context(:root[data-theme='dark']) .state-badge {
+  background: #042f2a;
+  color: var(--brand-teal);
+}
+
+:host-context(:root[data-theme='dark']) .state-badge--late {
+  background: rgb(248 113 113 / 0.12);
+  color: #ff8a8a;
+}
+
+:host-context(:root[data-theme='dark']) .rank-badge--first {
+  background: rgb(251 191 36 / 0.16);
+  color: #fbbf24;
+}
+
+:host-context(:root[data-theme='dark']) .rank-badge--second {
+  background: rgb(148 163 184 / 0.16);
+  color: #cbd5e1;
+}
+
+:host-context(:root[data-theme='dark']) .rank-badge--third {
+  background: rgb(251 146 60 / 0.16);
+  color: #fdba74;
+}
+
+/* ---------- Breakpoints ---------- */
+
+/* Tablet: 3 columnas */
+@media (max-width: 1099px) {
+  .metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Móvil: 2 columnas y toolbar apilado */
+@media (max-width: 599px) {
+  .reports-page {
+    padding: 18px 16px;
+    gap: 14px;
+  }
+
   .metrics {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .metric-card ion-card-content {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .metric-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .filter-card {
+    padding: 12px;
+  }
+
+  .report-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report-toolbar ion-select {
+    width: 100%;
+  }
+
+  .date-range {
+    width: 100%;
+  }
+
+  .date-field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .date-field ion-datetime-button {
+    width: 100%;
+  }
+
+  .range-presets {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .toolbar-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .toolbar-actions ion-button {
+    flex: 1;
   }
 }
