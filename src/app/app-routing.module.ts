@@ -6,8 +6,7 @@ import { authGuard } from './guards/auth.guard';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'autenticacion',
-    pathMatch: 'full',
+    loadChildren: () => import('./landing/landing.module').then((m) => m.LandingPageModule),
   },
   {
     path: 'autenticacion',

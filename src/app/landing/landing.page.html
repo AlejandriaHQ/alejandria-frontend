@@ -1,0 +1,180 @@
+<ion-content [fullscreen]="true">
+  <header class="landing-header">
+    <div class="landing-header__inner">
+      <a class="landing-brand" routerLink="/" aria-label="Alejandría — inicio">
+        <img
+          src="assets/img/ale_icono2.jpeg"
+          alt="Logo de Alejandría"
+          class="landing-brand__logo"
+        />
+        <span class="landing-brand__name">Alejandría</span>
+      </a>
+
+      <ion-button
+        routerLink="/autenticacion"
+        fill="outline"
+        class="landing-header__cta"
+        >Iniciar sesión</ion-button
+      >
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero__blob hero__blob--teal" aria-hidden="true"></div>
+      <div class="hero__blob hero__blob--seafoam" aria-hidden="true"></div>
+
+      <div class="hero__inner">
+        <div class="hero__content">
+          <h1 class="hero__title">
+            Cada libro, cada préstamo,<br />
+            <span class="hero__title-accent">bajo control.</span>
+          </h1>
+
+          <p class="hero__subtitle">
+            Alejandría reúne tu catálogo, tus préstamos y tus lectores en un solo lugar.
+            Registra devoluciones, detecta vencidos y consulta disponibilidad desde
+            cualquier dispositivo.
+          </p>
+
+          <div class="hero__actions">
+            <ion-button
+              routerLink="/autenticacion"
+              class="hero__cta hero__cta--primary"
+              >Iniciar sesión</ion-button
+            >
+
+            <ion-button
+              fill="clear"
+              class="hero__cta hero__cta--secondary"
+              (click)="scrollToFeatures()"
+              >Conocer más</ion-button
+            >
+          </div>
+
+          <ul class="hero__trust">
+            <li>
+              <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+              Catálogo centralizado
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+              Préstamos al día
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+              Reportes en vivo
+            </li>
+          </ul>
+        </div>
+
+        <figure class="hero-chart">
+          <figcaption class="hero-chart__header">
+            <span class="hero-chart__heading">
+              <span class="hero-chart__kicker">Actividad de la biblioteca</span>
+              <span class="hero-chart__title">Préstamos por mes</span>
+            </span>
+            <span class="hero-chart__period">Ene – Dic 2026</span>
+          </figcaption>
+
+          <div class="hero-chart__body">
+            <canvas
+              baseChart
+              [data]="loanChartData"
+              [options]="loanChartOptions"
+              [type]="'bar'"
+            ></canvas>
+          </div>
+
+          <p class="hero-chart__note">
+            <ion-icon name="trending-up-outline" aria-hidden="true"></ion-icon>
+            {{ peakMonth }} fue el mes más activo: {{ peakTotal }} préstamos.
+          </p>
+        </figure>
+      </div>
+    </section>
+
+    <section class="features" id="caracteristicas">
+      <div class="features__inner">
+        <div class="features__heading">
+          <p class="features__eyebrow">Módulos</p>
+          <h2 class="features__title">Todo lo que tu biblioteca necesita</h2>
+          <p class="features__intro">
+            Un conjunto de módulos integrados para cubrir las tareas diarias de gestión
+            bibliotecaria.
+          </p>
+        </div>
+
+        <div class="features__grid">
+          <article class="feature-card">
+            <div class="feature-card__icon" aria-hidden="true">
+              <ion-icon name="library-outline"></ion-icon>
+            </div>
+            <h3 class="feature-card__title">Catálogo</h3>
+            <p class="feature-card__text">
+              Centraliza el inventario de tus libros con fichas completas y búsqueda
+              avanzada.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon" aria-hidden="true">
+              <ion-icon name="swap-horizontal-outline"></ion-icon>
+            </div>
+            <h3 class="feature-card__title">Préstamos</h3>
+            <p class="feature-card__text">
+              Registra y controla préstamos y devoluciones con estados claros y a tiempo.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon" aria-hidden="true">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+            <h3 class="feature-card__title">Usuarios</h3>
+            <p class="feature-card__text">
+              Administra miembros, roles y accesos de forma sencilla y segura.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon" aria-hidden="true">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+            </div>
+            <h3 class="feature-card__title">Reportes</h3>
+            <p class="feature-card__text">
+              Obtén métricas e informes para tomar decisiones con datos confiables.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon" aria-hidden="true">
+              <ion-icon name="search-outline"></ion-icon>
+            </div>
+            <h3 class="feature-card__title">Consulta en línea</h3>
+            <p class="feature-card__text">
+              Permite consultar la disponibilidad del catálogo desde cualquier lugar.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="final-cta__inner">
+        <h2 class="final-cta__title">Tu biblioteca, organizada y al día</h2>
+        <p class="final-cta__text">
+          Crea tu cuenta y empieza a controlar catálogo, préstamos y lectores desde el
+          primer día.
+        </p>
+        <ion-button routerLink="/autenticacion" class="final-cta__button"
+          >Comenzar</ion-button
+        >
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <span>© 2026 Alejandría</span>
+  </footer>
+</ion-content>
