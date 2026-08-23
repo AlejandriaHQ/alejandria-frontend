@@ -612,10 +612,26 @@
 
   .hero__content {
     max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .hero__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero__actions {
+    justify-content: center;
   }
 
   .hero__stats {
+    justify-content: center;
     gap: 24px 36px;
+  }
+
+  .hero__trust {
+    justify-content: center;
   }
 
   .hero-panel {
