@@ -10,6 +10,15 @@
         <span class="landing-brand__name">Alejandría</span>
       </a>
 
+      <nav class="landing-nav" aria-label="Secciones de la página">
+        <a
+          class="landing-nav__link"
+          href="#caracteristicas"
+          (click)="onAnchorClick($event, 'caracteristicas')"
+          >Módulos</a
+        >
+      </nav>
+
       <ion-button
         routerLink="/autenticacion"
         fill="outline"
@@ -20,12 +29,11 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero__blob hero__blob--teal" aria-hidden="true"></div>
-      <div class="hero__blob hero__blob--seafoam" aria-hidden="true"></div>
-
+    <section class="hero" id="inicio">
       <div class="hero__inner">
         <div class="hero__content">
+          <p class="hero__eyebrow">Gestión bibliotecaria, en orden</p>
+
           <h1 class="hero__title">
             Cada libro, cada préstamo,<br />
             <span class="hero__title-accent">bajo control.</span>
@@ -47,37 +55,37 @@
             <ion-button
               fill="clear"
               class="hero__cta hero__cta--secondary"
-              (click)="scrollToFeatures()"
+              (click)="onAnchorClick($event, 'caracteristicas')"
               >Conocer más</ion-button
             >
           </div>
 
-          <ul class="hero__trust">
-            <li>
-              <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
-              Catálogo centralizado
-            </li>
-            <li>
-              <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
-              Préstamos al día
-            </li>
-            <li>
-              <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
-              Reportes en vivo
-            </li>
-          </ul>
+          <dl class="hero__stats">
+            <div class="hero__stat">
+              <dt class="hero__stat-value">5</dt>
+              <dd class="hero__stat-label">módulos integrados</dd>
+            </div>
+            <div class="hero__stat">
+              <dt class="hero__stat-value">6,000+</dt>
+              <dd class="hero__stat-label">títulos gestionables</dd>
+            </div>
+            <div class="hero__stat">
+              <dt class="hero__stat-value">100%</dt>
+              <dd class="hero__stat-label">préstamos al día</dd>
+            </div>
+          </dl>
         </div>
 
-        <figure class="hero-chart">
-          <figcaption class="hero-chart__header">
-            <span class="hero-chart__heading">
-              <span class="hero-chart__kicker">Actividad de la biblioteca</span>
-              <span class="hero-chart__title">Préstamos por mes</span>
+        <figure class="hero-panel">
+          <figcaption class="hero-panel__header">
+            <span class="hero-panel__heading">
+              <span class="hero-panel__kicker">Actividad de la biblioteca</span>
+              <span class="hero-panel__title">Préstamos por mes</span>
             </span>
-            <span class="hero-chart__period">Ene – Dic 2026</span>
+            <span class="hero-panel__period">Ene – Dic 2026</span>
           </figcaption>
 
-          <div class="hero-chart__body">
+          <div class="hero-panel__body">
             <canvas
               baseChart
               [data]="loanChartData"
@@ -86,7 +94,7 @@
             ></canvas>
           </div>
 
-          <p class="hero-chart__note">
+          <p class="hero-panel__note">
             <ion-icon name="trending-up-outline" aria-hidden="true"></ion-icon>
             {{ peakMonth }} fue el mes más activo: {{ peakTotal }} préstamos.
           </p>
@@ -97,19 +105,17 @@
     <section class="features" id="caracteristicas">
       <div class="features__inner">
         <div class="features__heading">
-          <p class="features__eyebrow">Módulos</p>
+          <p class="features__eyebrow">Los módulos</p>
           <h2 class="features__title">Todo lo que tu biblioteca necesita</h2>
           <p class="features__intro">
             Un conjunto de módulos integrados para cubrir las tareas diarias de gestión
-            bibliotecaria.
+            bibliotecaria, sin fricción.
           </p>
         </div>
 
         <div class="features__grid">
           <article class="feature-card">
-            <div class="feature-card__icon" aria-hidden="true">
-              <ion-icon name="library-outline"></ion-icon>
-            </div>
+            <span class="feature-card__index" aria-hidden="true">01</span>
             <h3 class="feature-card__title">Catálogo</h3>
             <p class="feature-card__text">
               Centraliza el inventario de tus libros con fichas completas y búsqueda
@@ -118,9 +124,7 @@
           </article>
 
           <article class="feature-card">
-            <div class="feature-card__icon" aria-hidden="true">
-              <ion-icon name="swap-horizontal-outline"></ion-icon>
-            </div>
+            <span class="feature-card__index" aria-hidden="true">02</span>
             <h3 class="feature-card__title">Préstamos</h3>
             <p class="feature-card__text">
               Registra y controla préstamos y devoluciones con estados claros y a tiempo.
@@ -128,9 +132,7 @@
           </article>
 
           <article class="feature-card">
-            <div class="feature-card__icon" aria-hidden="true">
-              <ion-icon name="people-outline"></ion-icon>
-            </div>
+            <span class="feature-card__index" aria-hidden="true">03</span>
             <h3 class="feature-card__title">Usuarios</h3>
             <p class="feature-card__text">
               Administra miembros, roles y accesos de forma sencilla y segura.
@@ -138,9 +140,7 @@
           </article>
 
           <article class="feature-card">
-            <div class="feature-card__icon" aria-hidden="true">
-              <ion-icon name="bar-chart-outline"></ion-icon>
-            </div>
+            <span class="feature-card__index" aria-hidden="true">04</span>
             <h3 class="feature-card__title">Reportes</h3>
             <p class="feature-card__text">
               Obtén métricas e informes para tomar decisiones con datos confiables.
@@ -148,20 +148,29 @@
           </article>
 
           <article class="feature-card">
-            <div class="feature-card__icon" aria-hidden="true">
-              <ion-icon name="search-outline"></ion-icon>
-            </div>
+            <span class="feature-card__index" aria-hidden="true">05</span>
             <h3 class="feature-card__title">Consulta en línea</h3>
             <p class="feature-card__text">
               Permite consultar la disponibilidad del catálogo desde cualquier lugar.
             </p>
           </article>
+
+          <article class="feature-card feature-card--cta">
+            <h3 class="feature-card__title">¿Listo para empezar?</h3>
+            <p class="feature-card__text">
+              Organiza catálogo, préstamos y lectores desde el primer día.
+            </p>
+            <ion-button routerLink="/autenticacion" class="feature-card__button"
+              >Comenzar</ion-button
+            >
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="final-cta">
+    <section class="final-cta" id="empieza">
       <div class="final-cta__inner">
+        <p class="final-cta__eyebrow">Empieza hoy</p>
         <h2 class="final-cta__title">Tu biblioteca, organizada y al día</h2>
         <p class="final-cta__text">
           Crea tu cuenta y empieza a controlar catálogo, préstamos y lectores desde el

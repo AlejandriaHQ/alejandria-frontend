@@ -21,6 +21,13 @@ const LOANS_RETURNED = [32, 27, 41, 36, 44, 50, 58, 43, 48, 41, 37, 47];
 
 const LOANS_IN_PROGRESS = [14, 12, 17, 16, 23, 24, 31, 19, 23, 19, 17, 21];
 
+// Colores pensados para el panel "sala de lectura" (fondo verde tinta).
+// Se mantienen constantes en ambos temas porque el panel permanece oscuro.
+const CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.12)';
+const CHART_TICK_COLOR = 'rgba(238, 243, 233, 0.8)';
+const IN_PROGRESS_COLOR = '#ece2c8';
+const IN_PROGRESS_HOVER = '#f7efdb';
+
 interface BrandTokens {
   navy: string;
   teal: string;
@@ -72,8 +79,9 @@ export class LandingPage implements OnInit, OnDestroy {
     this.router.navigate(['/autenticacion']);
   }
 
-  scrollToFeatures(): void {
-    document.getElementById('caracteristicas')?.scrollIntoView({ behavior: 'smooth' });
+  onAnchorClick(event: Event, id: string): void {
+    event.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   }
 
   private refreshChartTheme(): void {
@@ -91,18 +99,18 @@ export class LandingPage implements OnInit, OnDestroy {
           data: [...LOANS_RETURNED],
           backgroundColor: tokens.teal,
           hoverBackgroundColor: tokens.tealStrong,
-          borderRadius: 4,
+          borderRadius: 5,
           borderSkipped: false,
-          maxBarThickness: 22,
+          maxBarThickness: 26,
         },
         {
           label: 'En curso',
           data: [...LOANS_IN_PROGRESS],
-          backgroundColor: tokens.navy,
-          hoverBackgroundColor: tokens.slate,
+          backgroundColor: IN_PROGRESS_COLOR,
+          hoverBackgroundColor: IN_PROGRESS_HOVER,
           borderRadius: { topLeft: 6, topRight: 6 },
           borderSkipped: false,
-          maxBarThickness: 22,
+          maxBarThickness: 26,
         },
       ],
     };
@@ -125,8 +133,8 @@ export class LandingPage implements OnInit, OnDestroy {
             boxWidth: 7,
             boxHeight: 7,
             padding: 16,
-            color: tokens.slate,
-            font: { family: 'Inter, sans-serif', size: 12, weight: 600 },
+            color: CHART_TICK_COLOR,
+            font: { family: 'Figtree, sans-serif', size: 12, weight: 600 },
           },
         },
         tooltip: {
@@ -137,8 +145,8 @@ export class LandingPage implements OnInit, OnDestroy {
           cornerRadius: 10,
           displayColors: true,
           boxPadding: 4,
-          titleFont: { family: 'Manrope, sans-serif', size: 13, weight: 700 },
-          bodyFont: { family: 'Inter, sans-serif', size: 12 },
+          titleFont: { family: 'Alegreya, serif', size: 13, weight: 700 },
+          bodyFont: { family: 'Figtree, sans-serif', size: 12 },
           callbacks: {
             label: (item) => `${item.dataset.label ?? ''}: ${item.parsed.y} préstamos`,
           },
@@ -150,19 +158,19 @@ export class LandingPage implements OnInit, OnDestroy {
           grid: { display: false },
           border: { display: false },
           ticks: {
-            color: tokens.slate,
-            font: { family: 'Inter, sans-serif', size: 11 },
+            color: CHART_TICK_COLOR,
+            font: { family: 'Figtree, sans-serif', size: 11 },
             maxRotation: 0,
           },
         },
         y: {
           stacked: true,
           beginAtZero: true,
-          grid: { color: tokens.border, drawTicks: false },
+          grid: { color: CHART_GRID_COLOR, drawTicks: false },
           border: { display: false },
           ticks: {
-            color: tokens.slate,
-            font: { family: 'Inter, sans-serif', size: 11 },
+            color: CHART_TICK_COLOR,
+            font: { family: 'Figtree, sans-serif', size: 11 },
             stepSize: 20,
             padding: 8,
           },
