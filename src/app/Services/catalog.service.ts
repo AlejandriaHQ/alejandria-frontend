@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiService } from './api.service';
+import { ApiService, PaginatedResult } from './api.service';
 import { Category } from '../models/categoria.model';
 import { Book } from '../models/libro.model';
 
@@ -76,9 +76,27 @@ export class CatalogService {
     );
   }
 
-  /** Busca libros usando el endpoint paginado del backend. Devuelve la página 1 (10 por página). */
+  /**
+   * Busca libros con el endpoint paginado y devuelve la página 1 (10 por página).
+   *
+   * Compatibilidad: mantiene la firma `Observable<Book[]>` que usan las vistas
+   * legadas (catálogo, socio). Delega en `searchBooksPage` para no duplicar la
+   * lógica de filtros.
+   */
   searchBooksAsync(query?: string, categoryId?: number): Observable<Book[]> {
-    const params: Record<string, string | number> = { page: 1 };
+    return this.searchBooksPage(query, categoryId, 1).pipe(map((result) => result.items));
+  }
+
+  /**
+   * Busca libros con paginación real del backend (`/biblioteca/libros/paginar/`).
+   *
+   * Conserva los metadatos (`maxPages/currentPage/previous/next`) y mapea los
+   * `LibroDTO` a `Book[]`. La caché síncrona se actualiza con los items de la
+   * página para que `getBooks()`/`searchBooks()` (consumidores legados) sigan
+   * funcionando con los datos visibles.
+   */
+  searchBooksPage(query?: string, categoryId?: number, page = 1): Observable<PaginatedResult<Book>> {
+    const params: Record<string, string | number> = { page };
 
     if (query && query.trim().length > 0) {
       params['filter'] = query.trim();
@@ -88,10 +106,10 @@ export class CatalogService {
       params['categoria'] = categoryId;
     }
 
-    return this.api.get<LibroDTO[]>('/biblioteca/libros/paginar/', params).pipe(
-      map((dtos) => {
-        this.booksCache = (dtos ?? []).map((dto) => this.fromLibroDTO(dto));
-        return this.booksCache;
+    return this.api.getPaginated<LibroDTO>('/biblioteca/libros/paginar/', params).pipe(
+      map((result) => {
+        this.booksCache = result.items.map((dto) => this.fromLibroDTO(dto));
+        return { ...result, items: this.booksCache };
       }),
     );
   }

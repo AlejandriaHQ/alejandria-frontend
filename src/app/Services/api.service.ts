@@ -38,6 +38,30 @@ export class ApiService {
       );
   }
 
+  /**
+   * GET con metadatos de paginación (endpoints .../paginar).
+   *
+   * A diferencia de `get`, NO descarta `maxPages/currentpage/previous/next`:
+   * lee el envelope completo y devuelve `PaginatedResult<T>` con `datos`
+   * mapeados a `items`.
+   */
+  getPaginated<T>(path: string, params?: Record<string, string | number>): Observable<PaginatedResult<T>> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          httpParams = httpParams.set(key, String(value));
+        }
+      });
+    }
+    return this.http
+      .get<ApiEnvelope<T[]>>(this.url(path), { params: httpParams })
+      .pipe(
+        map((e) => this.unwrapPaginated<T>(e)),
+        catchError((err) => this.handleHttpError(err))
+      );
+  }
+
   post<T = unknown>(path: string, body: unknown): Observable<T> {
     return this.http
       .post<ApiEnvelope<T>>(this.url(path), body)
@@ -78,6 +102,23 @@ export class ApiService {
       throw new Error(this.messageToText(envelope?.Mensaje));
     }
     return (envelope.datos ?? (null as unknown as T));
+  }
+
+  /**
+   * Extrae el envelope de paginación completo. Conserva las métricas del backend
+   * (`maxPages`, `currentpage`, `previous`, `next`); `datos` se expone como `items`.
+   */
+  private unwrapPaginated<T>(envelope: ApiEnvelope<T[]>): PaginatedResult<T> {
+    if (!envelope || envelope.success === false) {
+      throw new Error(this.messageToText(envelope?.Mensaje));
+    }
+    return {
+      items: envelope.datos ?? [],
+      maxPages: envelope.maxPages ?? 1,
+      currentPage: envelope.currentpage ?? 1,
+      previous: envelope.previous ?? false,
+      next: envelope.next ?? false,
+    };
   }
 
   /**
@@ -150,4 +191,13 @@ export interface ApiEnvelope<T> {
   currentpage?: number;
   previous?: boolean;
   next?: boolean;
+}
+
+/** Resultado de un endpoint .../paginar: items de la página + metadatos. */
+export interface PaginatedResult<T> {
+  items: T[];
+  maxPages: number;
+  currentPage: number;
+  previous: boolean;
+  next: boolean;
 }

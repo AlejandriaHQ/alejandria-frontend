@@ -48,6 +48,17 @@ export class CatalogoPage implements OnInit {
 
   loading: boolean = false;
 
+  /** Página actual de la lista de libros (paginación del backend). */
+  currentPage: number = 1;
+
+  /** Total de páginas disponibles según el backend. */
+  maxPages: number = 1;
+
+  /** Si existe una página anterior / siguiente. */
+  hasPrevious: boolean = false;
+
+  hasNext: boolean = false;
+
   private readonly booksSubject = new BehaviorSubject<Book[]>([]);
 
   readonly books$: Observable<Book[]> = this.booksSubject.asObservable();
@@ -74,13 +85,23 @@ export class CatalogoPage implements OnInit {
     this.users = this.loanService.getUsers();
   }
 
-  /** Recarga la lista visible de libros según los filtros actuales. */
-  filteredBooks() {
+  /**
+   * Recarga la lista visible de libros según los filtros actuales.
+   *
+   * Usa la paginación del backend: `page` indica cuál página pedir. Al cambiar
+   * los filtros (searchbar / selector) se llama sin argumento y vuelve a la
+   * página 1.
+   */
+  filteredBooks(page: number = 1) {
     this.loading = true;
 
-    this.catalogService.searchBooksAsync(this.query, this.categoryId).subscribe({
-      next: (books) => {
-        this.booksSubject.next(books);
+    this.catalogService.searchBooksPage(this.query, this.categoryId, page).subscribe({
+      next: (result) => {
+        this.booksSubject.next(result.items);
+        this.currentPage = result.currentPage;
+        this.maxPages = result.maxPages;
+        this.hasPrevious = result.previous;
+        this.hasNext = result.next;
         this.loading = false;
       },
       error: (error: unknown) => {
@@ -88,6 +109,22 @@ export class CatalogoPage implements OnInit {
         this.showMessage('Error al cargar libros', this.toMessage(error));
       },
     });
+  }
+
+  /** Navega a una página concreta si está dentro del rango. */
+  goToPage(page: number) {
+    if (page < 1 || page > this.maxPages) {
+      return;
+    }
+    this.filteredBooks(page);
+  }
+
+  nextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  previousPage() {
+    this.goToPage(this.currentPage - 1);
   }
 
   private loadCategories() {

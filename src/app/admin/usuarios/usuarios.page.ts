@@ -28,6 +28,13 @@ export class UsuariosPage implements OnInit {
   users: User[] = [];
   filteredUsers: User[] = [];
   query = '';
+  loading = false;
+  /** Página actual de la lista de usuarios (paginación del backend). */
+  currentPage = 1;
+  /** Total de páginas disponibles según el backend. */
+  maxPages = 1;
+  hasPrevious = false;
+  hasNext = false;
   editingId: number | null = null;
   error = '';
   fieldErrors: Record<string, string> = {};
@@ -38,32 +45,60 @@ export class UsuariosPage implements OnInit {
   ngOnInit() {
     this.load();
   }
-  load() {
-    this.userService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        this.applyFilter();
+
+  /**
+   * Carga la lista de usuarios con la paginación del backend.
+   *
+   * Se usa `searchUsers` (en vez de `getUsers`) para conservar los metadatos de
+   * paginación. La búsqueda se delega al servidor con el filtro actual; al pedir
+   * una página fuera de rango (p. ej. tras borrar el último de una página) se
+   * regresa a la última página válida.
+   */
+  load(page: number = 1) {
+    this.loading = true;
+    this.userService.searchUsers(this.query, page).subscribe({
+      next: (result) => {
+        // Si la página pedida queda vacía por haber eliminado registros de una
+        // página avanzada, salta a la última página válida.
+        if (result.users.length === 0 && result.currentPage > 1 && result.maxPages > 0) {
+          this.load(result.maxPages);
+          return;
+        }
+        this.users = result.users;
+        this.filteredUsers = result.users;
+        this.currentPage = result.currentPage;
+        this.maxPages = result.maxPages;
+        this.hasPrevious = result.previous;
+        this.hasNext = result.next;
+        this.error = '';
+        this.loading = false;
       },
       error: (error: unknown) => {
+        this.loading = false;
         this.error = this.toMessage(error);
       },
     });
   }
+
+  /** Al escribir en el buscador se reinicia la búsqueda a la página 1. */
   onSearch() {
-    this.applyFilter();
+    this.load(1);
   }
-  private applyFilter(): void {
-    const q = this.query.trim().toLowerCase();
-    if (!q) {
-      this.filteredUsers = this.users;
+
+  /** Navega a una página concreta si está dentro del rango. */
+  goToPage(page: number) {
+    if (page < 1 || page > this.maxPages) {
       return;
     }
-    this.filteredUsers = this.users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(q) ||
-        (user.cedula ?? '').toLowerCase().includes(q) ||
-        user.identifier.toLowerCase().includes(q),
-    );
+    this.load(page);
+  }
+
+  nextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  previousPage() {
+    this.goToPage(this.currentPage - 1);
   }
   openNew() {
     this.editingId = null;
@@ -149,7 +184,7 @@ export class UsuariosPage implements OnInit {
     request$.subscribe({
       next: () => {
         this.closeForm();
-        this.load();
+        this.load(this.currentPage);
         this.showMessage(
           wasEditing ? 'Cambios guardados' : 'Usuario registrado',
           wasEditing
@@ -172,7 +207,7 @@ export class UsuariosPage implements OnInit {
             this.userService.deleteUser(user.id).subscribe({
               next: () => {
                 this.cancel();
-                this.load();
+                this.load(this.currentPage);
                 this.showMessage('Usuario eliminado', 'Usuario eliminado definitivamente.');
               },
               error: (error: unknown) => {

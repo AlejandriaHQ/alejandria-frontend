@@ -20,6 +20,13 @@
       debounce="200"
     ></ion-searchbar>
 
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="users-loading"
+      aria-label="Cargando usuarios"
+    ></ion-spinner>
+
     <ion-card *ngFor="let user of filteredUsers" class="user-card"
         ><ion-card-content
           ><div class="user-info">
@@ -48,9 +55,34 @@
         ></ion-card
       >
 
-      <div class="users-empty" *ngIf="query.trim() && filteredUsers.length === 0">
-        <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
-        <p>No se encontraron usuarios para la búsqueda.</p>
+      <div class="users-empty" *ngIf="!loading && filteredUsers.length === 0">
+        <ion-icon [name]="query.trim() ? 'search-outline' : 'people-outline'" aria-hidden="true"></ion-icon>
+        <p *ngIf="query.trim()">No se encontraron usuarios para la búsqueda.</p>
+        <p *ngIf="!query.trim()">No hay usuarios registrados.</p>
+      </div>
+
+      <div class="users-pagination" *ngIf="maxPages > 1">
+        <ion-button
+          fill="outline"
+          size="small"
+          [disabled]="!hasPrevious"
+          (click)="previousPage()"
+        >
+          <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+          Anterior
+        </ion-button>
+
+        <span class="pagination-info">Página {{ currentPage }} de {{ maxPages }}</span>
+
+        <ion-button
+          fill="outline"
+          size="small"
+          [disabled]="!hasNext"
+          (click)="nextPage()"
+        >
+          Siguiente
+          <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+        </ion-button>
       </div>
   </main>
 </ion-content>

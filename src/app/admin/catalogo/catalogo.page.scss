@@ -225,6 +225,27 @@ ion-select {
   gap: 20px;
 }
 
+/* Controles de paginación del catálogo */
+.catalogo-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.catalogo-pagination ion-button {
+  --border-radius: 9999px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.pagination-info {
+  color: var(--brand-slate);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 ion-card {
   margin: 0;
   border-radius: 12px;

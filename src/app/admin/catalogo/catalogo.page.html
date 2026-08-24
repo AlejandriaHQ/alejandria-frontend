@@ -123,6 +123,30 @@
         </ion-card-content>
       </ion-card>
     </div>
+
+    <div class="catalogo-pagination" *ngIf="maxPages > 1">
+      <ion-button
+        fill="outline"
+        color="primary"
+        [disabled]="!hasPrevious"
+        (click)="previousPage()"
+      >
+        <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+        Anterior
+      </ion-button>
+
+      <span class="pagination-info">Página {{ currentPage }} de {{ maxPages }}</span>
+
+      <ion-button
+        fill="outline"
+        color="primary"
+        [disabled]="!hasNext"
+        (click)="nextPage()"
+      >
+        Siguiente
+        <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
   </div>
 </ion-content>
 
