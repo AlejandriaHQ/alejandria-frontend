@@ -138,7 +138,15 @@ export class CatalogService {
   addBook(book: Omit<Book, 'id' | 'available'> & { cantidad?: number }): Observable<Book> {
     return this.api
       .post<LibroDTO>('/biblioteca/libros/', this.toLibroCreatePayload(book))
-      .pipe(map((dto) => this.fromLibroDTO(dto)));
+      .pipe(
+        map((dto) => {
+          const created = this.fromLibroDTO(dto);
+          // Mantiene la caché síncrona al día por si una vista legada la lee
+          // sin `subscribe` (p. ej. `getBooks()` tras guardar).
+          this.mergeBook(created);
+          return created;
+        }),
+      );
   }
 
   updateBook(
@@ -147,27 +155,55 @@ export class CatalogService {
   ): Observable<Book> {
     return this.api
       .put<LibroDTO>(`/biblioteca/libros/${id}/`, this.toLibroUpdatePayload(data))
-      .pipe(map((dto) => this.fromLibroDTO(dto)));
+      .pipe(
+        map((dto) => {
+          const updated = this.fromLibroDTO(dto);
+          this.mergeBook(updated);
+          return updated;
+        }),
+      );
   }
 
   deleteBook(id: number): Observable<boolean> {
-    return this.api.delete<unknown>(`/biblioteca/libros/${id}/`).pipe(map(() => true));
+    return this.api.delete<unknown>(`/biblioteca/libros/${id}/`).pipe(
+      map(() => {
+        this.booksCache = this.booksCache.filter((book) => book.id !== id);
+        return true;
+      }),
+    );
   }
 
   addCategory(name: string): Observable<Category> {
     return this.api
       .post<CategoriaDTO>('/biblioteca/categorias/', { nombre: name })
-      .pipe(map((dto) => this.fromCategoriaDTO(dto)));
+      .pipe(
+        map((dto) => {
+          const created = this.fromCategoriaDTO(dto);
+          this.mergeCategory(created);
+          return created;
+        }),
+      );
   }
 
   updateCategory(id: number, name: string): Observable<Category> {
     return this.api
       .put<CategoriaDTO>(`/biblioteca/categorias/${id}/`, { nombre: name })
-      .pipe(map((dto) => this.fromCategoriaDTO(dto)));
+      .pipe(
+        map((dto) => {
+          const updated = this.fromCategoriaDTO(dto);
+          this.mergeCategory(updated);
+          return updated;
+        }),
+      );
   }
 
   deleteCategory(id: number): Observable<boolean> {
-    return this.api.delete<unknown>(`/biblioteca/categorias/${id}/`).pipe(map(() => true));
+    return this.api.delete<unknown>(`/biblioteca/categorias/${id}/`).pipe(
+      map(() => {
+        this.categoriesCache = this.categoriesCache.filter((category) => category.id !== id);
+        return true;
+      }),
+    );
   }
 
   // ===== Mapeo DTO <-> modelo =====
@@ -237,6 +273,26 @@ export class CatalogService {
 
   private fromCategoriaDTO(dto: CategoriaDTO): Category {
     return { id: dto.id_categoria, name: dto.nombre };
+  }
+
+  /** Inserta o actualiza un libro en la caché síncrona por id. */
+  private mergeBook(book: Book): void {
+    const index = this.booksCache.findIndex((b) => b.id === book.id);
+    if (index >= 0) {
+      this.booksCache[index] = book;
+    } else {
+      this.booksCache.push(book);
+    }
+  }
+
+  /** Inserta o actualiza una categoría en la caché síncrona por id. */
+  private mergeCategory(category: Category): void {
+    const index = this.categoriesCache.findIndex((c) => c.id === category.id);
+    if (index >= 0) {
+      this.categoriesCache[index] = category;
+    } else {
+      this.categoriesCache.push(category);
+    }
   }
 
   private normalize(text: string): string {
