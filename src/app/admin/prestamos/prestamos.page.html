@@ -19,8 +19,9 @@
 
       <ion-card *ngFor="let request of pendingRequests" class="loan-card">
         <div class="loan-info">
-          <strong>{{ bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
-          <span>{{ userById(request.userId)?.name ?? 'Usuario' }}</span>
+          <!-- Prefiere los nombres que envía el backend; cae a la caché/placeholder si faltan. -->
+          <strong>{{ request.bookTitle ?? bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span>{{ request.userName ?? userById(request.userId)?.name ?? 'Usuario' }}</span>
           <span class="text-mono">Solicitado: {{ formatDate(request.requestedDate) }}</span>
         </div>
 

@@ -6,4 +6,7 @@ export interface LoanRequest {
   userId: number;
   requestedDate: Date;
   status: LoanRequestStatus;
+  /** Nombres resueltos por el backend (evitan depender de la caché). */
+  bookTitle?: string;
+  userName?: string;
 }

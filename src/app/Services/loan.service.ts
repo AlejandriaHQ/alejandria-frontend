@@ -415,6 +415,10 @@ export class LoanService {
       userId: dto.id_usuario,
       requestedDate: this.parseDate(dto.fecha_solicitud) ?? new Date(),
       status: this.requestStatusFromBackend(dto.estado),
+      // El backend ya envía el nombre del usuario y el título del libro:
+      // se usan como fuente primaria para no depender de la caché local.
+      bookTitle: dto.id_libro_titulo ?? undefined,
+      userName: dto.id_usuario_nombre ?? undefined,
     };
   }
 
