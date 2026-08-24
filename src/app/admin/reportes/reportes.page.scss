@@ -198,6 +198,12 @@
   border-radius: 14px;
 }
 
+.loading-spinner {
+  display: flex;
+  margin: 48px auto;
+  color: var(--brand-teal-strong);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
