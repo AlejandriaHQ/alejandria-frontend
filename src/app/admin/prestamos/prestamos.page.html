@@ -80,12 +80,13 @@
       <ion-card>
         <ion-select
           label="Socio"
-          placeholder="Selecciona un socio para ver su historial"
+          interface="popover"
+          placeholder="Selecciona un socio"
           [(ngModel)]="selectedUserId"
           (ionChange)="onSocioChange()"
         >
           <ion-select-option *ngFor="let socio of users" [value]="socio.id">
-            {{ socio.name }}
+            {{ socio.name || socio.email || socio.identifier }}
           </ion-select-option>
         </ion-select>
       </ion-card>
