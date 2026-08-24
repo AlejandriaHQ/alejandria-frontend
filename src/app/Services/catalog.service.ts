@@ -1,37 +1,114 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiService } from './api.service';
 import { Category } from '../models/categoria.model';
 import { Book } from '../models/libro.model';
+
+/** DTO de categoría tal como lo devuelve el backend Django. */
+interface CategoriaDTO {
+  id_categoria: number;
+  nombre: string;
+  descripcion?: string | null;
+  activo: boolean;
+}
+
+/** DTO de libro tal como lo devuelve el backend Django. */
+interface LibroDTO {
+  id_libro: number;
+  titulo: string;
+  autor: string;
+  isbn: string;
+  anio: number | null;
+  editorial?: string | null;
+  descripcion?: string | null;
+  portada?: string | null;
+  cantidad: number;
+  id_categoria: number;
+  prestados: number;
+  disponibles: number;
+  activo: boolean;
+}
+
+/** Payload para crear/actualizar un libro. */
+interface LibroPayload {
+  titulo: string;
+  autor: string;
+  isbn?: string;
+  cantidad: number;
+  id_categoria: number;
+  anio?: number | null;
+  editorial?: string | null;
+  descripcion?: string | null;
+  portada?: string | null;
+  activo?: boolean;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class CatalogService {
-  private readonly booksKey = 'alejandria_books';
+  private readonly api = inject(ApiService);
 
-  private readonly categoriesKey = 'alejandria_categories';
+  /** Caché síncrona de libros. Alimenta `getBooks()/searchBooks()` (consumidores síncronos legados). */
+  private booksCache: Book[] = [];
 
-  private categories: Category[] = this.loadCategories();
+  /** Caché síncrona de categorías. Alimenta `getCategories()` (consumidor síncrono legado). */
+  private categoriesCache: Category[] = [];
 
-  private books: Book[] = this.loadBooks();
+  // ===== Carga asíncrona desde la API (la usa la vista de catálogo) =====
 
-  constructor() {
-    if (!localStorage.getItem(this.categoriesKey)) {
-      this.saveCategories();
-    }
-
-    if (!localStorage.getItem(this.booksKey)) {
-      this.saveBooks();
-    }
+  loadCategories(): Observable<Category[]> {
+    return this.api.get<CategoriaDTO[]>('/biblioteca/categorias/').pipe(
+      map((dtos) => {
+        this.categoriesCache = (dtos ?? []).map((dto) => this.fromCategoriaDTO(dto));
+        return this.categoriesCache;
+      }),
+    );
   }
 
-  getCategories(): Category[] {
-    return this.categories;
+  loadBooks(): Observable<Book[]> {
+    return this.api.get<LibroDTO[]>('/biblioteca/libros/').pipe(
+      map((dtos) => {
+        this.booksCache = (dtos ?? []).map((dto) => this.fromLibroDTO(dto));
+        return this.booksCache;
+      }),
+    );
   }
 
+  /** Busca libros usando el endpoint paginado del backend. Devuelve la página 1 (10 por página). */
+  searchBooksAsync(query?: string, categoryId?: number): Observable<Book[]> {
+    const params: Record<string, string | number> = { page: 1 };
+
+    if (query && query.trim().length > 0) {
+      params['filter'] = query.trim();
+    }
+
+    if (categoryId) {
+      params['categoria'] = categoryId;
+    }
+
+    return this.api.get<LibroDTO[]>('/biblioteca/libros/paginar/', params).pipe(
+      map((dtos) => {
+        this.booksCache = (dtos ?? []).map((dto) => this.fromLibroDTO(dto));
+        return this.booksCache;
+      }),
+    );
+  }
+
+  // ===== Getters síncronos (compatibilidad con consumidores legados) =====
+
+  /** Devuelve la caché actual de libros. NO debe usarse para cargar datos nuevos. */
   getBooks(): Book[] {
-    return this.books;
+    return this.booksCache;
   }
 
+  /** Devuelve la caché actual de categorías. NO debe usarse para cargar datos nuevos. */
+  getCategories(): Category[] {
+    return this.categoriesCache;
+  }
+
+  /** Filtro síncrono sobre la caché de libros (lo usa la vista de usuario legada). */
   searchBooks(query?: string, categoryId?: number): Book[] {
     const category = categoryId ?? 0;
 
@@ -39,7 +116,7 @@ export class CatalogService {
       .split(/\s+/)
       .filter(Boolean);
 
-    return this.books.filter((book) => {
+    return this.booksCache.filter((book) => {
       const matchesCategory = category === 0 || book.categoryId === category;
 
       if (!matchesCategory) {
@@ -56,6 +133,112 @@ export class CatalogService {
     });
   }
 
+  // ===== Mutaciones (asíncronas) =====
+
+  addBook(book: Omit<Book, 'id' | 'available'> & { cantidad?: number }): Observable<Book> {
+    return this.api
+      .post<LibroDTO>('/biblioteca/libros/', this.toLibroCreatePayload(book))
+      .pipe(map((dto) => this.fromLibroDTO(dto)));
+  }
+
+  updateBook(
+    id: number,
+    data: Partial<Book> & { cantidad?: number; activo?: boolean },
+  ): Observable<Book> {
+    return this.api
+      .put<LibroDTO>(`/biblioteca/libros/${id}/`, this.toLibroUpdatePayload(data))
+      .pipe(map((dto) => this.fromLibroDTO(dto)));
+  }
+
+  deleteBook(id: number): Observable<boolean> {
+    return this.api.delete<unknown>(`/biblioteca/libros/${id}/`).pipe(map(() => true));
+  }
+
+  addCategory(name: string): Observable<Category> {
+    return this.api
+      .post<CategoriaDTO>('/biblioteca/categorias/', { nombre: name })
+      .pipe(map((dto) => this.fromCategoriaDTO(dto)));
+  }
+
+  updateCategory(id: number, name: string): Observable<Category> {
+    return this.api
+      .put<CategoriaDTO>(`/biblioteca/categorias/${id}/`, { nombre: name })
+      .pipe(map((dto) => this.fromCategoriaDTO(dto)));
+  }
+
+  deleteCategory(id: number): Observable<boolean> {
+    return this.api.delete<unknown>(`/biblioteca/categorias/${id}/`).pipe(map(() => true));
+  }
+
+  // ===== Mapeo DTO <-> modelo =====
+
+  private fromLibroDTO(dto: LibroDTO): Book {
+    return {
+      id: dto.id_libro,
+      title: dto.titulo,
+      author: dto.autor,
+      isbn: dto.isbn,
+      categoryId: dto.id_categoria,
+      year: dto.anio ?? new Date().getFullYear(),
+      available: dto.disponibles > 0,
+      description: dto.descripcion ?? undefined,
+      cover: dto.portada ?? undefined,
+    };
+  }
+
+  private toLibroCreatePayload(book: Omit<Book, 'id' | 'available'> & { cantidad?: number }): LibroPayload {
+    return {
+      titulo: book.title,
+      autor: book.author,
+      isbn: book.isbn || undefined,
+      cantidad: book.cantidad ?? 1,
+      id_categoria: book.categoryId,
+      anio: book.year ?? undefined,
+      descripcion: book.description ?? undefined,
+      portada: book.cover ?? undefined,
+    };
+  }
+
+  private toLibroUpdatePayload(
+    data: Partial<Book> & { cantidad?: number; activo?: boolean },
+  ): Partial<LibroPayload> {
+    const payload: Partial<LibroPayload> = {};
+
+    if (data.title !== undefined) {
+      payload.titulo = data.title;
+    }
+    if (data.author !== undefined) {
+      payload.autor = data.author;
+    }
+    if (data.isbn !== undefined) {
+      payload.isbn = data.isbn;
+    }
+    if (data.categoryId !== undefined) {
+      payload.id_categoria = data.categoryId;
+    }
+    if (data.year !== undefined) {
+      payload.anio = data.year;
+    }
+    if (data.description !== undefined) {
+      payload.descripcion = data.description;
+    }
+    if (data.cover !== undefined) {
+      payload.portada = data.cover;
+    }
+    if (data.cantidad !== undefined) {
+      payload.cantidad = data.cantidad;
+    }
+    if (data.activo !== undefined) {
+      payload.activo = data.activo;
+    }
+
+    return payload;
+  }
+
+  private fromCategoriaDTO(dto: CategoriaDTO): Category {
+    return { id: dto.id_categoria, name: dto.nombre };
+  }
+
   private normalize(text: string): string {
     return text
       .normalize('NFD')
@@ -63,198 +246,5 @@ export class CatalogService {
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .trim();
-  }
-
-  addBook(book: Omit<Book, 'id'>): Book {
-    const nextId = this.books.reduce((max, current) => Math.max(max, current.id), 0) + 1;
-
-    const newBook: Book = {
-      ...book,
-      id: nextId,
-    };
-
-    this.books.push(newBook);
-
-    this.saveBooks();
-
-    return newBook;
-  }
-
-  updateBook(id: number, data: Partial<Book>): Book | null {
-    const index = this.books.findIndex((book) => book.id === id);
-
-    if (index === -1) {
-      return null;
-    }
-
-    this.books[index] = {
-      ...this.books[index],
-      ...data,
-    };
-
-    this.saveBooks();
-
-    return this.books[index];
-  }
-
-  deleteBook(id: number): boolean {
-    const index = this.books.findIndex((book) => book.id === id);
-
-    if (index === -1) {
-      return false;
-    }
-
-    this.books.splice(index, 1);
-
-    this.saveBooks();
-
-    return true;
-  }
-
-  addCategory(name: string): Category {
-    const nextId = this.categories.reduce((max, current) => Math.max(max, current.id), 0) + 1;
-
-    const newCategory: Category = {
-      id: nextId,
-      name,
-    };
-
-    this.categories.push(newCategory);
-
-    this.saveCategories();
-
-    return newCategory;
-  }
-
-  updateCategory(id: number, name: string): Category | null {
-    const category = this.categories.find((c) => c.id === id);
-
-    if (!category) {
-      return null;
-    }
-
-    category.name = name;
-
-    this.saveCategories();
-
-    return category;
-  }
-
-  deleteCategory(id: number): boolean {
-    const inUse = this.books.some((book) => book.categoryId === id);
-
-    if (inUse) {
-      return false;
-    }
-
-    const index = this.categories.findIndex((c) => c.id === id);
-
-    if (index === -1) {
-      return false;
-    }
-
-    this.categories.splice(index, 1);
-
-    this.saveCategories();
-
-    return true;
-  }
-
-  private loadCategories(): Category[] {
-    const stored = localStorage.getItem(this.categoriesKey);
-
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        // Dato corrupto: se usan los valores iniciales
-      }
-    }
-
-    return [
-      { id: 1, name: 'Novela' },
-      { id: 2, name: 'Ciencia' },
-      { id: 3, name: 'Historia' },
-    ];
-  }
-
-  private loadBooks(): Book[] {
-    const stored = localStorage.getItem(this.booksKey);
-
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        // Dato corrupto: se usan los valores iniciales
-      }
-    }
-
-    return [
-      {
-        id: 1,
-        title: 'Cien años de soledad',
-        author: 'Gabriel García Márquez',
-        isbn: '978-0307474728',
-        categoryId: 1,
-        year: 1967,
-        available: true,
-        description:
-          'La historia de la familia Buendía en Macondo, obra maestra del realismo mágico.',
-        cover: 'assets/img/covers/cien-anos-de-soledad.jpg',
-      },
-      {
-        id: 2,
-        title: 'Don Quijote de la Mancha',
-        author: 'Miguel de Cervantes',
-        isbn: '978-8420412146',
-        categoryId: 1,
-        year: 1605,
-        available: false,
-        description: 'Las aventuras del ingenioso hidalgo y su fiel escudero Sancho Panza.',
-        cover: 'assets/img/covers/don-quijote.jpg',
-      },
-      {
-        id: 3,
-        title: 'Introducción a la programación',
-        author: 'Libro académico',
-        isbn: '978-0000000000',
-        categoryId: 2,
-        year: 2018,
-        available: true,
-        description: 'Manual académico con los fundamentos de la programación.',
-        cover: 'assets/img/covers/introduccion-a-la-programacion.jpg',
-      },
-      {
-        id: 4,
-        title: 'Una breve historia del tiempo',
-        author: 'Stephen Hawking',
-        isbn: '978-0553380163',
-        categoryId: 2,
-        year: 1988,
-        available: true,
-        description:
-          'El clásico de divulgación científica sobre el universo, del genial Stephen Hawking.',
-        cover: 'assets/img/covers/breve-historia-del-tiempo.jpg',
-      },
-      {
-        id: 5,
-        title: 'Sapiens: De animales a dioses',
-        author: 'Yuval Noah Harari',
-        isbn: '978-8499926223',
-        categoryId: 3,
-        year: 2011,
-        available: false,
-        description: 'Un recorrido por la historia de la humanidad, de los homínidos a los dioses.',
-        cover: 'assets/img/covers/sapiens.jpg',
-      },
-    ];
-  }
-
-  private saveCategories() {
-    localStorage.setItem(this.categoriesKey, JSON.stringify(this.categories));
-  }
-
-  private saveBooks() {
-    localStorage.setItem(this.booksKey, JSON.stringify(this.books));
   }
 }

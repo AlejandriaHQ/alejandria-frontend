@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { AlertController } from '@ionic/angular';
 import { CatalogService } from '../../Services/catalog.service';
 import { LoanService } from '../../Services/loan.service';
@@ -45,7 +46,11 @@ export class CatalogoPage implements OnInit {
 
   newCover: string = '';
 
-  newAvailable: boolean = true;
+  loading: boolean = false;
+
+  private readonly booksSubject = new BehaviorSubject<Book[]>([]);
+
+  readonly books$: Observable<Book[]> = this.booksSubject.asObservable();
 
   users: User[] = [];
 
@@ -62,13 +67,38 @@ export class CatalogoPage implements OnInit {
   }
 
   ngOnInit() {
-    this.categories = this.catalogService.getCategories();
+    this.loadCategories();
+
+    this.filteredBooks();
 
     this.users = this.loanService.getUsers();
   }
 
-  filteredBooks(): Book[] {
-    return this.catalogService.searchBooks(this.query, this.categoryId);
+  /** Recarga la lista visible de libros según los filtros actuales. */
+  filteredBooks() {
+    this.loading = true;
+
+    this.catalogService.searchBooksAsync(this.query, this.categoryId).subscribe({
+      next: (books) => {
+        this.booksSubject.next(books);
+        this.loading = false;
+      },
+      error: (error: unknown) => {
+        this.loading = false;
+        this.showMessage('Error al cargar libros', this.toMessage(error));
+      },
+    });
+  }
+
+  private loadCategories() {
+    this.catalogService.loadCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error: unknown) => {
+        this.showMessage('Error al cargar categorías', this.toMessage(error));
+      },
+    });
   }
 
   categoryName(categoryId: number): string {
@@ -104,7 +134,6 @@ export class CatalogoPage implements OnInit {
     this.newCategoryId = book.categoryId;
     this.newYear = book.year;
     this.newCover = book.cover ?? '';
-    this.newAvailable = book.available;
 
     this.showForm = true;
   }
@@ -124,7 +153,6 @@ export class CatalogoPage implements OnInit {
     this.newCategoryId = 0;
     this.newYear = new Date().getFullYear();
     this.newCover = '';
-    this.newAvailable = true;
     this.formInvalid = false;
   }
 
@@ -147,16 +175,21 @@ export class CatalogoPage implements OnInit {
       categoryId: this.newCategoryId,
       year: this.newYear,
       cover: this.newCover || undefined,
-      available: this.newAvailable,
     };
 
-    if (this.editingBook) {
-      this.catalogService.updateBook(this.editingBook.id, data);
-    } else {
-      this.catalogService.addBook(data);
-    }
+    const request$ = this.editingBook
+      ? this.catalogService.updateBook(this.editingBook.id, data)
+      : this.catalogService.addBook(data);
 
-    this.closeForm();
+    request$.subscribe({
+      next: () => {
+        this.closeForm();
+        this.filteredBooks();
+      },
+      error: (error: unknown) => {
+        this.showMessage('No se pudo guardar el libro', this.toMessage(error));
+      },
+    });
   }
 
   showDetail(book: Book) {
@@ -210,17 +243,20 @@ export class CatalogoPage implements OnInit {
       return;
     }
 
-    if (this.editingCategory) {
-      this.catalogService.updateCategory(this.editingCategory.id, name);
-    } else {
-      this.catalogService.addCategory(name);
-    }
+    const request$ = this.editingCategory
+      ? this.catalogService.updateCategory(this.editingCategory.id, name)
+      : this.catalogService.addCategory(name);
 
-    this.editingCategory = null;
-
-    this.newCategory = '';
-
-    this.categories = this.catalogService.getCategories();
+    request$.subscribe({
+      next: () => {
+        this.editingCategory = null;
+        this.newCategory = '';
+        this.loadCategories();
+      },
+      error: (error: unknown) => {
+        this.showMessage('No se pudo guardar la categoría', this.toMessage(error));
+      },
+    });
   }
 
   startEditCategory(category: Category) {
@@ -241,29 +277,15 @@ export class CatalogoPage implements OnInit {
         {
           text: 'Eliminar',
           handler: () => {
-            const deleted = this.catalogService.deleteCategory(category.id);
-
-            if (!deleted) {
-              this.showCategoryInUseError(category);
-            }
-
-            this.categories = this.catalogService.getCategories();
+            this.catalogService.deleteCategory(category.id).subscribe({
+              next: () => {
+                this.loadCategories();
+              },
+              error: (error: unknown) => {
+                this.showMessage('No se pudo eliminar la categoría', this.toMessage(error));
+              },
+            });
           },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
-  private async showCategoryInUseError(category: Category) {
-    const alert = await this.alertController.create({
-      header: 'No se puede eliminar',
-      message: `La categoría "${category.name}" tiene libros asignados. Reasigna o elimina esos libros primero.`,
-      buttons: [
-        {
-          text: 'Entendido',
-          role: 'cancel',
         },
       ],
     });
@@ -298,11 +320,14 @@ export class CatalogoPage implements OnInit {
         {
           text: 'Eliminar',
           handler: () => {
-            const deleted = this.catalogService.deleteBook(book.id);
-
-            if (!deleted) {
-              this.showMessage('No se pudo eliminar', 'El libro no se encontró.');
-            }
+            this.catalogService.deleteBook(book.id).subscribe({
+              next: () => {
+                this.filteredBooks();
+              },
+              error: (error: unknown) => {
+                this.showMessage('No se pudo eliminar el libro', this.toMessage(error));
+              },
+            });
           },
         },
       ],
@@ -341,6 +366,14 @@ export class CatalogoPage implements OnInit {
     );
 
     this.closeLendModal();
+  }
+
+  private toMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return String(error);
   }
 
   private async showMessage(header: string, message: string) {

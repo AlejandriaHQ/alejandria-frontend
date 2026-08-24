@@ -50,11 +50,18 @@
       </ion-select>
     </div>
 
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="catalogo-loading"
+      aria-label="Cargando catálogo"
+    ></ion-spinner>
+
     <div class="books-grid">
       <ion-card
         button
         class="book-card"
-        *ngFor="let book of filteredBooks()"
+        *ngFor="let book of books$ | async"
         (click)="showDetail(book)"
       >
         <div class="book-cover">
@@ -237,17 +244,6 @@
             placeholder="Ej. 2001"
             aria-label="Año de publicación"
           ></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label>Disponible para préstamo</ion-label>
-
-          <ion-toggle
-            slot="end"
-            name="available"
-            [(ngModel)]="newAvailable"
-            aria-label="Disponible para préstamo"
-          ></ion-toggle>
         </ion-item>
 
         <p *ngIf="formInvalid" class="form-error" role="alert">
