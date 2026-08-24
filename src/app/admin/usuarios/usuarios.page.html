@@ -41,8 +41,8 @@
               size="small"
               [color]="user.status === 'inactive' ? 'success' : 'danger'"
               (click)="user.status === 'inactive' ? reactivate(user) : remove(user)"
-              ><ion-icon slot="start" [name]="user.status === 'inactive' ? 'person-add-outline' : 'power-outline'"></ion-icon
-              >{{ user.status === 'inactive' ? 'Activar' : 'Desactivar' }}</ion-button
+              ><ion-icon slot="start" [name]="user.status === 'inactive' ? 'person-add-outline' : 'trash-outline'"></ion-icon
+              >{{ user.status === 'inactive' ? 'Activar' : 'Eliminar' }}</ion-button
             >
           </div></ion-card-content
         ></ion-card

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { LoanService } from '../../Services/loan.service';
+import { UserService } from '../../Services/user.service';
 import { User, UserRole } from '../../models/usuario.model';
 
 type UserForm = {
@@ -12,6 +12,7 @@ type UserForm = {
   address: string;
   role: UserRole;
 };
+const MENSAJE_GENERICO = 'No se pudo completar la operación. Revise los datos enviados.';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const NAME_MIN_LENGTH = 2;
 const NAME_PATTERN = /^[\p{L}\s.'-]+$/u;
@@ -32,14 +33,21 @@ export class UsuariosPage implements OnInit {
   fieldErrors: Record<string, string> = {};
   form: UserForm = this.emptyForm();
   showForm = false;
-  private readonly loanService = inject(LoanService);
+  private readonly userService = inject(UserService);
   private readonly alerts = inject(AlertController);
   ngOnInit() {
     this.load();
   }
   load() {
-    this.users = this.loanService.getUsers();
-    this.applyFilter();
+    this.userService.getUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.applyFilter();
+      },
+      error: (error: unknown) => {
+        this.error = this.toMessage(error);
+      },
+    });
   }
   onSearch() {
     this.applyFilter();
@@ -131,86 +139,103 @@ export class UsuariosPage implements OnInit {
       return;
     }
 
-    try {
-      const wasEditing = this.editingId !== null;
-      const payload = {
-        name,
-        cedula,
-        email,
-        phone,
-        address,
-        role: this.form.role,
-      };
-      if (this.editingId) {
-        this.loanService.updateUser(this.editingId, payload);
-      } else {
-        this.loanService.createUser({ ...payload, password: this.form.password });
-      }
-      this.closeForm();
-      this.load();
-      await this.showMessage(
-        wasEditing ? 'Cambios guardados' : 'Usuario registrado',
-        wasEditing
-          ? 'Los datos del usuario fueron actualizados.'
-          : 'El usuario fue registrado correctamente.',
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'No fue posible guardar el usuario.';
-      // Mapea el error de unicidad del servicio al campo correspondiente
-      if (message.includes('cédula')) {
-        this.fieldErrors['cedula'] = message;
-      } else if (message.includes('correo')) {
-        this.fieldErrors['email'] = message;
-      } else {
-        this.error = message;
-      }
-    }
+    const wasEditing = this.editingId !== null;
+    const baseData = { name, cedula, email, phone, address, role: this.form.role };
+
+    const request$ = this.editingId
+      ? this.userService.updateUser(this.editingId, baseData)
+      : this.userService.createUser({ ...baseData, password: this.form.password });
+
+    request$.subscribe({
+      next: () => {
+        this.closeForm();
+        this.load();
+        this.showMessage(
+          wasEditing ? 'Cambios guardados' : 'Usuario registrado',
+          wasEditing
+            ? 'Los datos del usuario fueron actualizados.'
+            : 'El usuario fue registrado correctamente.',
+        );
+      },
+      error: (error: unknown) => this.handleSaveError(error),
+    });
   }
   async remove(user: User) {
-    const hasLoans = this.loanService.getLoansByUser(user.id).length > 0;
     const alert = await this.alerts.create({
-      header: 'Desactivar o eliminar',
-      message: hasLoans
-        ? `${user.name} tiene préstamos asociados y se desactivará (conservando su historial).`
-        : `${user.name} no tiene préstamos y se eliminará definitivamente.`,
+      header: 'Eliminar usuario',
+      message: `¿Eliminar definitivamente a ${user.name}? Si tiene préstamos asociados, no será posible y se mostrará un aviso.`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
-          text: 'Confirmar',
-          handler: async () => {
-            const result = this.loanService.removeUser(user.id);
-            this.cancel();
-            this.load();
-            if (result === 'deleted') {
-              await this.showMessage('Usuario eliminado', 'Usuario eliminado definitivamente.');
-            } else if (result === 'deactivated') {
-              await this.showMessage(
-                'Usuario desactivado',
-                'Usuario desactivado; su historial se conserva.',
-              );
-            }
+          text: 'Eliminar',
+          handler: () => {
+            this.userService.deleteUser(user.id).subscribe({
+              next: () => {
+                this.cancel();
+                this.load();
+                this.showMessage('Usuario eliminado', 'Usuario eliminado definitivamente.');
+              },
+              error: (error: unknown) => {
+                const message = this.toMessage(error);
+                if (message.includes('prestamos')) {
+                  this.showMessage(
+                    'No se puede eliminar',
+                    `${user.name} tiene préstamos asociados. No es posible eliminarlo.`,
+                  );
+                } else {
+                  this.showMessage('No se pudo eliminar', message);
+                }
+              },
+            });
           },
         },
       ],
     });
     await alert.present();
   }
-  async reactivate(user: User) {
+  async reactivate(_user: User) {
     const alert = await this.alerts.create({
       header: 'Activar usuario',
-      message: `¿Reactivar a ${user.name}? Podrá iniciar sesión nuevamente.`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Activar',
-          handler: () => {
-            this.loanService.reactivateUser(user.id);
-            this.load();
-          },
-        },
-      ],
+      message:
+        'La reactivación de usuarios requiere soporte del backend (aún no hay un endpoint para alternar la baja de un usuario).',
+      buttons: [{ text: 'Entendido', role: 'cancel' }],
     });
     await alert.present();
+  }
+  private handleSaveError(error: unknown): void {
+    const message = this.toMessage(error);
+    // Mensaje genérico del backend (anti-enumeración) para email/cédula en uso.
+    if (message.includes('No se pudo completar la operación')) {
+      if (message.includes('cedula')) {
+        this.fieldErrors['cedula'] = MENSAJE_GENERICO;
+      } else if (message.includes('email') || message.includes('correo')) {
+        this.fieldErrors['email'] = MENSAJE_GENERICO;
+      } else {
+        this.error = MENSAJE_GENERICO;
+      }
+      return;
+    }
+    // Errores específicos del serializer (formato de cédula, contraseña corta, ...).
+    if (message.includes('cédula') || message.includes('cedula')) {
+      this.fieldErrors['cedula'] = this.stripFieldPrefix(message);
+    } else if (message.includes('contraseña') || message.includes('password')) {
+      this.fieldErrors['password'] = this.stripFieldPrefix(message);
+    } else if (message.includes('correo') || message.includes('email')) {
+      this.fieldErrors['email'] = this.stripFieldPrefix(message);
+    } else {
+      this.error = message;
+    }
+  }
+  private stripFieldPrefix(message: string): string {
+    // El backend puede devolver "campo: mensaje"; se quita el prefijo "campo: ".
+    const index = message.indexOf(': ');
+    return index > -1 && index < 40 ? message.slice(index + 2) : message;
+  }
+  private toMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return 'Ocurrió un error inesperado';
   }
   private async showMessage(header: string, message: string) {
     const alert = await this.alerts.create({
