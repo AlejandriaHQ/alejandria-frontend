@@ -146,7 +146,8 @@ export class UsuariosPage implements OnInit {
     if (name.length < NAME_MIN_LENGTH) {
       this.fieldErrors['name'] = 'El nombre completo es obligatorio.';
     } else if (!NAME_PATTERN.test(name)) {
-      this.fieldErrors['name'] = 'El nombre solo puede contener letras, espacios, puntos y apóstrofes.';
+      this.fieldErrors['name'] =
+        'El nombre solo puede contener letras, espacios, puntos y apóstrofes.';
     }
     if (!cedula) {
       this.fieldErrors['cedula'] = 'La cédula es obligatoria.';
@@ -158,8 +159,12 @@ export class UsuariosPage implements OnInit {
     } else if (!EMAIL_PATTERN.test(email)) {
       this.fieldErrors['email'] = 'El correo no es válido.';
     }
-    if (!this.editingId && this.form.password.length < 6) {
+    // Al crear la contraseña es obligatoria; al editar es opcional (vacía = conservar
+    // la actual) pero, si se escribe una nueva, debe cumplir el mínimo.
+    if (this.form.password && this.form.password.length < 6) {
       this.fieldErrors['password'] = 'La contraseña debe tener al menos 6 caracteres.';
+    } else if (!this.editingId && !this.form.password) {
+      this.fieldErrors['password'] = 'La contraseña es obligatoria.';
     }
     if (!phone) {
       this.fieldErrors['phone'] = 'El teléfono es obligatorio.';
@@ -178,7 +183,12 @@ export class UsuariosPage implements OnInit {
     const baseData = { name, cedula, email, phone, address, role: this.form.role };
 
     const request$ = this.editingId
-      ? this.userService.updateUser(this.editingId, baseData)
+      ? this.userService.updateUser(this.editingId, {
+          ...baseData,
+          // Al editar solo se envía password si el admin escribió una nueva;
+          // si quedó vacía el backend conserva la contraseña existente.
+          ...(this.form.password ? { password: this.form.password } : {}),
+        })
       : this.userService.createUser({ ...baseData, password: this.form.password });
 
     request$.subscribe({

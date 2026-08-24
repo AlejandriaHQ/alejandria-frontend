@@ -157,15 +157,7 @@ ion-input {
   letter-spacing: 0.3px;
 }
 
-.forgot-button {
-  --color: var(--brand-teal-strong);
-  margin-top: 10px;
-  font-size: 14px;
-  min-height: 44px;
-}
-
 .login-button:focus-within,
-.forgot-button:focus-within,
 .visibility-toggle:focus-within {
   outline: 3px solid var(--brand-teal);
   outline-offset: 2px;
