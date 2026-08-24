@@ -257,6 +257,11 @@ export class CatalogService {
       available: dto.disponibles > 0,
       description: dto.descripcion ?? undefined,
       cover: dto.portada ?? undefined,
+      // Stock numérico: total, prestados y disponibles (con respaldo por si el
+      // backend omite algún campo en respuestas antiguas).
+      cantidad: dto.cantidad ?? 0,
+      prestados: dto.prestados ?? 0,
+      disponibles: dto.disponibles ?? 0,
     };
   }
 

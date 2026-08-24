@@ -8,4 +8,8 @@ export interface Book {
   available: boolean;
   description?: string;
   cover?: string;
+  /** Ejemplares totales, prestados y disponibles (del backend). */
+  cantidad?: number;
+  prestados?: number;
+  disponibles?: number;
 }

@@ -8,6 +8,7 @@ import { TokenService } from '../Services/token.service';
 import { UserService } from '../Services/user.service';
 import { Category } from '../models/categoria.model';
 import { Book } from '../models/libro.model';
+import { Loan } from '../models/prestamo.model';
 import { LoanRequest } from '../models/solicitud-prestamo.model';
 import { decodeJwtPayload } from '../utils/jwt.helper';
 
@@ -34,6 +35,10 @@ export class UsuarioPage implements OnInit {
   private pendingCatalogLoads: number = 0;
 
   pendingRequests: LoanRequest[] = [];
+
+  // Préstamos del socio sin devolver (activos o vencidos): se usan para saber
+  // qué títulos ya tiene y deshabilitar su solicitud.
+  activeLoans: Loan[] = [];
 
   selectedBook: Book | null = null;
 
@@ -64,6 +69,7 @@ export class UsuarioPage implements OnInit {
     const tokenUserId = this.resolveTokenUserId();
     if (tokenUserId) {
       this.currentUserId = tokenUserId;
+      this.loadActiveLoans();
     } else {
       // Fallback: resolver el id del usuario autenticado desde /usuarios/me/.
       // La caché de usuarios (getUserByIdentifier) solo se hidrata para admin y
@@ -71,6 +77,7 @@ export class UsuarioPage implements OnInit {
       this.userService.getCurrentUserProfile().subscribe({
         next: (me) => {
           this.currentUserId = me.id;
+          this.loadActiveLoans();
         },
         error: () => {
           this.currentUserId = 0;
@@ -135,6 +142,29 @@ export class UsuarioPage implements OnInit {
     });
   }
 
+  /**
+   * Carga los préstamos sin devolver del socio (activos o vencidos) para saber
+   * qué títulos ya tiene prestados y deshabilitar su solicitud en el catálogo.
+   */
+  private loadActiveLoans(): void {
+    if (this.currentUserId <= 0) {
+      this.activeLoans = [];
+      return;
+    }
+
+    this.loanService.getLoansByUser(this.currentUserId).subscribe({
+      next: (loans) => {
+        // Solo cuentan los ejemplares sin devolver (activos o vencidos).
+        this.activeLoans = loans.filter(
+          (loan) => loan.status === 'active' || loan.status === 'overdue',
+        );
+      },
+      error: () => {
+        this.activeLoans = [];
+      },
+    });
+  }
+
   /** Dispara una nueva búsqueda cuando cambian los filtros (searchbar / selector). */
   onSearch(): void {
     this.loadBooks();
@@ -186,8 +216,24 @@ export class UsuarioPage implements OnInit {
     );
   }
 
+  /**
+   * ¿El socio ya tiene este título como préstamo activo (sin devolver) o como
+   * solicitud pendiente? En ambos casos no puede volver a solicitarlo.
+   */
+  hasActiveLoan(bookId: number): boolean {
+    return (
+      this.activeLoans.some((loan) => loan.bookId === bookId) ||
+      this.hasPendingRequest(bookId)
+    );
+  }
+
+  /** ¿Puede el socio solicitar este título? (disponible y no lo tiene ya). */
+  canRequest(book: Book): boolean {
+    return book.available && !this.hasActiveLoan(book.id);
+  }
+
   async requestLoan(book: Book) {
-    if (!book.available || this.hasPendingRequest(book.id)) {
+    if (!this.canRequest(book)) {
       return;
     }
 

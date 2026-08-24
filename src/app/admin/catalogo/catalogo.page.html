@@ -88,6 +88,11 @@
               <ion-badge *ngIf="book.available" color="success"> Disponible </ion-badge>
 
               <ion-badge *ngIf="!book.available" color="warning"> Prestado </ion-badge>
+
+              <!-- Stock numérico: prestados y disponibles en el momento. -->
+              <p class="text-mono stock-info">
+                {{ book.prestados ?? 0 }} prestados · {{ book.disponibles ?? 0 }} disponibles
+              </p>
             </div>
 
             <ion-buttons>
@@ -282,6 +287,19 @@
           ></ion-input>
         </ion-item>
 
+        <ion-item>
+          <ion-input
+            label="Cantidad de ejemplares"
+            labelPlacement="floating"
+            name="cantidad"
+            type="number"
+            min="1"
+            [(ngModel)]="newCantidad"
+            placeholder="Ej. 3"
+            aria-label="Cantidad de ejemplares"
+          ></ion-input>
+        </ion-item>
+
         <p *ngIf="formInvalid" class="form-error" role="alert">
           Completa los campos obligatorios: título, autor, ISBN y categoría.
         </p>
@@ -353,6 +371,13 @@
         <ion-item>
           <ion-label>Año de publicación</ion-label>
           <ion-note slot="end">{{ selectedBook.year }}</ion-note>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Ejemplares</ion-label>
+          <ion-note slot="end">
+            {{ selectedBook.prestados ?? 0 }} prestados · {{ selectedBook.disponibles ?? 0 }} disponibles
+          </ion-note>
         </ion-item>
       </ion-list>
 

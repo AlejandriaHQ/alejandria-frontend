@@ -50,6 +50,9 @@ export class CatalogoPage implements OnInit {
 
   newCover: string = '';
 
+  // Stock total editable al crear/editar un libro (mínimo 1).
+  newCantidad: number = 1;
+
   loading: boolean = false;
 
   /** Página actual de la lista de libros (paginación del backend). */
@@ -175,6 +178,8 @@ export class CatalogoPage implements OnInit {
     this.newCategoryId = book.categoryId;
     this.newYear = book.year;
     this.newCover = book.cover ?? '';
+    // Precarga el stock actual del libro (1 si el backend no lo reportó).
+    this.newCantidad = book.cantidad ?? 1;
 
     this.showForm = true;
   }
@@ -194,6 +199,7 @@ export class CatalogoPage implements OnInit {
     this.newCategoryId = 0;
     this.newYear = new Date().getFullYear();
     this.newCover = '';
+    this.newCantidad = 1;
     this.formInvalid = false;
   }
 
@@ -209,6 +215,9 @@ export class CatalogoPage implements OnInit {
       return;
     }
 
+    // La cantidad mínima es 1: valores inválidos se corrigen al guardar.
+    const cantidad = this.newCantidad && this.newCantidad > 0 ? this.newCantidad : 1;
+
     const data = {
       title: this.newTitle.trim(),
       author: this.newAuthor.trim(),
@@ -216,6 +225,7 @@ export class CatalogoPage implements OnInit {
       categoryId: this.newCategoryId,
       year: this.newYear,
       cover: this.newCover || undefined,
+      cantidad,
     };
 
     const request$ = this.editingBook

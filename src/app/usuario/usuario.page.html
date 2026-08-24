@@ -89,7 +89,7 @@
           </div>
 
           <ion-button
-            *ngIf="book.available && !hasPendingRequest(book.id)"
+            *ngIf="canRequest(book)"
             expand="block"
             fill="outline"
             color="primary"
@@ -99,14 +99,15 @@
             Solicitar préstamo
           </ion-button>
 
+          <!-- Deshabilitado cuando el socio ya tiene el título (préstamo activo o solicitud pendiente). -->
           <ion-button
-            *ngIf="hasPendingRequest(book.id)"
+            *ngIf="hasActiveLoan(book.id)"
             expand="block"
             color="medium"
             class="request-button"
             disabled
           >
-            Solicitud enviada
+            {{ hasPendingRequest(book.id) ? 'Solicitud enviada' : 'Ya lo tienes' }}
           </ion-button>
         </ion-card-content>
       </ion-card>
