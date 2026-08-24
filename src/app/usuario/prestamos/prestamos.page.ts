@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { AuthService } from '../../Services/auth.service';
 import { CatalogService } from '../../Services/catalog.service';
 import { LoanService } from '../../Services/loan.service';
 import { TokenService } from '../../Services/token.service';
@@ -27,8 +26,6 @@ export class PrestamosPage implements OnInit {
 
   historyLoans: Loan[] = [];
 
-  private readonly authService = inject(AuthService);
-
   private readonly loanService = inject(LoanService);
 
   private readonly catalogService = inject(CatalogService);
@@ -40,17 +37,18 @@ export class PrestamosPage implements OnInit {
   private readonly alertController = inject(AlertController);
 
   ngOnInit() {
-    const identifier = this.authService.getCurrentUser()?.identifier ?? '';
     const tokenUserId = this.resolveTokenUserId();
 
     if (tokenUserId) {
       this.currentUserId = tokenUserId;
       this.loadData();
     } else {
-      // Fallback: mapear el identifier del usuario autenticado a su id.
-      this.userService.getUsers().subscribe({
-        next: (users) => {
-          this.currentUserId = users.find((user) => user.identifier === identifier)?.id ?? 0;
+      // Fallback: resolver el id del usuario autenticado desde /usuarios/me/
+      // (el backend restringió GET /usuarios/ a solo-admin, por lo que ya no se
+      // puede mapear por identifier sobre la lista completa).
+      this.userService.getCurrentUserProfile().subscribe({
+        next: (me) => {
+          this.currentUserId = me.id;
           this.loadData();
         },
         error: () => this.loadData(),
@@ -62,7 +60,7 @@ export class PrestamosPage implements OnInit {
    * Resuelve el `user_id` del usuario autenticado desde el access token (claim
    * `user_id` de SimpleJWT), con respaldo en los claims persistidos por
    * TokenService. Si no está disponible (sesión sin el claim), devuelve 0 y se
-   * recurre al mapeo por `identifier`.
+   * recurre a `getCurrentUserProfile()`.
    */
   private resolveTokenUserId(): number {
     const access = this.tokenService.getAccess();

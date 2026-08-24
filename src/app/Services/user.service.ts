@@ -120,6 +120,20 @@ export class UserService {
       .pipe(catchError((err: unknown) => throwError(() => this.toFriendlyError(err))));
   }
 
+  /**
+   * Devuelve el perfil del usuario autenticado (`GET /biblioteca/usuarios/me/`).
+   *
+   * El backend restringió la lista/detalle de usuarios a rol admin, así que para
+   * resolver el id del usuario actual en las vistas de usuario (role='user') se usa
+   * este endpoint, que devuelve los datos del propio token.
+   */
+  getCurrentUserProfile(): Observable<User> {
+    return this.api
+      .get<UsuarioDTO>('/biblioteca/usuarios/me/')
+      .pipe(map((dto) => this.fromUsuarioDTO(dto)))
+      .pipe(catchError((err: unknown) => throwError(() => this.toFriendlyError(err))));
+  }
+
   getUserById(id: number): Observable<User> {
     return this.api
       .get<UsuarioDTO>(`/biblioteca/usuarios/${id}/`)

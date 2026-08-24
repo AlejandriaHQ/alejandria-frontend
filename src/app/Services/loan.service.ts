@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { AuthService } from './auth.service';
 import { CatalogService } from './catalog.service';
 import { UserService } from './user.service';
 import { Loan, LoanStatus } from '../models/prestamo.model';
@@ -78,6 +79,7 @@ interface SolicitudDTO {
 })
 export class LoanService {
   private readonly api = inject(ApiService);
+  private readonly authService = inject(AuthService);
   private readonly catalogService = inject(CatalogService);
   private readonly userService = inject(UserService);
 
@@ -91,18 +93,22 @@ export class LoanService {
   private usersCache: User[] = [];
 
   constructor() {
-    // Hidrata la caché de usuarios para que los getters síncronos (reportes,
-    // catálogo de admin) no arranquen vacíos. Los errores se ignoran: es una
-    // hidratación de respaldo, los flujos principales usan los Observables.
-    this.userService.getUsers().subscribe({
-      next: (users) => {
-        this.usersCache = users;
-      },
-      error: () => {
-        // Sin red / sesión: la caché queda vacía y los métodos síncronos legacy
-        // degradan de forma segura.
-      },
-    });
+    // Solo hidratamos la caché de usuarios para administradores: el backend
+    // restringió GET /biblioteca/usuarios/ (y paginar/detalle) a rol admin, así
+    // que un usuario normal obtendría 403 y además la llamada es innecesaria en
+    // sus vistas. Si no es admin, la caché queda vacía y los getters síncronos
+    // legacy (getUsers/getUserById/getUserByIdentifier) degradan de forma segura.
+    if (this.authService.getCurrentUser()?.role === 'admin') {
+      this.userService.getUsers().subscribe({
+        next: (users) => {
+          this.usersCache = users;
+        },
+        error: () => {
+          // Sin red / sesión: la caché queda vacía y los métodos síncronos legacy
+          // degradan de forma segura.
+        },
+      });
+    }
   }
 
   // ===== Préstamos: lectura asíncrona (API) =====
