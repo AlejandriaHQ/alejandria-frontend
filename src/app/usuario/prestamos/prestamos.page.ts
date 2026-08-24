@@ -26,6 +26,12 @@ export class PrestamosPage implements OnInit {
 
   historyLoans: Loan[] = [];
 
+  // Indicador de carga de la vista (préstamos + solicitudes).
+  loading: boolean = false;
+
+  // Contador de peticiones pendientes para ocultar el spinner cuando terminen todas.
+  private pendingLoads: number = 0;
+
   private readonly loanService = inject(LoanService);
 
   private readonly catalogService = inject(CatalogService);
@@ -75,6 +81,10 @@ export class PrestamosPage implements OnInit {
   }
 
   private loadData() {
+    // Enciende el spinner mientras se precarga el catálogo y luego se consultan
+    // los préstamos y las solicitudes del usuario.
+    this.loading = true;
+
     // Precarga el catálogo para que `bookById()` resuelva los títulos al
     // renderizar. Si falla (sin red), igual se cargan los préstamos y las
     // solicitudes (los títulos quedan con el placeholder 'Libro no disponible').
@@ -85,15 +95,21 @@ export class PrestamosPage implements OnInit {
   }
 
   private loadUserData() {
+    // Cuenta las peticiones que dispara esta vista (préstamos + solicitudes) para
+    // apagar el spinner solo cuando todas hayan terminado.
+    this.pendingLoads = 1 + (this.currentUserId > 0 ? 1 : 0);
+
     if (this.currentUserId > 0) {
       this.loanService.getLoansByUser(this.currentUserId).subscribe({
         next: (loans) => {
           this.activeLoans = loans.filter((loan) => loan.status === 'active');
           this.overdueLoans = loans.filter((loan) => loan.status === 'overdue');
           this.historyLoans = loans.filter((loan) => loan.status === 'returned');
+          this.finishLoad();
         },
         error: (error: unknown) => {
           this.showError('No se pudieron cargar tus préstamos', this.toMessage(error));
+          this.finishLoad();
         },
       });
     }
@@ -103,11 +119,21 @@ export class PrestamosPage implements OnInit {
     this.loanService.getRequests().subscribe({
       next: (requests) => {
         this.requests = requests;
+        this.finishLoad();
       },
       error: (error: unknown) => {
         this.showError('No se pudieron cargar tus solicitudes', this.toMessage(error));
+        this.finishLoad();
       },
     });
+  }
+
+  /** Apaga el spinner cuando todas las peticiones pendientes hayan terminado. */
+  private finishLoad(): void {
+    this.pendingLoads = Math.max(0, this.pendingLoads - 1);
+    if (this.pendingLoads === 0) {
+      this.loading = false;
+    }
   }
 
   bookById(bookId: number): Book | null {

@@ -48,6 +48,14 @@
       </ion-select>
     </div>
 
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="usuario-loading"
+      aria-label="Cargando catálogo"
+    ></ion-spinner>
+
+    <ng-container *ngIf="!loading">
     <div class="books-grid">
       <ion-card
         button
@@ -103,6 +111,20 @@
         </ion-card-content>
       </ion-card>
     </div>
+
+    <!-- Estado vacío: catálogo sin libros o búsqueda sin resultados. -->
+    <div class="empty-state" *ngIf="filteredBooks().length === 0">
+      <ion-icon name="book-outline" aria-hidden="true"></ion-icon>
+
+      <p *ngIf="query.trim() || categoryId !== 0; else catalogEmpty">
+        No se encontraron libros para tu búsqueda.
+      </p>
+
+      <ng-template #catalogEmpty>
+        <p>No hay libros disponibles en el catálogo.</p>
+      </ng-template>
+    </div>
+    </ng-container>
   </div>
 </ion-content>
 

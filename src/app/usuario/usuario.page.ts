@@ -26,6 +26,13 @@ export class UsuarioPage implements OnInit {
 
   books: Book[] = [];
 
+  // Indicador de carga del catálogo (categorías + libros).
+  loading: boolean = false;
+
+  // Contador de cargas de catálogo en vuelo (categorías + libros): permite
+  // apagar el spinner solo cuando ambas peticiones hayan terminado.
+  private pendingCatalogLoads: number = 0;
+
   pendingRequests: LoanRequest[] = [];
 
   selectedBook: Book | null = null;
@@ -74,26 +81,46 @@ export class UsuarioPage implements OnInit {
 
   /** Carga las categorías desde `/biblioteca/categorias/` (asíncrono). */
   private loadCategories(): void {
+    this.startCatalogLoad();
     this.catalogService.loadCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
+        this.finishCatalogLoad();
       },
       error: () => {
         this.categories = [];
+        this.finishCatalogLoad();
       },
     });
   }
 
   /** Busca libros con los filtros actuales (query/categoría) vía la API (asíncrono). */
   private loadBooks(): void {
+    this.startCatalogLoad();
     this.catalogService.searchBooksAsync(this.query, this.categoryId).subscribe({
       next: (books) => {
         this.books = books;
+        this.finishCatalogLoad();
       },
       error: () => {
         this.books = [];
+        this.finishCatalogLoad();
       },
     });
+  }
+
+  /** Marca el inicio de una carga de catálogo (categorías o libros). */
+  private startCatalogLoad(): void {
+    this.pendingCatalogLoads += 1;
+    this.loading = true;
+  }
+
+  /** Marca el final de una carga de catálogo y apaga el spinner al terminar todas. */
+  private finishCatalogLoad(): void {
+    this.pendingCatalogLoads = Math.max(0, this.pendingCatalogLoads - 1);
+    if (this.pendingCatalogLoads === 0) {
+      this.loading = false;
+    }
   }
 
   /** Carga las solicitudes del usuario autenticado (el backend filtra por rol). */

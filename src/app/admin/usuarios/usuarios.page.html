@@ -27,6 +27,9 @@
       aria-label="Cargando usuarios"
     ></ion-spinner>
 
+    <!-- Error de carga de la lista: mensaje legible que devuelve el backend. -->
+    <p class="error" role="alert" *ngIf="!loading && error">{{ error }}</p>
+
     <ion-card *ngFor="let user of filteredUsers" class="user-card"
         ><ion-card-content
           ><div class="user-info">
@@ -55,7 +58,7 @@
         ></ion-card
       >
 
-      <div class="users-empty" *ngIf="!loading && filteredUsers.length === 0">
+      <div class="users-empty" *ngIf="!loading && !error && filteredUsers.length === 0">
         <ion-icon [name]="query.trim() ? 'search-outline' : 'people-outline'" aria-hidden="true"></ion-icon>
         <p *ngIf="query.trim()">No se encontraron usuarios para la búsqueda.</p>
         <p *ngIf="!query.trim()">No hay usuarios registrados.</p>

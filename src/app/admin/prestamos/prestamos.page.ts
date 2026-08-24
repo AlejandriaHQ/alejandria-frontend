@@ -33,6 +33,9 @@ export class PrestamosPage implements OnInit {
   /** Indica si se está consultando el historial del socio seleccionado. */
   historyLoading: boolean = false;
 
+  /** Indicador de carga inicial de la vista (solicitudes, préstamos, socios, libros). */
+  loading: boolean = false;
+
   private readonly loanService = inject(LoanService);
 
   private readonly catalogService = inject(CatalogService);
@@ -44,6 +47,7 @@ export class PrestamosPage implements OnInit {
   }
 
   private loadData() {
+    this.loading = true;
     forkJoin({
       pending: this.loanService.getPendingRequests(),
       active: this.loanService.getActiveLoans(),
@@ -60,8 +64,10 @@ export class PrestamosPage implements OnInit {
         // no duplicar la llamada. Se dejan solo los miembros (`role === 'user'`),
         // que son los que tienen historial de préstamos.
         this.users = result.users.filter((user) => user.role === 'user');
+        this.loading = false;
       },
       error: (error: unknown) => {
+        this.loading = false;
         this.showError('Error al cargar préstamos', this.toMessage(error));
       },
     });

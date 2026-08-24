@@ -2,6 +2,14 @@
 
 <ion-content>
   <div class="prestamos-page">
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="prestamos-loading"
+      aria-label="Cargando préstamos"
+    ></ion-spinner>
+
+    <ng-container *ngIf="!loading">
     <section class="loan-section">
       <h2>Solicitudes</h2>
 
@@ -84,5 +92,6 @@
         </div>
       </ion-card>
     </section>
+    </ng-container>
   </div>
 </ion-content>

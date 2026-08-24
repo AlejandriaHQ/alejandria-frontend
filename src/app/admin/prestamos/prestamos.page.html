@@ -2,6 +2,14 @@
 
 <ion-content>
   <div class="prestamos-page">
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="prestamos-loading"
+      aria-label="Cargando préstamos"
+    ></ion-spinner>
+
+    <ng-container *ngIf="!loading">
     <section class="loan-section">
       <h2>Solicitudes pendientes</h2>
 
@@ -82,7 +90,12 @@
         </ion-select>
       </ion-card>
 
-      <div *ngIf="historyLoading" class="empty-state">Cargando historial...</div>
+      <ion-spinner
+        *ngIf="historyLoading"
+        name="crescent"
+        class="prestamos-loading"
+        aria-label="Cargando historial del socio"
+      ></ion-spinner>
 
       <div *ngIf="!historyLoading && selectedUserId === null" class="empty-state">
         Selecciona un socio para ver su historial.
@@ -127,5 +140,6 @@
         </ion-buttons>
       </ion-card>
     </section>
+    </ng-container>
   </div>
 </ion-content>

@@ -34,6 +34,24 @@ export class ReportesPage implements OnInit {
     return this.rows.length > 0 || this.inventory.length > 0 || this.ranking.length > 0;
   }
 
+  /** Mensaje del estado vacío según el tipo de reporte consultado. */
+  get emptyMessage(): string {
+    switch (this.kind) {
+      case 'loans':
+        return 'No hay préstamos en el rango seleccionado.';
+      case 'returns':
+        return 'No hay devoluciones en el rango seleccionado.';
+      case 'inventory':
+        return 'No hay inventario para el catálogo.';
+      case 'topBooks':
+        return 'No hay datos para el ranking de libros.';
+      case 'topUsers':
+        return 'No hay datos para el ranking de usuarios.';
+      default:
+        return 'No hay datos para los filtros seleccionados.';
+    }
+  }
+
   private readonly reports = inject(ReportService);
   private readonly alertController = inject(AlertController);
 

@@ -207,7 +207,7 @@
         *ngIf="!loading && !rows.length && !inventory.length && !ranking.length"
       >
         <ion-icon name="file-tray-outline" aria-hidden="true"></ion-icon>
-        <p>No hay datos para los filtros seleccionados.</p>
+        <p>{{ emptyMessage }}</p>
       </div>
     </section>
   </main>

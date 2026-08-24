@@ -124,6 +124,19 @@
       </ion-card>
     </div>
 
+    <!-- Estado vacío: catálogo sin libros o búsqueda sin resultados. -->
+    <div class="empty-state" *ngIf="!loading && (books$ | async)?.length === 0">
+      <ion-icon name="book-outline" aria-hidden="true"></ion-icon>
+
+      <p *ngIf="query.trim() || categoryId !== 0; else catalogEmpty">
+        No se encontraron libros para la búsqueda.
+      </p>
+
+      <ng-template #catalogEmpty>
+        <p>El catálogo está vacío.</p>
+      </ng-template>
+    </div>
+
     <div class="catalogo-pagination" *ngIf="maxPages > 1">
       <ion-button
         fill="outline"
