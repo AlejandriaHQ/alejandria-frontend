@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import {
   HttpClient,
+  HttpContextToken,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
@@ -15,6 +16,14 @@ import { TokenService } from '../Services/token.service';
 
 const LOGIN_PATH = '/token/';
 const REFRESH_PATH = '/token/refresh/';
+
+/**
+ * Token de contexto (en memoria) que marca una request como reintento de refresh.
+ * Al viajar en el objeto HttpRequest (no como header HTTP), NO dispara preflight
+ * CORS ni consume Access-Control-Allow-Headers, evitando que el reintento se
+ * bloquee por la política de Cross-Origin del backend Django.
+ */
+const RETRY_CONTEXT = new HttpContextToken<boolean>(() => false);
 
 /**
  * Interceptor HTTP:
@@ -45,7 +54,7 @@ export class AuthInterceptor implements HttpInterceptor {
           error.status === 401 &&
           !authReq.url.includes(LOGIN_PATH) &&
           !authReq.url.includes(REFRESH_PATH) &&
-          !authReq.headers.has('X-Retry-Auth')
+          !authReq.context.get(RETRY_CONTEXT)
         ) {
           return this.tryRefresh(authReq, next);
         }
@@ -79,7 +88,8 @@ export class AuthInterceptor implements HttpInterceptor {
         }
         this.tokenService.saveTokens(tokens.access, tokens.refresh ?? refresh);
         const retry = req.clone({
-          setHeaders: { Authorization: `Bearer ${tokens.access}`, 'X-Retry-Auth': 'true' },
+          context: req.context.set(RETRY_CONTEXT, true),
+          setHeaders: { Authorization: `Bearer ${tokens.access}` },
         });
         return next.handle(retry);
       }),
@@ -95,7 +105,8 @@ export class AuthInterceptor implements HttpInterceptor {
     const access = this.tokenService.getAccess();
     if (access) {
       const retry = req.clone({
-        setHeaders: { Authorization: `Bearer ${access}`, 'X-Retry-Auth': 'true' },
+        context: req.context.set(RETRY_CONTEXT, true),
+        setHeaders: { Authorization: `Bearer ${access}` },
       });
       return next.handle(retry);
     }
