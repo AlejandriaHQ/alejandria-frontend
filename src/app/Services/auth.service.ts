@@ -1,237 +1,162 @@
-import { Injectable, Injector, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoanService } from './loan.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { TokenService } from './token.service';
+import { decodeJwtPayload } from '../utils/jwt.helper';
 
 export type UserRole = 'admin' | 'user';
 
-interface StoredSession {
+export interface AuthUser {
   identifier: string;
   role: UserRole;
-  expiresAt: number;
-  originalUser?: {
-    identifier: string;
-    role: UserRole;
-  } | null;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+/**
+ * Servicio de autenticación contra el backend Django (SimpleJWT).
+ *
+ * - `login()` llama a `POST /token/` con `{email, password}` (acepta email,
+ *   identifier o username como credencial) y guarda el par access/refresh.
+ * - Los claims `role` e `identifier` viajan en el payload del access token y
+ *   se persisten para que el guard y las páginas resuelvan la sesión en
+ *   sincronía.
+ * - `logout()` limpia tokens, claims y redirige a /autenticacion.
+ */
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly sessionKey = 'alejandria_sesion';
-
-  private currentUser: {
-    identifier: string;
-    role: UserRole;
-  } | null = null;
-
-  private timer: any;
-
-  private originalUser: {
-    identifier: string;
-    role: UserRole;
-  } | null = null;
-
-  // La sesión expira a las 8 horas (jornada de la biblioteca)
-  private inactivityTime = 8 * 60 * 60 * 1000;
-
+  private readonly http = inject(HttpClient);
+  private readonly tokenService = inject(TokenService);
   private readonly router = inject(Router);
 
-  // LoanService se resuelve de forma perezosa: LoanService ya inyecta AuthService,
-  // por lo que inyectarlo aquí directamente crearía una dependencia circular.
-  private readonly injector = inject(Injector);
+  private currentUser: AuthUser | null = null;
+
+  // Límite de sesión de trabajo (jornada de la biblioteca): 8 horas.
+  private readonly inactivityTime = 8 * 60 * 60 * 1000;
+
+  private inactivityTimer: any;
 
   constructor() {
     this.restoreSession();
   }
 
-  login(identifier: string, password: string): UserRole | null {
-    if (!identifier || !password) {
-      return null;
-    }
-
-    // Usuarios persistidos en alejandria_users: se valida por correo o identificador
-    // más contraseña, y el rol sale del propio usuario guardado.
-    const savedUser = this.injector
-      .get(LoanService)
-      .getUsers()
-      .find(
-        (user) =>
-          user.password === password &&
-          (user.email.toLowerCase() === identifier.toLowerCase() || user.identifier === identifier),
+  /**
+   * Inicia sesión contra el backend.
+   *
+   * @returns Observable con las credenciales de sesión (identifier y role).
+   */
+  login(identifier: string, password: string): Observable<AuthUser> {
+    return this.http
+      .post<{ access: string; refresh: string }>(`${environment.apiUrl}/token/`, {
+        email: identifier,
+        password,
+      })
+      .pipe(
+        map((tokens) => {
+          const user = this.applyTokens(tokens.access, tokens.refresh);
+          if (!user) {
+            throw new Error('Respuesta de autenticación inválida');
+          }
+          return user;
+        }),
       );
-
-    if (savedUser) {
-      // RN-08: un usuario desactivado no puede volver a iniciar sesión.
-      if (savedUser.status === 'inactive') {
-        return null;
-      }
-
-      this.currentUser = {
-        identifier: savedUser.identifier,
-        role: savedUser.role,
-      };
-
-      this.saveSession();
-      this.startTimer();
-
-      return savedUser.role;
-    }
-
-    // Administrador (respaldo de la demo; coincide con la semilla ADM-2026-0001)
-    if (identifier === 'admin@alejandria.com' && password === 'admin123') {
-      this.currentUser = {
-        identifier,
-        role: 'admin',
-      };
-
-      this.saveSession();
-      this.startTimer();
-
-      return 'admin';
-    }
-
-    // Usuario demo (respaldo; la sesión guarda el identificador unificado MEM-2026-0001)
-    if (identifier === 'usuario001' && password === 'usuario123') {
-      this.currentUser = {
-        identifier: 'MEM-2026-0001',
-        role: 'user',
-      };
-
-      this.saveSession();
-      this.startTimer();
-
-      return 'user';
-    }
-
-    return null;
   }
 
-  getCurrentUser() {
+  getCurrentUser(): AuthUser | null {
     return this.currentUser;
   }
 
-  get inUserView(): boolean {
-    return this.originalUser !== null;
+  /** Verifica si hay una sesión válida (access no expirado o refresh disponible). */
+  isAuthenticated(): boolean {
+    return this.currentUser !== null;
   }
 
-  // Solo administradores: entrar a la vista de usuario para probar la app
+  get inUserView(): boolean {
+    return this.originalUserBackup !== null;
+  }
 
-  enterUserView() {
+  private originalUserBackup: AuthUser | null = null;
+
+  // Solo administradores: entrar a la vista de usuario para probar la app.
+  enterUserView(): void {
     const user = this.getCurrentUser();
-
     if (!user || user.role !== 'admin' || this.inUserView) {
       return;
     }
-
-    this.originalUser = user;
-
-    this.currentUser = {
-      identifier: 'MEM-2026-0001',
-      role: 'user',
-    };
-
-    this.saveSession();
-    this.startTimer();
-
+    this.originalUserBackup = user;
+    this.currentUser = { identifier: 'MEM-2026-0001', role: 'user' };
+    this.startInactivityTimer();
     this.router.navigate(['/usuario']);
   }
 
-  exitUserView() {
+  exitUserView(): void {
     if (!this.inUserView) {
       return;
     }
-
-    this.currentUser = this.originalUser;
-
-    this.originalUser = null;
-
-    this.saveSession();
-    this.startTimer();
-
+    this.currentUser = this.originalUserBackup;
+    this.originalUserBackup = null;
+    this.startInactivityTimer();
     this.router.navigate(['/admin']);
   }
 
-  logout() {
+  logout(): void {
     this.currentUser = null;
-
-    this.originalUser = null;
-
-    this.clearStoredSession();
-    this.stopTimer();
-
+    this.originalUserBackup = null;
+    this.stopInactivityTimer();
+    this.tokenService.clear();
     this.router.navigate(['/autenticacion']);
   }
 
-  private saveSession() {
-    const session: StoredSession = {
-      identifier: this.currentUser!.identifier,
-      role: this.currentUser!.role,
-      expiresAt: Date.now() + this.inactivityTime,
-      originalUser: this.originalUser,
-    };
+  private applyTokens(access: string, refresh: string): AuthUser | null {
+    this.tokenService.saveTokens(access, refresh);
 
-    localStorage.setItem(this.sessionKey, JSON.stringify(session));
+    const payload = decodeJwtPayload(access);
+    const role = payload?.['role'] as UserRole | undefined;
+    const identifier = payload?.['identifier'] as string | undefined;
+    const userId = payload?.['user_id'] as number | undefined;
+
+    if (role && identifier) {
+      this.tokenService.saveClaims({ user_id: userId ?? 0, role, identifier });
+      this.currentUser = { identifier, role };
+      this.startInactivityTimer();
+      return this.currentUser;
+    }
+    return null;
   }
 
-  private restoreSession() {
-    const stored = localStorage.getItem(this.sessionKey);
+  private restoreSession(): void {
+    const claims = this.tokenService.getClaims();
+    const access = this.tokenService.getAccess();
 
-    if (!stored) {
+    if (!claims) {
+      this.currentUser = null;
       return;
     }
 
-    try {
-      const session: StoredSession = JSON.parse(stored);
+    const payload = access ? decodeJwtPayload(access) : null;
+    const exp = payload?.['exp'] as number | undefined;
 
-      const remaining = session.expiresAt - Date.now();
+    const accessValid = !!exp && exp * 1000 > Date.now();
 
-      if (remaining <= 0) {
-        this.clearStoredSession();
-
-        return;
-      }
-
-      this.currentUser = {
-        identifier: session.identifier,
-        role: session.role,
-      };
-
-      this.originalUser = session.originalUser ?? null;
-
-      this.timer = setTimeout(() => this.expireSession(), remaining);
-    } catch {
-      this.clearStoredSession();
+    // Sesión válida si el access no expiró, o si hay refresh para renovarlo.
+    if (accessValid || this.tokenService.getRefresh()) {
+      this.currentUser = { identifier: claims.identifier, role: claims.role };
+      this.startInactivityTimer();
+    } else {
+      this.tokenService.clear();
+      this.currentUser = null;
     }
   }
 
-  private startTimer() {
-    this.stopTimer();
-
-    this.timer = setTimeout(() => this.expireSession(), this.inactivityTime);
+  private startInactivityTimer(): void {
+    this.stopInactivityTimer();
+    this.inactivityTimer = setTimeout(() => this.logout(), this.inactivityTime);
   }
 
-  private expireSession() {
-    this.currentUser = null;
-
-    this.timer = null;
-
-    this.clearStoredSession();
-
-    console.log('Sesión expirada por inactividad');
-
-    this.router.navigate(['/autenticacion']);
-  }
-
-  private clearStoredSession() {
-    localStorage.removeItem(this.sessionKey);
-  }
-
-  private stopTimer() {
-    if (this.timer) {
-      clearTimeout(this.timer);
-
-      this.timer = null;
+  private stopInactivityTimer(): void {
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+      this.inactivityTimer = null;
     }
   }
 }
