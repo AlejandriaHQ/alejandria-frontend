@@ -8,6 +8,7 @@ import { TokenService } from '../Services/token.service';
 import { UserService } from '../Services/user.service';
 import { Category } from '../models/categoria.model';
 import { Book } from '../models/libro.model';
+import { LoanRequest } from '../models/solicitud-prestamo.model';
 import { decodeJwtPayload } from '../utils/jwt.helper';
 
 @Component({
@@ -22,6 +23,10 @@ export class UsuarioPage implements OnInit {
   categoryId: number = 0;
 
   categories: Category[] = [];
+
+  books: Book[] = [];
+
+  pendingRequests: LoanRequest[] = [];
 
   selectedBook: Book | null = null;
 
@@ -42,7 +47,12 @@ export class UsuarioPage implements OnInit {
   private readonly alertController = inject(AlertController);
 
   ngOnInit() {
-    this.categories = this.catalogService.getCategories();
+    // Carga asíncrona desde la API: categorías, libros y solicitudes propias.
+    // Los getters síncronos legacy (getCategories/searchBooks/getRequestsByUser)
+    // leen cachés vacías porque la vista de usuario nunca los hidrataba.
+    this.loadCategories();
+    this.loadBooks();
+    this.loadRequests();
 
     const tokenUserId = this.resolveTokenUserId();
     if (tokenUserId) {
@@ -60,6 +70,47 @@ export class UsuarioPage implements OnInit {
         },
       });
     }
+  }
+
+  /** Carga las categorías desde `/biblioteca/categorias/` (asíncrono). */
+  private loadCategories(): void {
+    this.catalogService.loadCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: () => {
+        this.categories = [];
+      },
+    });
+  }
+
+  /** Busca libros con los filtros actuales (query/categoría) vía la API (asíncrono). */
+  private loadBooks(): void {
+    this.catalogService.searchBooksAsync(this.query, this.categoryId).subscribe({
+      next: (books) => {
+        this.books = books;
+      },
+      error: () => {
+        this.books = [];
+      },
+    });
+  }
+
+  /** Carga las solicitudes del usuario autenticado (el backend filtra por rol). */
+  private loadRequests(): void {
+    this.loanService.getRequests().subscribe({
+      next: (requests) => {
+        this.pendingRequests = requests;
+      },
+      error: () => {
+        this.pendingRequests = [];
+      },
+    });
+  }
+
+  /** Dispara una nueva búsqueda cuando cambian los filtros (searchbar / selector). */
+  onSearch(): void {
+    this.loadBooks();
   }
 
   /**
@@ -81,7 +132,7 @@ export class UsuarioPage implements OnInit {
   }
 
   filteredBooks(): Book[] {
-    return this.catalogService.searchBooks(this.query, this.categoryId);
+    return this.books;
   }
 
   categoryName(categoryId: number): string {
@@ -103,9 +154,9 @@ export class UsuarioPage implements OnInit {
   }
 
   hasPendingRequest(bookId: number): boolean {
-    return this.loanService
-      .getRequestsByUser(this.currentUserId)
-      .some((request) => request.bookId === bookId && request.status === 'pending');
+    return this.pendingRequests.some(
+      (request) => request.bookId === bookId && request.status === 'pending',
+    );
   }
 
   async requestLoan(book: Book) {
@@ -124,14 +175,21 @@ export class UsuarioPage implements OnInit {
         {
           text: 'Solicitar',
           handler: () => {
-            const request = this.loanService.requestLoan(book.id, this.currentUserId);
-
-            if (request) {
-              this.showMessage(
-                'Solicitud enviada',
-                `Solicitaste "${book.title}". El administrador la procesará en el mostrador.`,
-              );
-            }
+            // POST /biblioteca/solicitudes/: el backend fuerza el `id_usuario`
+            // cuando el rol es 'user', así que `this.currentUserId` se envía
+            // como referencia y no se puede alterar desde el cliente.
+            this.loanService.requestLoanApi(book.id, this.currentUserId).subscribe({
+              next: () => {
+                this.showMessage(
+                  'Solicitud enviada',
+                  `Solicitaste "${book.title}". El administrador la procesará en el mostrador.`,
+                );
+                this.loadRequests();
+              },
+              error: (error: unknown) => {
+                this.showMessage('No se pudo enviar la solicitud', this.toMessage(error));
+              },
+            });
           },
         },
       ],
@@ -153,5 +211,13 @@ export class UsuarioPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  private toMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return String(error);
   }
 }

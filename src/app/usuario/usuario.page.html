@@ -28,7 +28,7 @@
       <ion-searchbar
         placeholder="Buscar por título, autor o ISBN"
         [(ngModel)]="query"
-        (ionInput)="filteredBooks()"
+        (ionInput)="onSearch()"
       >
       </ion-searchbar>
 
@@ -38,7 +38,7 @@
         interface="popover"
         placeholder="Todas"
         [(ngModel)]="categoryId"
-        (ionChange)="filteredBooks()"
+        (ionChange)="onSearch()"
       >
         <ion-select-option [value]="0"> Todas </ion-select-option>
 
