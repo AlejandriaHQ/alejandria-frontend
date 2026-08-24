@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -32,25 +32,37 @@ export class ApiService {
     }
     return this.http
       .get<ApiEnvelope<T>>(this.url(path), { params: httpParams })
-      .pipe(map((e) => this.unwrap(e)));
+      .pipe(
+        map((e) => this.unwrap(e)),
+        catchError((err) => this.handleHttpError(err))
+      );
   }
 
   post<T = unknown>(path: string, body: unknown): Observable<T> {
     return this.http
       .post<ApiEnvelope<T>>(this.url(path), body)
-      .pipe(map((e) => this.unwrap(e)));
+      .pipe(
+        map((e) => this.unwrap(e)),
+        catchError((err) => this.handleHttpError(err))
+      );
   }
 
   put<T = unknown>(path: string, body: unknown): Observable<T> {
     return this.http
       .put<ApiEnvelope<T>>(this.url(path), body)
-      .pipe(map((e) => this.unwrap(e)));
+      .pipe(
+        map((e) => this.unwrap(e)),
+        catchError((err) => this.handleHttpError(err))
+      );
   }
 
   delete<T = unknown>(path: string): Observable<T> {
     return this.http
       .delete<ApiEnvelope<T>>(this.url(path))
-      .pipe(map((e) => this.unwrap(e)));
+      .pipe(
+        map((e) => this.unwrap(e)),
+        catchError((err) => this.handleHttpError(err))
+      );
   }
 
   private url(path: string): string {
@@ -66,6 +78,42 @@ export class ApiService {
       throw new Error(this.messageToText(envelope?.Mensaje));
     }
     return (envelope.datos ?? (null as unknown as T));
+  }
+
+  /**
+   * Normaliza errores HTTP (4xx/5xx). Angular los emite como `HttpErrorResponse`
+   * y, al no pasar por `unwrap`, el `Mensaje` del envelope se perdía. Aquí se
+   * extrae el `Mensaje` del body (envelope) y se lanza un Error con texto
+   * legible; si no hay `Mensaje`, se usa un mensaje genérico según el status.
+   */
+  private handleHttpError(err: HttpErrorResponse): Observable<never> {
+    console.error('[ApiService] Error HTTP', err);
+    const message = this.extractHttpErrorMessage(err.error, err.status);
+    return throwError(() => new Error(message));
+  }
+
+  private extractHttpErrorMessage(body: unknown, status: number): string {
+    // El body es el envelope (o un objeto con success/Mensaje), pero a veces
+    // el backend responde texto plano: se usa como mensaje directo.
+    const envelope = (body ?? {}) as Partial<ApiEnvelope<unknown>>;
+    if (envelope.Mensaje !== undefined && envelope.Mensaje !== null) {
+      return this.messageToText(envelope.Mensaje);
+    }
+    if (typeof body === 'string' && body.length > 0) {
+      return body;
+    }
+    return this.genericHttpStatusMessage(status);
+  }
+
+  private genericHttpStatusMessage(status: number): string {
+    const messages: Record<number, string> = {
+      400: 'Solicitud inválida',
+      401: 'Sesión no válida',
+      403: 'No tiene permisos para realizar esta acción',
+      404: 'Recurso no encontrado',
+      500: 'Error interno del servidor',
+    };
+    return messages[status] ?? 'Ocurrió un error inesperado';
   }
 
   private messageToText(message: unknown): string {
