@@ -200,26 +200,6 @@ export class CatalogoPage implements OnInit {
     this.selectedBook = null;
   }
 
-  onCoverSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-
-    const file = input.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      this.newCover = reader.result as string;
-    };
-
-    reader.readAsDataURL(file);
-
-    input.value = '';
-  }
-
   removeCover() {
     this.newCover = '';
   }

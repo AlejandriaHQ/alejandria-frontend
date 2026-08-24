@@ -162,24 +162,23 @@
           </div>
 
           <div class="portada-actions">
-            <ion-button fill="outline" color="primary" (click)="coverFile.click()">
-              <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
-              Subir imagen
-            </ion-button>
-
             <ion-button *ngIf="newCover" fill="clear" color="danger" (click)="removeCover()">
               Quitar
             </ion-button>
           </div>
-
-          <input
-            #coverFile
-            type="file"
-            accept="image/*"
-            hidden
-            (change)="onCoverSelected($event)"
-          />
         </div>
+
+        <ion-item>
+          <ion-input
+            type="url"
+            label="URL de la portada"
+            labelPlacement="floating"
+            name="cover"
+            [(ngModel)]="newCover"
+            placeholder="https://ejemplo.com/portada.jpg"
+            aria-label="URL de la portada"
+          ></ion-input>
+        </ion-item>
 
         <ion-item>
           <ion-input
