@@ -116,21 +116,37 @@
       <section class="form-section">
         <h3 class="form-section-title">Datos personales</h3>
 
-        <ion-item class="form-field" [class.has-error]="fieldErrors['name']" lines="none">
+        <!-- El backend exige first_name y last_name separados y obligatorios:
+             por eso el formulario usa dos campos en lugar de un nombre compuesto. -->
+        <ion-item class="form-field" [class.has-error]="fieldErrors['firstName']" lines="none">
           <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
           <ion-input
             labelPlacement="floating"
             [attr.aria-required]="true"
-            maxlength="100"
-            autocomplete="name"
-            [(ngModel)]="form.name"
+            maxlength="150"
+            autocomplete="given-name"
+            [(ngModel)]="form.firstName"
+          >
+            <span slot="label">Nombre <span class="required-mark" aria-hidden="true">*</span></span>
+          </ion-input>
+        </ion-item>
+        <p class="field-error" *ngIf="fieldErrors['firstName']">{{ fieldErrors['firstName'] }}</p>
+
+        <ion-item class="form-field" [class.has-error]="fieldErrors['lastName']" lines="none">
+          <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+          <ion-input
+            labelPlacement="floating"
+            [attr.aria-required]="true"
+            maxlength="150"
+            autocomplete="family-name"
+            [(ngModel)]="form.lastName"
           >
             <span slot="label"
-              >Nombre completo <span class="required-mark" aria-hidden="true">*</span></span
+              >Apellido <span class="required-mark" aria-hidden="true">*</span></span
             >
           </ion-input>
         </ion-item>
-        <p class="field-error" *ngIf="fieldErrors['name']">{{ fieldErrors['name'] }}</p>
+        <p class="field-error" *ngIf="fieldErrors['lastName']">{{ fieldErrors['lastName'] }}</p>
 
         <ion-item class="form-field" [class.has-error]="fieldErrors['cedula']" lines="none">
           <ion-icon slot="start" name="card-outline" aria-hidden="true"></ion-icon>

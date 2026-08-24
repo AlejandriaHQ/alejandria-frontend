@@ -4,7 +4,8 @@ import { UserService } from '../../Services/user.service';
 import { User, UserRole } from '../../models/usuario.model';
 
 type UserForm = {
-  name: string;
+  firstName: string;
+  lastName: string;
   cedula: string;
   email: string;
   password: string;
@@ -112,7 +113,10 @@ export class UsuariosPage implements OnInit {
     this.error = '';
     this.fieldErrors = {};
     this.form = {
-      name: user.name,
+      // El backend expone first_name/last_name separados; si el User no los trae
+      // (origen distinto al DTO) se separa el nombre compuesto como respaldo.
+      firstName: user.firstName ?? user.name.split(' ')[0] ?? '',
+      lastName: user.lastName ?? user.name.split(' ').slice(1).join(' '),
       cedula: user.cedula ?? '',
       email: user.email,
       password: '',
@@ -137,17 +141,27 @@ export class UsuariosPage implements OnInit {
   }
   async save() {
     this.fieldErrors = {};
-    const name = this.form.name.trim();
+    const firstName = this.form.firstName.trim();
+    const lastName = this.form.lastName.trim();
     const cedula = this.form.cedula.trim();
     const email = this.form.email.trim();
     const phone = this.form.phone.trim();
     const address = this.form.address.trim();
 
-    if (name.length < NAME_MIN_LENGTH) {
-      this.fieldErrors['name'] = 'El nombre completo es obligatorio.';
-    } else if (!NAME_PATTERN.test(name)) {
-      this.fieldErrors['name'] =
+    // El backend exige first_name y last_name por separado y obligatorios
+    // (UsuarioSerializerReg/Update); por eso se validan como campos independientes
+    // y nunca se envía un last_name vacío.
+    if (firstName.length < NAME_MIN_LENGTH) {
+      this.fieldErrors['firstName'] = 'El nombre es obligatorio.';
+    } else if (!NAME_PATTERN.test(firstName)) {
+      this.fieldErrors['firstName'] =
         'El nombre solo puede contener letras, espacios, puntos y apóstrofes.';
+    }
+    if (lastName.length < NAME_MIN_LENGTH) {
+      this.fieldErrors['lastName'] = 'El apellido es obligatorio.';
+    } else if (!NAME_PATTERN.test(lastName)) {
+      this.fieldErrors['lastName'] =
+        'El apellido solo puede contener letras, espacios, puntos y apóstrofes.';
     }
     if (!cedula) {
       this.fieldErrors['cedula'] = 'La cédula es obligatoria.';
@@ -180,7 +194,7 @@ export class UsuariosPage implements OnInit {
     }
 
     const wasEditing = this.editingId !== null;
-    const baseData = { name, cedula, email, phone, address, role: this.form.role };
+    const baseData = { firstName, lastName, cedula, email, phone, address, role: this.form.role };
 
     const request$ = this.editingId
       ? this.userService.updateUser(this.editingId, {
@@ -291,6 +305,15 @@ export class UsuariosPage implements OnInit {
     await alert.present();
   }
   private emptyForm(): UserForm {
-    return { name: '', cedula: '', email: '', password: '', phone: '', address: '', role: 'user' };
+    return {
+      firstName: '',
+      lastName: '',
+      cedula: '',
+      email: '',
+      password: '',
+      phone: '',
+      address: '',
+      role: 'user',
+    };
   }
 }

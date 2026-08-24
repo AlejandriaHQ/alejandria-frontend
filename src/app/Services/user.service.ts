@@ -73,9 +73,10 @@ interface PaginarEnvelope<T> {
   next?: boolean;
 }
 
-/** Input para crear un usuario (forma del frontend, con `name` compuesto). */
+/** Input para crear un usuario (forma del frontend, con nombres separados). */
 export interface UsuarioCreateInput {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: UserRole;
   cedula: string;
@@ -86,7 +87,8 @@ export interface UsuarioCreateInput {
 
 /** Input para actualizar un usuario. `password` es opcional (si se omite se conserva). */
 export interface UsuarioUpdateInput {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: UserRole;
   cedula: string;
@@ -228,6 +230,7 @@ export class UserService {
    *
    * - `id` ← `id` (si el DTO no lo trae, en UPDATE, se usa `fallbackId`).
    * - `name` ← derivado: `first_name + ' ' + last_name` (trim).
+   * - `firstName`/`lastName` ← campos separados del backend (para el formulario).
    * - `status` ← derivado: `is_active ? 'active' : 'inactive'`.
    * - `password` ← `''`: el backend es write_only (README nunca lo devuelve).
    * - `registrationDate` no existe en el backend: se deja `undefined`.
@@ -236,6 +239,8 @@ export class UserService {
     return {
       id: dto.id ?? fallbackId ?? 0,
       name: `${dto.first_name} ${dto.last_name}`.trim(),
+      firstName: dto.first_name,
+      lastName: dto.last_name,
       identifier: dto.identifier ?? '',
       role: dto.role === 'admin' ? 'admin' : 'user',
       email: dto.email,
@@ -249,10 +254,9 @@ export class UserService {
   }
 
   private toUsuarioCreatePayload(data: UsuarioCreateInput): UsuarioCreatePayload {
-    const { first_name, last_name } = this.splitName(data.name);
     return {
-      first_name,
-      last_name,
+      first_name: data.firstName.trim(),
+      last_name: data.lastName.trim(),
       email: data.email,
       password: data.password,
       role: data.role,
@@ -263,10 +267,9 @@ export class UserService {
   }
 
   private toUsuarioUpdatePayload(data: UsuarioUpdateInput): UsuarioUpdatePayload {
-    const { first_name, last_name } = this.splitName(data.name);
     const payload: UsuarioUpdatePayload = {
-      first_name,
-      last_name,
+      first_name: data.firstName.trim(),
+      last_name: data.lastName.trim(),
       email: data.email,
       role: data.role,
       cedula: data.cedula,
@@ -281,24 +284,6 @@ export class UserService {
       payload.password = data.password;
     }
     return payload;
-  }
-
-  /**
-   * Divide el nombre compuesto del frontend en `first_name` y `last_name`.
-   *
-   * "María López" -> first_name "María", last_name "López". Si hay más de dos
-   * palabras, la primera va a `first_name` y el resto (unido) a `last_name`
-   * ("José María Gil" -> "José" / "María Gil").
-   */
-  private splitName(name: string): { first_name: string; last_name: string } {
-    const parts = name
-      .trim()
-      .replace(/\s+/g, ' ')
-      .split(' ');
-    return {
-      first_name: parts[0] ?? '',
-      last_name: parts.slice(1).join(' '),
-    };
   }
 
   private fromPaginar(envelope: PaginarEnvelope<UsuarioDTO[]>, requestedPage: number): UsuarioSearchResult {
