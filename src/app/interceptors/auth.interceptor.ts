@@ -115,6 +115,9 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private handleSessionExpired(): void {
+    // clear() emite sessionCleared$, y AuthService (suscrito) limpia su estado
+    // en memoria (currentUser y timer). No inyectamos AuthService aquí para
+    // evitar el ciclo AuthService → HttpClient → interceptor → AuthService.
     this.tokenService.clear();
     this.router.navigate(['/autenticacion']);
   }

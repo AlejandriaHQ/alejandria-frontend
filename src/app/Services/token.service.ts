@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 /**
  * Gestión del par de tokens JWT emitido por SimpleJWT (backend Django).
@@ -14,6 +15,14 @@ export class TokenService {
   private readonly accessKey = 'alejandria_access';
   private readonly refreshKey = 'alejandria_refresh';
   private readonly claimsKey = 'alejandria_claims';
+
+  // Notifica que la sesión se borró (p.ej. expiración de tokens en el interceptor).
+  // AuthService se suscribe para limpiar su estado en memoria sin crear un ciclo
+  // de inyección (el interceptor solo depende de este servicio).
+  private readonly sessionClearedSubject = new Subject<void>();
+
+  /** Observable que emite cada vez que `clear()` elimina tokens y claims. */
+  readonly sessionCleared$ = this.sessionClearedSubject.asObservable();
 
   saveTokens(access: string, refresh: string): void {
     localStorage.setItem(this.accessKey, access);
@@ -53,6 +62,7 @@ export class TokenService {
     localStorage.removeItem(this.accessKey);
     localStorage.removeItem(this.refreshKey);
     localStorage.removeItem(this.claimsKey);
+    this.sessionClearedSubject.next();
   }
 }
 

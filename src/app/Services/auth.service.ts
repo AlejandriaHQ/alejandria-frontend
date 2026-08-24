@@ -37,6 +37,11 @@ export class AuthService {
   private inactivityTimer: any;
 
   constructor() {
+    // Reacciona a cualquier borrado de tokens (p.ej. 401 de refresh fallido en
+    // el interceptor) para limpiar el estado en memoria. Esto evita el ciclo de
+    // inyección AuthService → HttpClient → interceptor → AuthService: el
+    // interceptor solo usa TokenService, y AuthService se entera vía observable.
+    this.tokenService.sessionCleared$.subscribe(() => this.resetSessionState());
     this.restoreSession();
   }
 
@@ -100,11 +105,19 @@ export class AuthService {
   }
 
   logout(): void {
+    this.resetSessionState();
+    this.tokenService.clear(); // emite sessionCleared$ → resetSessionState (idempotente)
+    this.router.navigate(['/autenticacion']);
+  }
+
+  /**
+   * Limpia solo el estado en memoria (usuario, backup y timer) sin tocar
+   * tokens ni navegar. Lo usa logout() y la suscripción a sessionCleared$.
+   */
+  private resetSessionState(): void {
     this.currentUser = null;
     this.originalUserBackup = null;
     this.stopInactivityTimer();
-    this.tokenService.clear();
-    this.router.navigate(['/autenticacion']);
   }
 
   private applyTokens(access: string, refresh: string): AuthUser | null {
