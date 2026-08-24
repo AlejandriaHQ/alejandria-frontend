@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
+import { forkJoin } from 'rxjs';
 import { CatalogService } from '../../Services/catalog.service';
 import { LoanService } from '../../Services/loan.service';
 import { Book } from '../../models/libro.model';
@@ -31,11 +32,22 @@ export class PrestamosPage implements OnInit {
   }
 
   private loadData() {
-    this.loanService.detectOverdue();
-
-    this.pendingRequests = this.loanService.getPendingRequests();
-    this.activeLoans = this.loanService.getActiveLoans();
-    this.overdueLoans = this.loanService.getOverdueLoans();
+    forkJoin({
+      pending: this.loanService.getPendingRequests(),
+      active: this.loanService.getActiveLoans(),
+      overdue: this.loanService.getOverdueLoans(),
+      users: this.loanService.loadUsers(),
+      books: this.catalogService.loadBooks(),
+    }).subscribe({
+      next: (result) => {
+        this.pendingRequests = result.pending;
+        this.activeLoans = result.active;
+        this.overdueLoans = result.overdue;
+      },
+      error: (error: unknown) => {
+        this.showError('Error al cargar préstamos', this.toMessage(error));
+      },
+    });
   }
 
   bookById(bookId: number): Book | null {
@@ -66,16 +78,12 @@ export class PrestamosPage implements OnInit {
         {
           text: 'Aprobar',
           handler: () => {
-            const loan = this.loanService.approveRequest(request.id);
-
-            if (!loan) {
-              this.showError(
-                'No se pudo aprobar',
-                'Verifica que el libro esté disponible y que el usuario no tenga 3 préstamos activos ni vencidos sin devolver.',
-              );
-            }
-
-            this.loadData();
+            this.loanService.approveRequest(request.id).subscribe({
+              next: () => this.loadData(),
+              error: (error: unknown) => {
+                this.showError('No se pudo aprobar', this.toMessage(error));
+              },
+            });
           },
         },
       ],
@@ -96,9 +104,12 @@ export class PrestamosPage implements OnInit {
         {
           text: 'Rechazar',
           handler: () => {
-            this.loanService.rejectRequest(request.id);
-
-            this.loadData();
+            this.loanService.rejectRequest(request.id).subscribe({
+              next: () => this.loadData(),
+              error: (error: unknown) => {
+                this.showError('No se pudo rechazar', this.toMessage(error));
+              },
+            });
           },
         },
       ],
@@ -119,15 +130,26 @@ export class PrestamosPage implements OnInit {
         {
           text: 'Devolver',
           handler: () => {
-            this.loanService.returnLoan(loan.id);
-
-            this.loadData();
+            this.loanService.returnLoan(loan.id).subscribe({
+              next: () => this.loadData(),
+              error: (error: unknown) => {
+                this.showError('No se pudo registrar la devolución', this.toMessage(error));
+              },
+            });
           },
         },
       ],
     });
 
     await alert.present();
+  }
+
+  private toMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return String(error);
   }
 
   private async showError(header: string, message: string) {
