@@ -58,7 +58,8 @@
   box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
 }
 
-.category-form ion-input {
+.category-form ion-input,
+.category-form ion-textarea {
   --color: var(--brand-navy);
   --placeholder-color: var(--brand-slate);
 }
@@ -68,6 +69,13 @@
   border: 1px solid var(--brand-border);
   border-radius: 12px;
   margin-bottom: 8px;
+}
+
+/* Descripción secundaria dentro del item de categoría en la lista. */
+.category-desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--brand-slate);
 }
 
 /* Modal de préstamo */

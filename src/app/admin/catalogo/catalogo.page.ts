@@ -32,6 +32,10 @@ export class CatalogoPage implements OnInit {
 
   newCategory: string = '';
 
+  newCategoryDescription: string = '';
+
+  newCategoryActive: boolean = true;
+
   editingCategory: Category | null = null;
 
   newTitle: string = '';
@@ -250,7 +254,16 @@ export class CatalogoPage implements OnInit {
 
     this.editingCategory = null;
 
+    this.resetCategoryForm();
+  }
+
+  /** Reinicia los campos del formulario de categorías (nueva categoría activa por defecto). */
+  private resetCategoryForm() {
     this.newCategory = '';
+
+    this.newCategoryDescription = '';
+
+    this.newCategoryActive = true;
   }
 
   addCategory() {
@@ -261,13 +274,23 @@ export class CatalogoPage implements OnInit {
     }
 
     const request$ = this.editingCategory
-      ? this.catalogService.updateCategory(this.editingCategory.id, name)
-      : this.catalogService.addCategory(name);
+      ? this.catalogService.updateCategory(this.editingCategory.id, {
+          name,
+          // Al editar se envía el valor real del campo (incluso vacío) para
+          // permitir limpiar la descripción existente en el backend.
+          description: this.newCategoryDescription.trim(),
+          active: this.newCategoryActive,
+        })
+      : this.catalogService.addCategory({
+          name,
+          // Al crear, una descripción vacía se omite (el backend la deja nula).
+          description: this.newCategoryDescription.trim() || undefined,
+        });
 
     request$.subscribe({
       next: () => {
         this.editingCategory = null;
-        this.newCategory = '';
+        this.resetCategoryForm();
         this.loadCategories();
       },
       error: (error: unknown) => {
@@ -280,6 +303,10 @@ export class CatalogoPage implements OnInit {
     this.editingCategory = category;
 
     this.newCategory = category.name;
+
+    this.newCategoryDescription = category.description ?? '';
+
+    this.newCategoryActive = category.active ?? true;
   }
 
   async deleteCategory(category: Category) {

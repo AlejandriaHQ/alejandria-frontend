@@ -13,6 +13,13 @@ interface CategoriaDTO {
   activo: boolean;
 }
 
+/** Payload para crear/actualizar una categoría (nombre + descripción + activo). */
+interface CategoriaPayload {
+  nombre: string;
+  descripcion?: string;
+  activo?: boolean;
+}
+
 /** DTO de libro tal como lo devuelve el backend Django. */
 interface LibroDTO {
   id_libro: number;
@@ -191,9 +198,15 @@ export class CatalogService {
     );
   }
 
-  addCategory(name: string): Observable<Category> {
+  /**
+   * Crea una categoría con nombre obligatorio y descripción opcional.
+   *
+   * El backend crea la categoría activa por defecto, así que aquí no se envía
+   * `activo` (solo se usa al actualizar).
+   */
+  addCategory(data: { name: string; description?: string }): Observable<Category> {
     return this.api
-      .post<CategoriaDTO>('/biblioteca/categorias/', { nombre: name })
+      .post<CategoriaDTO>('/biblioteca/categorias/', this.toCategoriaCreatePayload(data))
       .pipe(
         map((dto) => {
           const created = this.fromCategoriaDTO(dto);
@@ -203,9 +216,16 @@ export class CatalogService {
       );
   }
 
-  updateCategory(id: number, name: string): Observable<Category> {
+  /**
+   * Actualiza una categoría de forma parcial: solo envía los campos definidos
+   * (nombre, descripción y/o activo).
+   */
+  updateCategory(
+    id: number,
+    data: { name?: string; description?: string; active?: boolean },
+  ): Observable<Category> {
     return this.api
-      .put<CategoriaDTO>(`/biblioteca/categorias/${id}/`, { nombre: name })
+      .put<CategoriaDTO>(`/biblioteca/categorias/${id}/`, this.toCategoriaUpdatePayload(data))
       .pipe(
         map((dto) => {
           const updated = this.fromCategoriaDTO(dto);
@@ -290,7 +310,44 @@ export class CatalogService {
   }
 
   private fromCategoriaDTO(dto: CategoriaDTO): Category {
-    return { id: dto.id_categoria, name: dto.nombre };
+    return {
+      id: dto.id_categoria,
+      name: dto.nombre,
+      description: dto.descripcion ?? undefined,
+      active: dto.activo,
+    };
+  }
+
+  /** Payload de creación de categoría: nombre obligatorio, descripción opcional. */
+  private toCategoriaCreatePayload(data: { name: string; description?: string }): CategoriaPayload {
+    const payload: CategoriaPayload = { nombre: data.name };
+
+    if (data.description !== undefined) {
+      payload.descripcion = data.description;
+    }
+
+    return payload;
+  }
+
+  /** Payload de actualización de categoría: solo incluye los campos presentes. */
+  private toCategoriaUpdatePayload(data: {
+    name?: string;
+    description?: string;
+    active?: boolean;
+  }): Partial<CategoriaPayload> {
+    const payload: Partial<CategoriaPayload> = {};
+
+    if (data.name !== undefined) {
+      payload.nombre = data.name;
+    }
+    if (data.description !== undefined) {
+      payload.descripcion = data.description;
+    }
+    if (data.active !== undefined) {
+      payload.activo = data.active;
+    }
+
+    return payload;
   }
 
   /** Inserta o actualiza un libro en la caché síncrona por id. */
