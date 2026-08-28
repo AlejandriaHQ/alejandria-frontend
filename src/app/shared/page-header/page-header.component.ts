@@ -23,15 +23,28 @@ export class PageHeaderComponent {
     return this.authService.getCurrentUser();
   }
 
-  get userName() {
+  get userName(): string {
     if (!this.currentUser) {
       return '';
+    }
+
+    if (this.currentUser.name && this.currentUser.name.trim()) {
+      return this.currentUser.name.trim();
+    }
+
+    const full = `${this.currentUser.firstName || ''} ${this.currentUser.lastName || ''}`.trim();
+    if (full) {
+      return full;
     }
 
     return this.currentUser.role === 'admin' ? 'Administrador' : 'Usuario';
   }
 
-  get initial() {
+  get initial(): string {
+    const nameToUse = this.userName;
+    if (nameToUse && nameToUse !== 'Administrador' && nameToUse !== 'Usuario') {
+      return nameToUse.charAt(0).toUpperCase();
+    }
     return (this.currentUser?.identifier || 'A').charAt(0).toUpperCase();
   }
 

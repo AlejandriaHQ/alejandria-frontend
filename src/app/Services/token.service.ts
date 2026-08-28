@@ -70,4 +70,7 @@ export interface TokenClaims {
   user_id: number;
   role: 'admin' | 'user';
   identifier: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
 }

@@ -11,6 +11,9 @@ export type UserRole = 'admin' | 'user';
 export interface AuthUser {
   identifier: string;
   role: UserRole;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 /**
@@ -89,7 +92,13 @@ export class AuthService {
       return;
     }
     this.originalUserBackup = user;
-    this.currentUser = { identifier: 'MEM-2026-0001', role: 'user' };
+    this.currentUser = {
+      identifier: 'MEM-2026-0001',
+      role: 'user',
+      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
     this.startInactivityTimer();
     this.router.navigate(['/usuario']);
   }
@@ -127,11 +136,22 @@ export class AuthService {
     const role = payload?.['role'] as UserRole | undefined;
     const identifier = payload?.['identifier'] as string | undefined;
     const userId = payload?.['user_id'] as number | undefined;
+    const firstName = (payload?.['first_name'] as string) || undefined;
+    const lastName = (payload?.['last_name'] as string) || undefined;
+    const tokenName = (payload?.['name'] as string) || (`${firstName || ''} ${lastName || ''}`.trim() || undefined);
 
     if (role && identifier) {
-      this.tokenService.saveClaims({ user_id: userId ?? 0, role, identifier });
-      this.currentUser = { identifier, role };
+      this.tokenService.saveClaims({
+        user_id: userId ?? 0,
+        role,
+        identifier,
+        name: tokenName,
+        firstName,
+        lastName,
+      });
+      this.currentUser = { identifier, role, name: tokenName, firstName, lastName };
       this.startInactivityTimer();
+      this.fetchUserProfile();
       return this.currentUser;
     }
     return null;
@@ -153,12 +173,62 @@ export class AuthService {
 
     // Sesión válida si el access no expiró, o si hay refresh para renovarlo.
     if (accessValid || this.tokenService.getRefresh()) {
-      this.currentUser = { identifier: claims.identifier, role: claims.role };
+      this.currentUser = {
+        identifier: claims.identifier,
+        role: claims.role,
+        name: claims.name,
+        firstName: claims.firstName,
+        lastName: claims.lastName,
+      };
       this.startInactivityTimer();
+      this.fetchUserProfile();
     } else {
       this.tokenService.clear();
       this.currentUser = null;
     }
+  }
+
+  /**
+   * Carga asíncronamente el perfil del usuario autenticado (/biblioteca/usuarios/me/)
+   * para asegurar que el nombre completo esté actualizado en la sesión.
+   */
+  public fetchUserProfile(): void {
+    if (!this.currentUser) {
+      return;
+    }
+    this.http
+      .get<{ success?: boolean; datos?: any } | any>(`${environment.apiUrl}/biblioteca/usuarios/me/`)
+      .subscribe({
+        next: (res) => {
+          const data = res?.datos || res;
+          if (data && (data.first_name !== undefined || data.last_name !== undefined)) {
+            const firstName = data.first_name || '';
+            const lastName = data.last_name || '';
+            const fullName = `${firstName} ${lastName}`.trim() || data.email || '';
+
+            if (this.currentUser && fullName) {
+              this.currentUser = {
+                ...this.currentUser,
+                name: fullName,
+                firstName,
+                lastName,
+              };
+              const claims = this.tokenService.getClaims();
+              if (claims) {
+                this.tokenService.saveClaims({
+                  ...claims,
+                  name: fullName,
+                  firstName,
+                  lastName,
+                });
+              }
+            }
+          }
+        },
+        error: () => {
+          // Silencioso si falla la llamada
+        },
+      });
   }
 
   private startInactivityTimer(): void {
