@@ -27,6 +27,17 @@ export class UsuarioPage implements OnInit {
 
   books: Book[] = [];
 
+  /** Página actual de la lista de libros (paginación del backend). */
+  currentPage: number = 1;
+
+  /** Total de páginas disponibles según el backend. */
+  maxPages: number = 1;
+
+  /** Si existe una página anterior / siguiente. */
+  hasPrevious: boolean = false;
+
+  hasNext: boolean = false;
+
   // Indicador de carga del catálogo (categorías + libros).
   loading: boolean = false;
 
@@ -101,16 +112,23 @@ export class UsuarioPage implements OnInit {
     });
   }
 
-  /** Busca libros con los filtros actuales (query/categoría) vía la API (asíncrono). */
-  private loadBooks(): void {
+  /** Busca libros con los filtros actuales (query/categoría) y la página solicitada (asíncrono). */
+  private loadBooks(page = 1): void {
     this.startCatalogLoad();
-    this.catalogService.searchBooksAsync(this.query, this.categoryId).subscribe({
-      next: (books) => {
-        this.books = books;
+    this.catalogService.searchBooksPage(this.query, this.categoryId, page).subscribe({
+      next: (result) => {
+        this.books = result.items;
+        this.currentPage = result.currentPage;
+        this.maxPages = result.maxPages;
+        this.hasPrevious = result.previous;
+        this.hasNext = result.next;
         this.finishCatalogLoad();
       },
       error: () => {
         this.books = [];
+        this.maxPages = 1;
+        this.hasPrevious = false;
+        this.hasNext = false;
         this.finishCatalogLoad();
       },
     });
@@ -167,7 +185,22 @@ export class UsuarioPage implements OnInit {
 
   /** Dispara una nueva búsqueda cuando cambian los filtros (searchbar / selector). */
   onSearch(): void {
-    this.loadBooks();
+    this.currentPage = 1;
+    this.loadBooks(1);
+  }
+
+  /** Navega a la página siguiente si existe. */
+  nextPage(): void {
+    if (this.hasNext) {
+      this.loadBooks(this.currentPage + 1);
+    }
+  }
+
+  /** Navega a la página anterior si existe. */
+  previousPage(): void {
+    if (this.hasPrevious) {
+      this.loadBooks(this.currentPage - 1);
+    }
   }
 
   /**
