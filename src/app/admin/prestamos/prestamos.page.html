@@ -2,6 +2,14 @@
 
 <ion-content>
   <div class="prestamos-page">
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="prestamos-loading"
+      aria-label="Cargando préstamos"
+    ></ion-spinner>
+
+    <ng-container *ngIf="!loading">
     <section class="loan-section">
       <h2>Solicitudes pendientes</h2>
 
@@ -11,8 +19,9 @@
 
       <ion-card *ngFor="let request of pendingRequests" class="loan-card">
         <div class="loan-info">
-          <strong>{{ bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
-          <span>{{ userById(request.userId)?.name ?? 'Usuario' }}</span>
+          <!-- Prefiere los nombres que envía el backend; cae a la caché/placeholder si faltan. -->
+          <strong>{{ request.bookTitle ?? bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span>{{ request.userName ?? userById(request.userId)?.name ?? 'Usuario' }}</span>
           <span class="text-mono">Solicitado: {{ formatDate(request.requestedDate) }}</span>
         </div>
 
@@ -65,5 +74,74 @@
         </ion-buttons>
       </ion-card>
     </section>
+
+    <section class="loan-section">
+      <h2>Historial de préstamos por socio</h2>
+
+      <ion-card class="selector-card">
+        <ion-select
+          label="Socio"
+          interface="alert"
+          placeholder="Selecciona un socio"
+          [(ngModel)]="selectedUserId"
+          (ionChange)="onSocioChange()"
+        >
+          <ion-select-option *ngFor="let socio of users" [value]="socio.id">
+            {{ socio.name || socio.email || socio.identifier }}
+          </ion-select-option>
+        </ion-select>
+      </ion-card>
+
+      <ion-spinner
+        *ngIf="historyLoading"
+        name="crescent"
+        class="prestamos-loading"
+        aria-label="Cargando historial del socio"
+      ></ion-spinner>
+
+      <div *ngIf="!historyLoading && selectedUserId === null" class="empty-state">
+        Selecciona un socio para ver su historial.
+      </div>
+
+      <div
+        *ngIf="!historyLoading && selectedUserId !== null && socioLoans.length === 0"
+        class="empty-state"
+      >
+        Sin préstamos para este socio.
+      </div>
+
+      <ion-card
+        *ngFor="let loan of socioLoans"
+        class="loan-card"
+        [class.loan-card--overdue]="loan.status === 'overdue'"
+      >
+        <div class="loan-info">
+          <strong>{{ bookById(loan.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <span>{{ userById(loan.userId)?.name ?? 'Usuario' }}</span>
+          <span class="text-mono">
+            Prestado: {{ formatDate(loan.loanDate) }} · Vence: {{ formatDate(loan.dueDate) }}
+            <ng-container *ngIf="loan.returnDate">
+              · Devuelto: {{ formatDate(loan.returnDate) }}
+            </ng-container>
+          </span>
+        </div>
+
+        <ion-buttons class="loan-actions">
+          <ion-badge [color]="loanStatusColor(loan.status)">
+            {{ loanStatusLabel(loan.status) }}
+          </ion-badge>
+
+          <ion-button
+            *ngIf="loan.status === 'active' || loan.status === 'overdue'"
+            fill="outline"
+            color="primary"
+            (click)="returnLoan(loan)"
+          >
+            Devolver
+          </ion-button>
+        </ion-buttons>
+      </ion-card>
+    </section>
+    </ng-container>
   </div>
 </ion-content>

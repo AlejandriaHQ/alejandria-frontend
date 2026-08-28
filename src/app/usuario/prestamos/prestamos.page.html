@@ -2,6 +2,14 @@
 
 <ion-content>
   <div class="prestamos-page">
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="prestamos-loading"
+      aria-label="Cargando préstamos"
+    ></ion-spinner>
+
+    <ng-container *ngIf="!loading">
     <section class="loan-section">
       <h2>Solicitudes</h2>
 
@@ -9,7 +17,8 @@
 
       <ion-card *ngFor="let request of requests" class="loan-card">
         <div class="loan-info">
-          <strong>{{ bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
+          <!-- Prefiere el título que envía el backend; cae a la caché/placeholder si falta. -->
+          <strong>{{ request.bookTitle ?? bookById(request.bookId)?.title ?? 'Libro no disponible' }}</strong>
           <span class="text-mono">Solicitado: {{ formatDate(request.requestedDate) }}</span>
         </div>
 
@@ -84,5 +93,6 @@
         </div>
       </ion-card>
     </section>
+    </ng-container>
   </div>
 </ion-content>

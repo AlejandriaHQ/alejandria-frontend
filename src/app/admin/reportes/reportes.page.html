@@ -123,6 +123,13 @@
     </section>
 
     <section class="data">
+      <ion-spinner
+        *ngIf="loading"
+        name="crescent"
+        aria-label="Cargando"
+        class="loading-spinner"
+      ></ion-spinner>
+
       <table *ngIf="rows.length">
         <thead>
           <tr>
@@ -197,10 +204,10 @@
 
       <div
         class="empty-state"
-        *ngIf="!rows.length && !inventory.length && !ranking.length"
+        *ngIf="!loading && !rows.length && !inventory.length && !ranking.length"
       >
         <ion-icon name="file-tray-outline" aria-hidden="true"></ion-icon>
-        <p>No hay datos para los filtros seleccionados.</p>
+        <p>{{ emptyMessage }}</p>
       </div>
     </section>
   </main>

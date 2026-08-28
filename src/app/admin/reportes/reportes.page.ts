@@ -1,20 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { DatetimeCustomEvent } from '@ionic/angular';
-import { ReportRow, ReportService } from '../../Services/report.service';
+import { AlertController, DatetimeCustomEvent } from '@ionic/angular';
+import {
+  InventoryRow,
+  RankingRow,
+  ReportRow,
+  ReportService,
+} from '../../Services/report.service';
 
 type ReportKind = 'loans' | 'returns' | 'inventory' | 'topBooks' | 'topUsers';
-
-interface InventoryRow {
-  category: string;
-  total: number;
-  borrowed: number;
-  available: number;
-}
-
-interface RankingRow {
-  label: string;
-  total: number;
-}
 
 @Component({
   selector: 'app-reportes',
@@ -30,6 +23,7 @@ export class ReportesPage implements OnInit {
   rows: ReportRow[] = [];
   inventory: InventoryRow[] = [];
   ranking: RankingRow[] = [];
+  loading = false;
 
   readonly reportSelectOptions = {
     cssClass: 'report-select-alert',
@@ -40,7 +34,26 @@ export class ReportesPage implements OnInit {
     return this.rows.length > 0 || this.inventory.length > 0 || this.ranking.length > 0;
   }
 
+  /** Mensaje del estado vacío según el tipo de reporte consultado. */
+  get emptyMessage(): string {
+    switch (this.kind) {
+      case 'loans':
+        return 'No hay préstamos en el rango seleccionado.';
+      case 'returns':
+        return 'No hay devoluciones en el rango seleccionado.';
+      case 'inventory':
+        return 'No hay inventario para el catálogo.';
+      case 'topBooks':
+        return 'No hay datos para el ranking de libros.';
+      case 'topUsers':
+        return 'No hay datos para el ranking de usuarios.';
+      default:
+        return 'No hay datos para los filtros seleccionados.';
+    }
+  }
+
   private readonly reports = inject(ReportService);
+  private readonly alertController = inject(AlertController);
 
   ngOnInit() {
     // Rango por defecto: último mes, para que la vista ya traiga datos.
@@ -48,16 +61,112 @@ export class ReportesPage implements OnInit {
   }
 
   load() {
-    this.dashboard = this.reports.dashboard();
+    this.dashboard = { books: 0, users: 0, active: 0, overdue: 0, month: 0 };
     this.rows = [];
     this.inventory = [];
     this.ranking = [];
 
-    if (this.kind === 'loans') this.rows = this.reports.loansReport(this.start, this.end);
-    if (this.kind === 'returns') this.rows = this.reports.returnsReport(this.start, this.end);
-    if (this.kind === 'inventory') this.inventory = this.reports.inventory();
-    if (this.kind === 'topBooks') this.ranking = this.reports.topBooks();
-    if (this.kind === 'topUsers') this.ranking = this.reports.topUsers();
+    this.loadDashboard();
+
+    if (this.kind === 'loans') this.loadLoansReport();
+    else if (this.kind === 'returns') this.loadReturnsReport();
+    else if (this.kind === 'inventory') this.loadInventory();
+    else if (this.kind === 'topBooks') this.loadTopBooks();
+    else if (this.kind === 'topUsers') this.loadTopUsers();
+  }
+
+  private loadDashboard(): void {
+    this.reports.dashboard().subscribe({
+      next: (dashboard) => {
+        this.dashboard = dashboard;
+      },
+      error: (error: unknown) => {
+        this.showMessage('No se pudieron cargar los indicadores', this.toMessage(error));
+      },
+    });
+  }
+
+  private loadLoansReport(): void {
+    this.loading = true;
+    this.reports.loansReport(this.start, this.end).subscribe({
+      next: (rows) => {
+        this.rows = rows;
+        this.loading = false;
+      },
+      error: (error: unknown) => {
+        this.loading = false;
+        this.showMessage('No se pudo cargar el reporte de préstamos', this.toMessage(error));
+      },
+    });
+  }
+
+  private loadReturnsReport(): void {
+    this.loading = true;
+    this.reports.returnsReport(this.start, this.end).subscribe({
+      next: (rows) => {
+        this.rows = rows;
+        this.loading = false;
+      },
+      error: (error: unknown) => {
+        this.loading = false;
+        this.showMessage('No se pudo cargar el reporte de devoluciones', this.toMessage(error));
+      },
+    });
+  }
+
+  private loadInventory(): void {
+    this.loading = true;
+    this.reports.inventory().subscribe({
+      next: (rows) => {
+        this.inventory = rows;
+        this.loading = false;
+      },
+      error: (error: unknown) => {
+        this.loading = false;
+        this.showMessage('No se pudo cargar el inventario', this.toMessage(error));
+      },
+    });
+  }
+
+  private loadTopBooks(): void {
+    this.loading = true;
+    this.reports.topBooks().subscribe({
+      next: (ranking) => {
+        this.ranking = ranking;
+        this.loading = false;
+      },
+      error: (error: unknown) => {
+        this.loading = false;
+        this.showMessage('No se pudo cargar el ranking de libros', this.toMessage(error));
+      },
+    });
+  }
+
+  private loadTopUsers(): void {
+    this.loading = true;
+    this.reports.topUsers().subscribe({
+      next: (ranking) => {
+        this.ranking = ranking;
+        this.loading = false;
+      },
+      error: (error: unknown) => {
+        this.loading = false;
+        this.showMessage('No se pudo cargar el ranking de usuarios', this.toMessage(error));
+      },
+    });
+  }
+
+  private toMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  private async showMessage(header: string, message: string): Promise<void> {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: [{ text: 'Entendido', role: 'cancel' }],
+    });
+    await alert.present();
   }
 
   format(value: Date | string | null | undefined): string {

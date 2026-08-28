@@ -28,7 +28,7 @@
       <ion-searchbar
         placeholder="Buscar por título, autor o ISBN"
         [(ngModel)]="query"
-        (ionInput)="filteredBooks()"
+        (ionInput)="onSearch()"
       >
       </ion-searchbar>
 
@@ -38,7 +38,7 @@
         interface="popover"
         placeholder="Todas"
         [(ngModel)]="categoryId"
-        (ionChange)="filteredBooks()"
+        (ionChange)="onSearch()"
       >
         <ion-select-option [value]="0"> Todas </ion-select-option>
 
@@ -48,6 +48,14 @@
       </ion-select>
     </div>
 
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="usuario-loading"
+      aria-label="Cargando catálogo"
+    ></ion-spinner>
+
+    <ng-container *ngIf="!loading">
     <div class="books-grid">
       <ion-card
         button
@@ -81,7 +89,7 @@
           </div>
 
           <ion-button
-            *ngIf="book.available && !hasPendingRequest(book.id)"
+            *ngIf="canRequest(book)"
             expand="block"
             fill="outline"
             color="primary"
@@ -91,18 +99,58 @@
             Solicitar préstamo
           </ion-button>
 
+          <!-- Deshabilitado cuando el socio ya tiene el título (préstamo activo o solicitud pendiente). -->
           <ion-button
-            *ngIf="hasPendingRequest(book.id)"
+            *ngIf="hasActiveLoan(book.id)"
             expand="block"
             color="medium"
             class="request-button"
             disabled
           >
-            Solicitud enviada
+            {{ hasPendingRequest(book.id) ? 'Solicitud enviada' : 'Ya lo tienes' }}
           </ion-button>
         </ion-card-content>
       </ion-card>
     </div>
+
+    <!-- Estado vacío: catálogo sin libros o búsqueda sin resultados. -->
+    <div class="empty-state" *ngIf="filteredBooks().length === 0">
+      <ion-icon name="book-outline" aria-hidden="true"></ion-icon>
+
+      <p *ngIf="query.trim() || categoryId !== 0; else catalogEmpty">
+        No se encontraron libros para tu búsqueda.
+      </p>
+
+      <ng-template #catalogEmpty>
+        <p>No hay libros disponibles en el catálogo.</p>
+      </ng-template>
+    </div>
+
+    <!-- Controles de paginación del catálogo -->
+    <div class="usuario-pagination" *ngIf="maxPages > 1">
+      <ion-button
+        fill="outline"
+        color="primary"
+        [disabled]="!hasPrevious"
+        (click)="previousPage()"
+      >
+        <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+        Anterior
+      </ion-button>
+
+      <span class="pagination-info">Página {{ currentPage }} de {{ maxPages }}</span>
+
+      <ion-button
+        fill="outline"
+        color="primary"
+        [disabled]="!hasNext"
+        (click)="nextPage()"
+      >
+        Siguiente
+        <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
+    </ng-container>
   </div>
 </ion-content>
 

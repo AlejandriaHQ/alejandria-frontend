@@ -1,5 +1,6 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../Services/auth.service';
 
 @Component({
@@ -8,7 +9,7 @@ import { AuthService } from '../Services/auth.service';
   styleUrls: ['./autenticacion.page.scss'],
   standalone: false,
 })
-export class AutenticacionPage implements OnInit, OnDestroy {
+export class AutenticacionPage implements OnInit {
   identifier: string = '';
 
   password: string = '';
@@ -19,22 +20,12 @@ export class AutenticacionPage implements OnInit, OnDestroy {
 
   showPassword: boolean = false;
 
-  private loadingTimer: any;
-
   private readonly authService = inject(AuthService);
 
   private readonly router = inject(Router);
 
   ngOnInit() {
     this.redirectIfAuthenticated();
-  }
-
-  ngOnDestroy() {
-    if (this.loadingTimer) {
-      clearTimeout(this.loadingTimer);
-
-      this.loadingTimer = null;
-    }
   }
 
   togglePasswordVisibility() {
@@ -50,27 +41,29 @@ export class AutenticacionPage implements OnInit, OnDestroy {
 
     this.loading = true;
 
-    this.loadingTimer = setTimeout(() => {
-      this.loading = false;
+    this.authService.login(this.identifier, this.password).subscribe({
+      next: (user) => {
+        this.loading = false;
+        this.router.navigate([user.role === 'admin' ? '/admin' : '/usuario']);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading = false;
+        this.error = this.extractError(err);
+      },
+    });
+  }
 
-      this.loadingTimer = null;
-
-      const role = this.authService.login(this.identifier, this.password);
-
-      if (role === 'admin') {
-        this.router.navigate(['/admin']);
-
-        return;
-      }
-
-      if (role === 'user') {
-        this.router.navigate(['/usuario']);
-
-        return;
-      }
-
-      this.error = 'Identificador o contraseña incorrectos';
-    }, 500);
+  private extractError(err: HttpErrorResponse): string {
+    if (err?.error?.detail) {
+      return err.error.detail;
+    }
+    if (err?.error?.Mensaje) {
+      return String(err.error.Mensaje);
+    }
+    if (err?.status === 0) {
+      return 'No se pudo conectar con el servidor. Verifique que el backend esté activo.';
+    }
+    return 'Identificador o contraseña incorrectos';
   }
 
   private redirectIfAuthenticated() {

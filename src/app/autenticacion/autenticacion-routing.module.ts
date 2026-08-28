@@ -3,17 +3,12 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { AutenticacionPage } from './autenticacion.page';
 
+// Sin ruta de recuperación: el backend no tiene envío de email ni endpoint
+// para ello. El cambio de contraseña se hace desde la gestión de usuarios.
 const routes: Routes = [
   {
     path: '',
     component: AutenticacionPage,
-  },
-  {
-    path: 'recuperar-contrasena',
-    loadChildren: () =>
-      import('./recuperar-contrasena/recuperar-contrasena.module').then(
-        (m) => m.RecuperarContrasenaPageModule,
-      ),
   },
 ];
 

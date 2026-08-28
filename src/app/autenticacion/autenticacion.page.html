@@ -88,7 +88,9 @@
               aria-hidden="true"
             >
             </ion-icon>
-            <span class="sr-only">{{ showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }}</span>
+            <span class="sr-only"
+              >{{ showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }}</span
+            >
           </ion-button>
         </ion-item>
 
@@ -110,13 +112,8 @@
         </ion-button>
       </form>
 
-      <ion-button
-        fill="clear"
-        class="forgot-button"
-        routerLink="/autenticacion/recuperar-contrasena"
-      >
-        ¿Olvidaste tu contraseña?
-      </ion-button>
+      <!-- Sin enlace de recuperación: el backend no tiene envío de email.
+           La contraseña solo se cambia desde la gestión de usuarios (admin). -->
     </div>
   </div>
 </ion-content>

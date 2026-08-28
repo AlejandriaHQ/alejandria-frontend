@@ -65,6 +65,31 @@
   font-size: 0.875rem;
 }
 
+/* Indicador de carga de la lista de usuarios */
+.users-loading {
+  display: block;
+  margin: 24px auto;
+}
+
+/* Controles de paginación de la lista de usuarios */
+.users-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.users-pagination ion-button {
+  --border-radius: 10px;
+}
+
+.pagination-info {
+  color: var(--brand-slate);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 :host-context(:root[data-theme='dark']) .users-search {
   --border: 1px solid var(--brand-border);
   border-color: var(--brand-border);

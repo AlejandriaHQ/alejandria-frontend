@@ -8,11 +8,25 @@
   margin-bottom: 28px;
 }
 
+/* Selector de socio: el label de Ionic queda pegado al borde del ion-card.
+   Se añade padding para que no choque con los bordes. */
+.loan-section .selector-card ion-select {
+  padding: 16px 20px;
+  --padding-start: 0;
+}
+
 .loan-section h2 {
   margin: 0 0 14px;
   color: var(--brand-navy);
   font-size: 20px;
   font-weight: 700;
+}
+
+/* Indicador de carga global e historial del socio. */
+.prestamos-loading {
+  display: block;
+  margin: 32px auto;
+  color: var(--brand-teal-strong);
 }
 
 .empty-state {

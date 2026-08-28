@@ -2,7 +2,15 @@ export type UserRole = 'admin' | 'user';
 
 export interface User {
   id: number;
+  /**
+   * Nombre visible (compuesto "first_name last_name") para las listas.
+   * Se mantiene derivado para no romper las vistas que muestran `user.name`.
+   */
   name: string;
+  /** Primer nombre (backend `first_name`). Se expone para el formulario de edición. */
+  firstName?: string;
+  /** Apellido (backend `last_name`). Se expone para el formulario de edición. */
+  lastName?: string;
   identifier: string;
   role: UserRole;
   email: string;

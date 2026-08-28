@@ -50,11 +50,18 @@
       </ion-select>
     </div>
 
+    <ion-spinner
+      *ngIf="loading"
+      name="crescent"
+      class="catalogo-loading"
+      aria-label="Cargando catálogo"
+    ></ion-spinner>
+
     <div class="books-grid">
       <ion-card
         button
         class="book-card"
-        *ngFor="let book of filteredBooks()"
+        *ngFor="let book of books$ | async"
         (click)="showDetail(book)"
       >
         <div class="book-cover">
@@ -81,6 +88,11 @@
               <ion-badge *ngIf="book.available" color="success"> Disponible </ion-badge>
 
               <ion-badge *ngIf="!book.available" color="warning"> Prestado </ion-badge>
+
+              <!-- Stock numérico: prestados y disponibles en el momento. -->
+              <p class="text-mono stock-info">
+                {{ book.prestados ?? 0 }} prestados · {{ book.disponibles ?? 0 }} disponibles
+              </p>
             </div>
 
             <ion-buttons>
@@ -115,6 +127,43 @@
           </div>
         </ion-card-content>
       </ion-card>
+    </div>
+
+    <!-- Estado vacío: catálogo sin libros o búsqueda sin resultados. -->
+    <div class="empty-state" *ngIf="!loading && (books$ | async)?.length === 0">
+      <ion-icon name="book-outline" aria-hidden="true"></ion-icon>
+
+      <p *ngIf="query.trim() || categoryId !== 0; else catalogEmpty">
+        No se encontraron libros para la búsqueda.
+      </p>
+
+      <ng-template #catalogEmpty>
+        <p>El catálogo está vacío.</p>
+      </ng-template>
+    </div>
+
+    <div class="catalogo-pagination" *ngIf="maxPages > 1">
+      <ion-button
+        fill="outline"
+        color="primary"
+        [disabled]="!hasPrevious"
+        (click)="previousPage()"
+      >
+        <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+        Anterior
+      </ion-button>
+
+      <span class="pagination-info">Página {{ currentPage }} de {{ maxPages }}</span>
+
+      <ion-button
+        fill="outline"
+        color="primary"
+        [disabled]="!hasNext"
+        (click)="nextPage()"
+      >
+        Siguiente
+        <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
     </div>
   </div>
 </ion-content>
@@ -155,24 +204,23 @@
           </div>
 
           <div class="portada-actions">
-            <ion-button fill="outline" color="primary" (click)="coverFile.click()">
-              <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
-              Subir imagen
-            </ion-button>
-
             <ion-button *ngIf="newCover" fill="clear" color="danger" (click)="removeCover()">
               Quitar
             </ion-button>
           </div>
-
-          <input
-            #coverFile
-            type="file"
-            accept="image/*"
-            hidden
-            (change)="onCoverSelected($event)"
-          />
         </div>
+
+        <ion-item>
+          <ion-input
+            type="url"
+            label="URL de la portada"
+            labelPlacement="floating"
+            name="cover"
+            [(ngModel)]="newCover"
+            placeholder="https://ejemplo.com/portada.jpg"
+            aria-label="URL de la portada"
+          ></ion-input>
+        </ion-item>
 
         <ion-item>
           <ion-input
@@ -240,14 +288,16 @@
         </ion-item>
 
         <ion-item>
-          <ion-label>Disponible para préstamo</ion-label>
-
-          <ion-toggle
-            slot="end"
-            name="available"
-            [(ngModel)]="newAvailable"
-            aria-label="Disponible para préstamo"
-          ></ion-toggle>
+          <ion-input
+            label="Cantidad de ejemplares"
+            labelPlacement="floating"
+            name="cantidad"
+            type="number"
+            min="1"
+            [(ngModel)]="newCantidad"
+            placeholder="Ej. 3"
+            aria-label="Cantidad de ejemplares"
+          ></ion-input>
         </ion-item>
 
         <p *ngIf="formInvalid" class="form-error" role="alert">
@@ -322,6 +372,13 @@
           <ion-label>Año de publicación</ion-label>
           <ion-note slot="end">{{ selectedBook.year }}</ion-note>
         </ion-item>
+
+        <ion-item>
+          <ion-label>Ejemplares</ion-label>
+          <ion-note slot="end">
+            {{ selectedBook.prestados ?? 0 }} prestados · {{ selectedBook.disponibles ?? 0 }} disponibles
+          </ion-note>
+        </ion-item>
       </ion-list>
 
       <p *ngIf="selectedBook.description" class="detail-desc">{{ selectedBook.description }}</p>
@@ -363,6 +420,33 @@
           ></ion-input>
         </ion-item>
 
+        <ion-item>
+          <ion-textarea
+            label="Descripción"
+            labelPlacement="floating"
+            name="newCategoryDescription"
+            [(ngModel)]="newCategoryDescription"
+            placeholder="Describe brevemente la categoría (opcional)"
+            rows="2"
+            autoGrow="true"
+            aria-label="Descripción de la categoría"
+          ></ion-textarea>
+        </ion-item>
+
+        <!-- El toggle solo se puede cambiar al editar: el backend crea categorías activas por defecto. -->
+        <ion-item>
+          <ion-label>Categoría activa</ion-label>
+
+          <ion-toggle
+            slot="end"
+            name="newCategoryActive"
+            [(ngModel)]="newCategoryActive"
+            [disabled]="!editingCategory"
+            color="success"
+            aria-label="Categoría activa"
+          ></ion-toggle>
+        </ion-item>
+
         <ion-button type="submit" color="primary" class="save-button">
           {{ editingCategory ? 'Guardar cambios' : 'Agregar categoría' }}
         </ion-button>
@@ -370,7 +454,11 @@
 
       <ion-list lines="none" class="category-list">
         <ion-item *ngFor="let category of categories">
-          <ion-label>{{ category.name }}</ion-label>
+          <ion-label>
+            {{ category.name }}
+
+            <p *ngIf="category.description" class="category-desc">{{ category.description }}</p>
+          </ion-label>
 
           <ion-buttons slot="end">
             <ion-button
