@@ -511,13 +511,24 @@
         Vencimiento: 7 días.
       </p>
 
-      <ion-list lines="none" class="user-list">
+      <div *ngIf="loadingUsers" class="ion-text-center ion-padding">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p class="ion-no-margin">Cargando usuarios...</p>
+      </div>
+
+      <div *ngIf="!loadingUsers && users.length === 0" class="ion-text-center ion-padding">
+        <p class="ion-no-margin">No se encontraron usuarios disponibles.</p>
+      </div>
+
+      <ion-list lines="none" class="user-list" *ngIf="!loadingUsers && users.length > 0">
         <ion-item *ngFor="let user of users" button (click)="confirmLend(user)">
-          <div class="user-avatar-mini" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+          <div class="user-avatar-mini" aria-hidden="true">
+            {{ (user.name || user.firstName || user.identifier || 'U').charAt(0).toUpperCase() }}
+          </div>
 
           <ion-label>
-            <h2>{{ user.name }}</h2>
-            <p class="text-mono">{{ user.identifier }}</p>
+            <h2>{{ user.name || (user.firstName + ' ' + user.lastName).trim() || user.identifier }}</h2>
+            <p class="text-mono">{{ user.identifier }} &bull; {{ user.email }}</p>
           </ion-label>
         </ion-item>
       </ion-list>

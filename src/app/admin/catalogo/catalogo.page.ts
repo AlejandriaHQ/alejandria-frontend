@@ -72,6 +72,8 @@ export class CatalogoPage implements OnInit {
 
   users: User[] = [];
 
+  loadingUsers: boolean = false;
+
   libroParaPrestar: Book | null = null;
 
   private readonly catalogService = inject(CatalogService);
@@ -89,7 +91,22 @@ export class CatalogoPage implements OnInit {
 
     this.filteredBooks();
 
-    this.users = this.loanService.getUsers();
+    this.loadUsersList();
+  }
+
+  /** Carga asíncronamente la lista de usuarios desde la API para el modal de préstamos. */
+  loadUsersList() {
+    this.loadingUsers = true;
+    this.loanService.loadUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.loadingUsers = false;
+      },
+      error: () => {
+        this.users = [];
+        this.loadingUsers = false;
+      },
+    });
   }
 
   /**
@@ -392,34 +409,42 @@ export class CatalogoPage implements OnInit {
 
   openLendModal(book: Book) {
     this.libroParaPrestar = book;
+    this.loadUsersList();
   }
 
   closeLendModal() {
     this.libroParaPrestar = null;
   }
 
-  async confirmLend(user: User) {
+  confirmLend(user: User) {
     if (!this.libroParaPrestar) {
       return;
     }
 
-    const loan = this.loanService.createLoan(this.libroParaPrestar.id, user.id);
+    const bookToLend = this.libroParaPrestar;
+    this.loading = true;
 
-    if (!loan) {
-      await this.showMessage(
-        'No se pudo prestar',
-        'Verifica que el libro esté disponible y que el usuario no tenga 3 préstamos activos ni vencidos sin devolver.',
-      );
+    this.loanService.createLoanApi(bookToLend.id, user.id).subscribe({
+      next: () => {
+        this.loading = false;
+        this.closeLendModal();
+        this.filteredBooks(this.currentPage);
 
-      return;
-    }
+        const userNameDisplay =
+          user.name ||
+          `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+          user.identifier;
 
-    await this.showMessage(
-      'Préstamo registrado',
-      `"${this.libroParaPrestar.title}" prestado a ${user.name} por 7 días.`,
-    );
-
-    this.closeLendModal();
+        this.showMessage(
+          'Préstamo registrado',
+          `"${bookToLend.title}" prestado a ${userNameDisplay} por 7 días.`,
+        );
+      },
+      error: (error: unknown) => {
+        this.loading = false;
+        this.showMessage('No se pudo realizar el préstamo', this.toMessage(error));
+      },
+    });
   }
 
   private toMessage(error: unknown): string {
