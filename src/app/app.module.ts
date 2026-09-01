@@ -5,7 +5,7 @@ import { RouteReuseStrategy } from '@angular/router';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
-import { BarController, BarElement, CategoryScale, Legend, LinearScale, Tooltip } from 'chart.js';
+import { registerables } from 'chart.js';
 import { provideCharts } from 'ng2-charts';
 
 import { AppComponent } from './app.component';
@@ -19,7 +19,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideCharts({
-      registerables: [BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend],
+      registerables,
     }),
   ],
   bootstrap: [AppComponent],

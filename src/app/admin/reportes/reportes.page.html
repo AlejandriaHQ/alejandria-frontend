@@ -122,6 +122,69 @@
       </div>
     </section>
 
+    <!-- Secciones de Gráficos Analíticos -->
+    <section class="charts-grid" *ngIf="!loading && (hasData || dashboard.books > 0)">
+      <!-- Gráfico Donut de Resumen Dashboard -->
+      <ion-card class="chart-card" *ngIf="dashboardChartData">
+        <ion-card-header>
+          <ion-card-title>Estado Global de Préstamos</ion-card-title>
+        </ion-card-header>
+        <ion-card-content class="chart-container">
+          <canvas
+            baseChart
+            [data]="dashboardChartData"
+            [options]="dashboardChartOptions"
+            [type]="'doughnut'"
+          ></canvas>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Gráfico Donut de Devoluciones (A tiempo vs Extemporáneas) -->
+      <ion-card class="chart-card" *ngIf="loansChartData && rows.length > 0">
+        <ion-card-header>
+          <ion-card-title>Análisis de Devoluciones</ion-card-title>
+        </ion-card-header>
+        <ion-card-content class="chart-container">
+          <canvas
+            baseChart
+            [data]="loansChartData"
+            [options]="loansChartOptions"
+            [type]="'doughnut'"
+          ></canvas>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Gráfico de Barras de Inventario por Categoría -->
+      <ion-card class="chart-card chart-card--wide" *ngIf="inventoryChartData && inventory.length > 0">
+        <ion-card-header>
+          <ion-card-title>Inventario y Disponibilidad por Categoría</ion-card-title>
+        </ion-card-header>
+        <ion-card-content class="chart-container">
+          <canvas
+            baseChart
+            [data]="inventoryChartData"
+            [options]="inventoryChartOptions"
+            [type]="'bar'"
+          ></canvas>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Gráfico Horizontal de Rankings (Top libros / Top usuarios) -->
+      <ion-card class="chart-card chart-card--wide" *ngIf="rankingChartData && ranking.length > 0">
+        <ion-card-header>
+          <ion-card-title>{{ kind === 'topBooks' ? 'Top 10 Libros Más Solicitados' : 'Top 10 Usuarios Más Activos' }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content class="chart-container">
+          <canvas
+            baseChart
+            [data]="rankingChartData"
+            [options]="rankingChartOptions"
+            [type]="'bar'"
+          ></canvas>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
     <section class="data">
       <ion-spinner
         *ngIf="loading"
