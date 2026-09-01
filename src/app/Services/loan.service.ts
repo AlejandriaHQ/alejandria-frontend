@@ -291,6 +291,16 @@ export class LoanService {
     );
   }
 
+  /** Consulta paginada de usuarios con filtro para modales de préstamos y búsquedas. */
+  searchUsersPage(query?: string, page = 1) {
+    return this.userService.searchUsers(query, page).pipe(
+      map((result) => {
+        this.usersCache = result.users;
+        return result;
+      }),
+    );
+  }
+
   getUsers(): User[] {
     return [...this.usersCache];
   }

@@ -74,6 +74,16 @@ export class CatalogoPage implements OnInit {
 
   loadingUsers: boolean = false;
 
+  userSearchQuery: string = '';
+
+  userCurrentPage: number = 1;
+
+  userMaxPages: number = 1;
+
+  userHasPrevious: boolean = false;
+
+  userHasNext: boolean = false;
+
   libroParaPrestar: Book | null = null;
 
   private readonly catalogService = inject(CatalogService);
@@ -94,19 +104,45 @@ export class CatalogoPage implements OnInit {
     this.loadUsersList();
   }
 
-  /** Carga asíncronamente la lista de usuarios desde la API para el modal de préstamos. */
-  loadUsersList() {
+  /** Carga asíncronamente la lista paginada de usuarios desde la API para el modal de préstamos. */
+  loadUsersList(page: number = 1) {
     this.loadingUsers = true;
-    this.loanService.loadUsers().subscribe({
-      next: (users) => {
-        this.users = users;
+    this.userCurrentPage = page;
+
+    this.loanService.searchUsersPage(this.userSearchQuery, page).subscribe({
+      next: (result) => {
+        this.users = result.users;
+        this.userCurrentPage = result.currentPage;
+        this.userMaxPages = result.maxPages;
+        this.userHasPrevious = result.previous;
+        this.userHasNext = result.next;
         this.loadingUsers = false;
       },
       error: () => {
         this.users = [];
+        this.userMaxPages = 1;
+        this.userHasPrevious = false;
+        this.userHasNext = false;
         this.loadingUsers = false;
       },
     });
+  }
+
+  onUserSearch() {
+    this.userCurrentPage = 1;
+    this.loadUsersList(1);
+  }
+
+  nextUserPage() {
+    if (this.userHasNext) {
+      this.loadUsersList(this.userCurrentPage + 1);
+    }
+  }
+
+  previousUserPage() {
+    if (this.userHasPrevious) {
+      this.loadUsersList(this.userCurrentPage - 1);
+    }
   }
 
   /**
@@ -409,11 +445,14 @@ export class CatalogoPage implements OnInit {
 
   openLendModal(book: Book) {
     this.libroParaPrestar = book;
-    this.loadUsersList();
+    this.userSearchQuery = '';
+    this.userCurrentPage = 1;
+    this.loadUsersList(1);
   }
 
   closeLendModal() {
     this.libroParaPrestar = null;
+    this.userSearchQuery = '';
   }
 
   confirmLend(user: User) {
