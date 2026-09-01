@@ -489,8 +489,6 @@
 <ion-modal
   [isOpen]="!!libroParaPrestar"
   (ionModalDidDismiss)="closeLendModal()"
-  [initialBreakpoint]="0.6"
-  [breakpoints]="[0, 0.5, 0.6, 1]"
 >
   <ng-template>
     <ion-header>
@@ -503,24 +501,72 @@
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
+
+      <ion-toolbar *ngIf="libroParaPrestar">
+        <ion-searchbar
+          [(ngModel)]="userSearchQuery"
+          (ionInput)="onUserSearch()"
+          placeholder="Buscar socio por nombre, cédula o correo..."
+          debounce="300"
+          aria-label="Buscar socio"
+        ></ion-searchbar>
+      </ion-toolbar>
     </ion-header>
 
     <ion-content class="ion-padding" *ngIf="libroParaPrestar">
       <p class="lend-intro">
-        Elige el usuario al que prestarás <strong>{{ libroParaPrestar.title }}</strong>.
-        Vencimiento: 7 días.
+        Elige el usuario al que prestarás <strong>{{ libroParaPrestar.title }}</strong> (Vencimiento: 7 días).
       </p>
 
-      <ion-list lines="none" class="user-list">
+      <div *ngIf="loadingUsers" class="ion-text-center ion-padding">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p class="ion-no-margin">Cargando socios...</p>
+      </div>
+
+      <div *ngIf="!loadingUsers && users.length === 0" class="empty-state-mini ion-text-center ion-padding">
+        <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+        <p>No se encontraron socios que coincidan con la búsqueda.</p>
+      </div>
+
+      <ion-list lines="none" class="user-list" *ngIf="!loadingUsers && users.length > 0">
         <ion-item *ngFor="let user of users" button (click)="confirmLend(user)">
-          <div class="user-avatar-mini" aria-hidden="true">{{ user.name.charAt(0) }}</div>
+          <div class="user-avatar-mini" aria-hidden="true">
+            {{ (user.name || user.firstName || user.identifier || 'U').charAt(0).toUpperCase() }}
+          </div>
 
           <ion-label>
-            <h2>{{ user.name }}</h2>
-            <p class="text-mono">{{ user.identifier }}</p>
+            <h2>{{ user.name || (user.firstName + ' ' + user.lastName).trim() || user.identifier }}</h2>
+            <p class="text-mono">{{ user.identifier }} &bull; {{ user.email }}</p>
           </ion-label>
+
+          <ion-icon slot="end" name="chevron-forward-outline" color="medium"></ion-icon>
         </ion-item>
       </ion-list>
+
+      <!-- Controles de paginación del modal de socios -->
+      <div class="usuario-pagination" *ngIf="!loadingUsers && userMaxPages > 1">
+        <ion-button
+          fill="outline"
+          color="primary"
+          [disabled]="!userHasPrevious"
+          (click)="previousUserPage()"
+        >
+          <ion-icon slot="start" name="chevron-back-outline"></ion-icon>
+          Anterior
+        </ion-button>
+
+        <span class="pagination-info">Página {{ userCurrentPage }} de {{ userMaxPages }}</span>
+
+        <ion-button
+          fill="outline"
+          color="primary"
+          [disabled]="!userHasNext"
+          (click)="nextUserPage()"
+        >
+          Siguiente
+          <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
     </ion-content>
   </ng-template>
 </ion-modal>
